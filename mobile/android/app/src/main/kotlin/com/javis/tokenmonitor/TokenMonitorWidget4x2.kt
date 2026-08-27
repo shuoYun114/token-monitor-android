@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetProvider
+import com.javis.tokenmonitor.R
 
 class TokenMonitorWidget4x2 : HomeWidgetProvider() {
     override fun onUpdate(
