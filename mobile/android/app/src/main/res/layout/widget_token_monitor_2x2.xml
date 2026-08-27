@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#111522"
+    android:padding="12dp"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="今日花费"
+        android:textColor="#94A3B8"
+        android:textSize="10sp" />
+    <TextView
+        android:id="@+id/tv_today_cost_2x2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="$0.00"
+        android:textColor="#38BDF8"
+        android:textStyle="bold"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/tv_today_tokens_2x2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 Tok"
+        android:textColor="#FFFFFF"
+        android:textSize="10sp" />
+
+    <TextView
+        android:id="@+id/tv_claude_quota_2x2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Claude --"
+        android:textColor="#10B981"
+        android:textStyle="bold"
+        android:layout_marginTop="6dp"
+        android:textSize="11sp" />
+</LinearLayout>
