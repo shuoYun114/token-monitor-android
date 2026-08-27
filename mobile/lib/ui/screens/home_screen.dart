@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/monitor_provider.dart';
 import '../../theme/app_colors.dart';
@@ -18,12 +18,12 @@ class HomeScreen extends StatelessWidget {
     final settings = provider.settings;
 
     final costStr = settings.currency == 'CNY'
-        ? '¥'
-        : '\{today.costUsd.toStringAsFixed(2)}';
+        ? '¥${(today.costUsd * settings.usdToCnyRate).toStringAsFixed(2)}'
+        : '\$${today.costUsd.toStringAsFixed(2)}';
 
     final secondaryCostStr = settings.currency == 'CNY'
-        ? '≈ \{today.costUsd.toStringAsFixed(2)}'
-        : '≈ ¥';
+        ? '≈ \$${today.costUsd.toStringAsFixed(2)}'
+        : '≈ ¥${(today.costUsd * settings.usdToCnyRate).toStringAsFixed(2)}';
 
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +47,10 @@ class HomeScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: StatusBadge(status: provider.syncStatus),
+            child: StatusBadge(
+              status: provider.syncStatus,
+              errorMessage: provider.errorMessage,
+            ),
           ),
         ],
       ),
@@ -60,10 +63,36 @@ class HomeScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           children: [
+            // 错误提示条
+            if (provider.syncStatus == SyncStatus.error && provider.errorMessage != null) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.rose.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.rose.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, color: AppColors.rose, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        provider.errorMessage!,
+                        style: const TextStyle(color: AppColors.rose, fontSize: 11),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             if (stats != null && stats.devices.isNotEmpty) ...[
               _buildDeviceSelector(context, provider),
               const SizedBox(height: 12),
             ],
+
             GlassContainer(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -88,7 +117,7 @@ class HomeScreen extends StatelessWidget {
                           border: Border.all(color: AppColors.emerald.withOpacity(0.3)),
                         ),
                         child: Text(
-                          '+',
+                          '+${_formatTokens(today.totalTokens)}',
                           style: const TextStyle(
                             color: AppColors.emerald,
                             fontSize: 11,
@@ -133,13 +162,14 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       _buildMetricItem('本月支出', _formatCost(stats?.month.costUsd ?? 0.0, settings)),
                       _buildMetricItem('本月 Token', _formatTokens(stats?.month.totalTokens ?? 0)),
-                      _buildMetricItem('活跃工具', ' 个'),
+                      _buildMetricItem('活跃工具', '${today.clients.length} 个'),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
+
             if (provider.limits.isNotEmpty) ...[
               GlassContainer(
                 padding: const EdgeInsets.all(16),
@@ -178,6 +208,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
             ],
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -190,7 +221,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '已记录  款',
+                  '已记录 ${today.clients.length} 款',
                   style: const TextStyle(
                     color: AppColors.textMuted,
                     fontSize: 12,
@@ -199,6 +230,7 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
+
             if (today.clients.isEmpty)
               const Center(
                 child: Padding(
@@ -239,7 +271,7 @@ class HomeScreen extends StatelessWidget {
       child: Row(
         children: [
           _buildChip(
-            label: '全部设备 ()',
+            label: '全部设备 (${devices.length})',
             isSelected: provider.selectedDeviceId == null,
             onTap: () => provider.setSelectedDevice(null),
           ),
@@ -312,16 +344,16 @@ class HomeScreen extends StatelessWidget {
 
   String _formatCost(double usd, dynamic settings) {
     if (settings.currency == 'CNY') {
-      return '¥';
+      return '¥${(usd * settings.usdToCnyRate).toStringAsFixed(1)}';
     }
-    return '\{usd.toStringAsFixed(2)}';
+    return '\$${usd.toStringAsFixed(2)}';
   }
 
   String _formatTokens(int count) {
     if (count >= 1000000) {
-      return 'M';
+      return '${(count / 1000000.0).toStringAsFixed(2)}M';
     } else if (count >= 1000) {
-      return 'K';
+      return '${(count / 1000.0).toStringAsFixed(1)}K';
     }
     return count.toString();
   }

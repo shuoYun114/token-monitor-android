@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/monitor_provider.dart';
 import '../../theme/app_colors.dart';
@@ -17,6 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _hubSecretController;
   late TextEditingController _openRouterKeyController;
   late TextEditingController _deepSeekKeyController;
+  bool _isTesting = false;
 
   @override
   void initState() {
@@ -80,9 +81,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                         if (result is Map) {
                           setState(() {
-                            _hubUrlController.text = result['url']?.toString() ?? '';
-                            _hubSecretController.text = result['secret']?.toString() ?? '';
+                            _hubUrlController.text = result['url']?.toString().trim() ?? '';
+                            _hubSecretController.text = result['secret']?.toString().trim() ?? '';
                           });
+                          _saveAndConnect(provider, settings);
                         }
                       },
                       icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
@@ -91,27 +93,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _buildTextField('Hub URL (如 http://192.168.1.5:17321)', _hubUrlController),
+                _buildTextField('Hub URL (如 http://192.168.48.156:17321)', _hubUrlController),
                 const SizedBox(height: 10),
-                _buildTextField('Hub Secret 密钥', _hubSecretController, obscureText: true),
+                _buildTextField('Hub Secret 密钥 (在电脑端多设备同步查看)', _hubSecretController, obscureText: true),
                 const SizedBox(height: 14),
+
+                if (provider.errorMessage != null && provider.syncStatus == SyncStatus.error) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.rose.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.rose.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline_rounded, color: AppColors.rose, size: 16),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            provider.errorMessage!,
+                            style: const TextStyle(color: AppColors.rose, fontSize: 11),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 SizedBox(
                   width: double.infinity,
+                  height: 44,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.cyan,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    onPressed: () {
-                      settings.hubUrl = _hubUrlController.text.trim();
-                      settings.hubSecret = _hubSecretController.text.trim();
-                      provider.updateSettings(settings);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('已保存并尝试连接 Hub')),
-                      );
-                    },
-                    child: const Text('保存并连接', style: TextStyle(fontWeight: FontWeight.w700)),
+                    onPressed: _isTesting ? null : () => _saveAndConnect(provider, settings),
+                    child: _isTesting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                          )
+                        : const Text('保存并连接 Hub', style: TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 ),
               ],
@@ -119,7 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 货币与汇率
+          // 货币与显示
           GlassContainer(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -204,7 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Center(
             child: Text(
-              'Token Monitor for Android v1.0.0\n跨设备 AI 编程工具用量看板',
+              'Token Monitor for Android v1.0.1\n跨设备 AI 编程工具用量看板',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textMuted, fontSize: 11),
             ),
@@ -212,6 +239,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  void _saveAndConnect(MonitorProvider provider, dynamic settings) async {
+    setState(() {
+      _isTesting = true;
+    });
+
+    String url = _hubUrlController.text.trim();
+    if (url.isNotEmpty && !url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'http://$url';
+      _hubUrlController.text = url;
+    }
+
+    settings.hubUrl = url;
+    settings.hubSecret = _hubSecretController.text.trim();
+    provider.updateSettings(settings);
+
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    if (mounted) {
+      setState(() {
+        _isTesting = false;
+      });
+      if (provider.syncStatus == SyncStatus.connected) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.emerald,
+            content: Text('🎉 Hub 连接成功！数据已实时同步'),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildTextField(String label, TextEditingController controller, {bool obscureText = false}) {

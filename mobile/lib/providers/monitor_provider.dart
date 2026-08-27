@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/app_settings.dart';
 import '../models/device_stats.dart';
@@ -21,14 +21,14 @@ class MonitorProvider extends ChangeNotifier {
   List<LimitProviderItem> limits = [];
   SyncStatus syncStatus = SyncStatus.disconnected;
   String? errorMessage;
-  String? selectedDeviceId; // null 表示 '全部设备'
+  String? selectedDeviceId;
 
   Timer? _pollingTimer;
 
   MonitorProvider(this._storage) {
     settings = _storage.loadSettings();
     _loadInitialCache();
-    if (settings.hubUrl.isNotEmpty) {
+    if (settings.hubUrl.trim().isNotEmpty) {
       connectHub();
     }
   }
@@ -45,8 +45,10 @@ class MonitorProvider extends ChangeNotifier {
 
   /// 连接 Hub
   Future<void> connectHub() async {
-    if (settings.hubUrl.isEmpty) {
+    final rawUrl = settings.hubUrl.trim();
+    if (rawUrl.isEmpty) {
       syncStatus = SyncStatus.disconnected;
+      errorMessage = '未配置 Hub URL';
       notifyListeners();
       return;
     }
@@ -58,20 +60,21 @@ class MonitorProvider extends ChangeNotifier {
     try {
       // 1. 先进行一次单次拉取
       final data = await _hubService.fetchStats(
-        hubUrl: settings.hubUrl,
-        hubSecret: settings.hubSecret,
+        hubUrl: rawUrl,
+        hubSecret: settings.hubSecret.trim(),
       );
 
       _handleStatsPayload(data);
       syncStatus = SyncStatus.connected;
+      errorMessage = null;
       settings.isConnected = true;
       _storage.saveSettings(settings);
       notifyListeners();
 
       // 2. 开启 SSE 实时监听
       _hubService.startStreaming(
-        hubUrl: settings.hubUrl,
-        hubSecret: settings.hubSecret,
+        hubUrl: rawUrl,
+        hubSecret: settings.hubSecret.trim(),
         onData: (streamData) {
           _handleStatsPayload(streamData);
           syncStatus = SyncStatus.connected;
@@ -79,7 +82,6 @@ class MonitorProvider extends ChangeNotifier {
         },
         onError: (err) {
           // SSE 出错降级为定时轮询
-          syncStatus = SyncStatus.connected;
           _startPolling();
         },
       );
@@ -88,18 +90,23 @@ class MonitorProvider extends ChangeNotifier {
       _probeDirectLimits();
     } catch (e) {
       syncStatus = currentStats != null ? SyncStatus.offlineCache : SyncStatus.error;
-      errorMessage = e.toString();
+      errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
     }
   }
 
   void _handleStatsPayload(Map<String, dynamic> payload) {
-    currentStats = AggregateStats.fromJson(payload);
-    _storage.saveCachedStats(currentStats!, payload);
+    // 兼容 SSE 格式: {"type":"stats", "stats":{...}} 与普通 GET 格式: {...}
+    final Map<String, dynamic> statsMap = (payload.containsKey('stats') && payload['stats'] is Map)
+        ? payload['stats'] as Map<String, dynamic>
+        : payload;
 
-    // 解析返回的 limits 数据 (如果 Hub 包含了 limits)
-    if (payload['limits'] is List) {
-      final list = (payload['limits'] as List<dynamic>)
+    currentStats = AggregateStats.fromJson(statsMap);
+    _storage.saveCachedStats(currentStats!, statsMap);
+
+    // 解析 limits 数据
+    if (statsMap['limits'] is List) {
+      final list = (statsMap['limits'] as List<dynamic>)
           .map((e) => LimitProviderItem.fromJson(e as Map<String, dynamic>))
           .toList();
       if (list.isNotEmpty) {
@@ -131,7 +138,6 @@ class MonitorProvider extends ChangeNotifier {
     }
 
     if (directItems.isNotEmpty) {
-      // 合并到现有限额列表
       for (var d in directItems) {
         limits.removeWhere((x) => x.id == d.id);
         limits.add(d);
@@ -144,7 +150,7 @@ class MonitorProvider extends ChangeNotifier {
   void _startPolling() {
     _pollingTimer?.cancel();
     _pollingTimer = Timer.periodic(
-      Duration(seconds: settings.refreshIntervalSeconds),
+      Duration(seconds: settings.refreshIntervalSeconds.clamp(5, 60)),
       (_) => refreshNow(),
     );
   }
@@ -157,8 +163,19 @@ class MonitorProvider extends ChangeNotifier {
         hubSecret: settings.hubSecret,
       );
       _handleStatsPayload(data);
+      syncStatus = SyncStatus.connected;
+      errorMessage = null;
       _probeDirectLimits();
-    } catch (_) {}
+      notifyListeners();
+    } catch (e) {
+      if (currentStats == null) {
+        syncStatus = SyncStatus.error;
+      } else {
+        syncStatus = SyncStatus.offlineCache;
+      }
+      errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+    }
   }
 
   void updateSettings(AppSettings newSettings) {
@@ -173,7 +190,6 @@ class MonitorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 辅助获取当前选定设备/全量的今日用量
   PeriodUsage getSelectedPeriodToday() {
     if (currentStats == null) return PeriodUsage();
     if (selectedDeviceId == null) {
