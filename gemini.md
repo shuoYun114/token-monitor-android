@@ -6,16 +6,21 @@
 
 ## 📌 核心硬性要求 (Strict Rules)
 
-### 1. 自动 Git Commit 提交规范 (Micro-Commits)
+### 1. 自动 Git Commit 提交与变更明细规范 (Micro-Commits with Detailed Log)
 - **触发时机**：每次完成一个独立微功能、修复 Bug、更新配置或达成阶段性验证后，**必须自动执行 Git Commit**。
-- **提交信息格式**：严格使用标准化语义前缀：
-  - `feat:` 新增功能（如移动端看板、桌面微件、新 Provider 支持）
-  - `fix:` 修复 Bug 或逻辑缺陷
-  - `refactor:` 代码重构与架构优化
-  - `docs:` 文档与说明书更新
-  - `ci:` GitHub Actions / CI 工作流调整
-  - `style:` 格式调整（不影响代码逻辑）
-- **安全检查**：提交前确认 Git 仓库已正确初始化并关联远程仓库。
+- **提交信息格式 (Commit Message Structure)**：
+  - **标题行 (Subject)**：必须严格使用标准化语义前缀：
+    - `feat:` 新增功能（如移动端看板、桌面微件、新 Provider 支持）
+    - `fix:` 修复 Bug 或逻辑缺陷
+    - `refactor:` 代码重构与架构优化
+    - `docs:` 文档与说明书更新
+    - `ci:` GitHub Actions / CI 工作流调整
+    - `style:` 格式调整（不影响代码逻辑）
+  - **详细正文 (Body - 强制要求)**：**必须清晰写明本次 Commit 具体修改了什么内容**，包括：
+    - 涉及的模块与文件路径；
+    - 具体新增、修改或删除的功能逻辑与技术要点；
+    - 产生的效果与注意事项。
+- **环境安全检查**：提交前确认 Git 仓库已正确初始化。
 
 ### 2. GitHub Actions 云端自动构建 APK
 - 移动端 Android 客户端（`mobile/`）的构建由 GitHub Actions 云端工作流 `.github/workflows/build-android.yml` 自动接管。
