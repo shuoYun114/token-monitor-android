@@ -25,13 +25,22 @@ android {
         applicationId "com.javis.tokenmonitor"
         minSdk 21
         targetSdk 34
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 5
+        versionName "1.0.4"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("release.keystore")
+            storePassword "tokenmonitor2026"
+            keyAlias "tokenmonitor"
+            keyPassword "tokenmonitor2026"
+        }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled false
             shrinkResources false
         }

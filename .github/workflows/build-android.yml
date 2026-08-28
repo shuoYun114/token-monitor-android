@@ -47,9 +47,9 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.3
-          name: "Token Monitor Android v1.0.3"
-          body: "🚀 最新版本 Android APK (v1.0.3) 发布！\n\n- 在主看板顶部新增「今日消耗 Token」专属大字栏目（包含 M 级与精确数量展示）\n- 优化 RadialGauge 环形额度仪表盘数字与倒计时居中展示\n- 修复活跃工具卡片金额显示与排版布局\n\n**下载方式**：直接点击下方 Assets 中的 `app-release.apk` 即可下载安装。"
+          tag_name: v1.0.4
+          name: "Token Monitor Android v1.0.4 (固化永久签名版)"
+          body: "🔐 **固化永久签名版 (v1.0.4)** 发布！\n\n- 固化 Android 官方正式 Release 签名密钥库 (`release.keystore`)，彻底终结云端每次编译随机生成 debug 签名导致的「签名不一致无法更新」Bug。\n- 从本次 v1.0.4 开始，后续所有更新均支持**直接点击覆盖更新安装**，再也无需先卸载旧版本！\n\n**下载方式**：直接点击下方 Assets 中的 `app-release.apk` 即可下载安装。"
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false
