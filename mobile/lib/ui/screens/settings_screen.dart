@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/monitor_provider.dart';
+import '../../services/currency_service.dart';
 import '../../theme/app_colors.dart';
 import '../widgets/glass_container.dart';
 import 'qr_scan_screen.dart';
@@ -17,7 +18,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _hubSecretController;
   late TextEditingController _openRouterKeyController;
   late TextEditingController _deepSeekKeyController;
+  late TextEditingController _rateController;
   bool _isTesting = false;
+  bool _isUpdatingRate = false;
 
   @override
   void initState() {
@@ -27,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _hubSecretController = TextEditingController(text: settings.hubSecret);
     _openRouterKeyController = TextEditingController(text: settings.openRouterApiKey);
     _deepSeekKeyController = TextEditingController(text: settings.deepSeekApiKey);
+    _rateController = TextEditingController(text: settings.usdToCnyRate.toStringAsFixed(4));
   }
 
   @override
@@ -35,6 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _hubSecretController.dispose();
     _openRouterKeyController.dispose();
     _deepSeekKeyController.dispose();
+    _rateController.dispose();
     super.dispose();
   }
 
@@ -93,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _buildTextField('Hub URL (如 http://192.168.48.156:17321)', _hubUrlController),
+                _buildTextField('Hub URL (如 http://[2409:...]:17321)', _hubUrlController),
                 const SizedBox(height: 10),
                 _buildTextField('Hub Secret 密钥 (在电脑端多设备同步查看)', _hubSecretController, obscureText: true),
                 const SizedBox(height: 14),
@@ -146,14 +151,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 货币与显示
+          // 货币与汇率设置
           GlassContainer(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '货币与显示',
+                  '货币与实时汇率换算',
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 14,
@@ -178,6 +183,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           provider.updateSettings(settings);
                         }
                       },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _rateController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontFamily: 'monospace'),
+                        decoration: InputDecoration(
+                          labelText: 'USD/CNY 汇率 (与桌面端同步)',
+                          labelStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                          filled: true,
+                          fillColor: AppColors.surfaceLight,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                        ),
+                        onChanged: (val) {
+                          final n = double.tryParse(val);
+                          if (n != null && n > 0) {
+                            settings.usdToCnyRate = n;
+                            provider.updateSettings(settings);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.surfaceLight,
+                        foregroundColor: AppColors.cyan,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      ),
+                      onPressed: _isUpdatingRate
+                          ? null
+                          : () async {
+                              setState(() => _isUpdatingRate = true);
+                              final rate = await CurrencyService.fetchUsdToCnyRate();
+                              setState(() => _isUpdatingRate = false);
+                              if (rate != null) {
+                                _rateController.text = rate.toStringAsFixed(4);
+                                settings.usdToCnyRate = rate;
+                                provider.updateSettings(settings);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('已同步最新汇率: 1 USD = ${rate.toStringAsFixed(4)} CNY')),
+                                );
+                              }
+                            },
+                      child: _isUpdatingRate
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Text('刷新汇率', style: TextStyle(fontSize: 12)),
                     ),
                   ],
                 ),
@@ -231,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Center(
             child: Text(
-              'Token Monitor for Android v1.0.1\n跨设备 AI 编程工具用量看板',
+              'Token Monitor for Android v1.0.5\n跨设备 AI 编程工具用量看板',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textMuted, fontSize: 11),
             ),

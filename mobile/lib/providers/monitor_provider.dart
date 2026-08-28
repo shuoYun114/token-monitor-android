@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/app_settings.dart';
 import '../models/device_stats.dart';
 import '../models/limit_provider.dart';
+import '../services/currency_service.dart';
 import '../services/hub_client_service.dart';
 import '../services/limit_probe_service.dart';
 import '../services/storage_service.dart';
@@ -28,8 +29,18 @@ class MonitorProvider extends ChangeNotifier {
   MonitorProvider(this._storage) {
     settings = _storage.loadSettings();
     _loadInitialCache();
+    _fetchLiveExchangeRate();
     if (settings.hubUrl.trim().isNotEmpty) {
       connectHub();
+    }
+  }
+
+  Future<void> _fetchLiveExchangeRate() async {
+    final liveRate = await CurrencyService.fetchUsdToCnyRate();
+    if (liveRate != null && liveRate > 0) {
+      settings.usdToCnyRate = liveRate;
+      _storage.saveSettings(settings);
+      notifyListeners();
     }
   }
 
@@ -84,6 +95,7 @@ class MonitorProvider extends ChangeNotifier {
       );
 
       _probeDirectLimits();
+      _fetchLiveExchangeRate();
     } catch (e) {
       syncStatus = currentStats != null ? SyncStatus.offlineCache : SyncStatus.error;
       errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -182,6 +194,7 @@ class MonitorProvider extends ChangeNotifier {
       syncStatus = SyncStatus.connected;
       errorMessage = null;
       _probeDirectLimits();
+      _fetchLiveExchangeRate();
       notifyListeners();
     } catch (e) {
       if (currentStats == null) {
