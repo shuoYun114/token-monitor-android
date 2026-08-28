@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/monitor_provider.dart';
 import '../../theme/app_colors.dart';
 import '../widgets/glass_container.dart';
@@ -24,6 +25,10 @@ class HomeScreen extends StatelessWidget {
     final secondaryCostStr = settings.currency == 'CNY'
         ? '≈ \$${today.costUsd.toStringAsFixed(2)}'
         : '≈ ¥${(today.costUsd * settings.usdToCnyRate).toStringAsFixed(2)}';
+
+    final formatter = NumberFormat('#,###');
+    final exactTokensFormatted = formatter.format(today.totalTokens);
+    final shortTokensFormatted = _formatTokensShort(today.totalTokens);
 
     return Scaffold(
       appBar: AppBar(
@@ -93,83 +98,164 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
             ],
 
-            GlassContainer(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        '今日实时花费 (Today)',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+            // 核心双数据并列栏目：今日花费 + 今日消耗 Token 专属大栏目
+            Row(
+              children: [
+                // 1. 今日实时花费大卡片
+                Expanded(
+                  child: GlassContainer(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppColors.amber,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              '今日实时花费',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.emerald.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.emerald.withOpacity(0.3)),
-                        ),
-                        child: Text(
-                          '+${_formatTokens(today.totalTokens)}',
-                          style: const TextStyle(
-                            color: AppColors.emerald,
-                            fontSize: 11,
-                            fontFamily: 'monospace',
-                            fontWeight: FontWeight.w600,
+                        const SizedBox(height: 10),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            costStr,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              fontFamily: 'monospace',
+                              letterSpacing: -0.5,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        costStr,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 34,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: 'monospace',
-                          letterSpacing: -1,
+                        const SizedBox(height: 4),
+                        Text(
+                          secondaryCostStr,
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        secondaryCostStr,
-                        style: const TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 13,
-                          fontFamily: 'monospace',
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // 2. 今日消耗 Token 独立大卡片 (醒目大栏目)
+                Expanded(
+                  child: GlassContainer(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppColors.cyan,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              '今日消耗 Token',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 10),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                shortTokensFormatted,
+                                style: const TextStyle(
+                                  color: AppColors.cyan,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w800,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Text(
+                                'Tokens',
+                                style: TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '$exactTokensFormatted',
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  const Divider(color: AppColors.glassBorder, height: 1),
-                  const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildMetricItem('本月支出', _formatCost(stats?.month.costUsd ?? 0.0, settings)),
-                      _buildMetricItem('本月 Token', _formatTokens(stats?.month.totalTokens ?? 0)),
-                      _buildMetricItem('活跃工具', '${today.clients.length} 个'),
-                    ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // 月度支出与统计汇总卡片
+            GlassContainer(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildMetricItem('本月支出', _formatCost(stats?.month.costUsd ?? 0.0, settings)),
+                  const SizedBox(
+                    height: 24,
+                    child: VerticalDivider(color: AppColors.glassBorder, width: 1),
                   ),
+                  _buildMetricItem('本月 Token', _formatTokensShort(stats?.month.totalTokens ?? 0) + ' Tokens'),
+                  const SizedBox(
+                    height: 24,
+                    child: VerticalDivider(color: AppColors.glassBorder, width: 1),
+                  ),
+                  _buildMetricItem('活跃工具', '${today.clients.length} 款'),
                 ],
               ),
             ),
             const SizedBox(height: 16),
 
+            // AI 额度健康度
             if (provider.limits.isNotEmpty) ...[
               GlassContainer(
                 padding: const EdgeInsets.all(16),
@@ -333,7 +419,7 @@ class HomeScreen extends StatelessWidget {
           value,
           style: const TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
             fontFamily: 'monospace',
           ),
@@ -349,7 +435,7 @@ class HomeScreen extends StatelessWidget {
     return '\$${usd.toStringAsFixed(2)}';
   }
 
-  String _formatTokens(int count) {
+  String _formatTokensShort(int count) {
     if (count >= 1000000) {
       return '${(count / 1000000.0).toStringAsFixed(2)}M';
     } else if (count >= 1000) {

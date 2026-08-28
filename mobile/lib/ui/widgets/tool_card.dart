@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import 'glass_container.dart';
 
@@ -24,9 +24,9 @@ class ToolCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final toolColor = AppColors.getToolColor(clientName);
-    final costStr = currency == 'CNY'
-        ? '¥'
-        : '\{costUsd.toStringAsFixed(2)}';
+    final costText = currency == 'CNY'
+        ? '¥${(costUsd * rate).toStringAsFixed(2)}'
+        : '\$${costUsd.toStringAsFixed(2)}';
 
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -35,24 +35,24 @@ class ToolCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          // 图标容器
+          // 工具专属图标
           Container(
-            width: 38,
-            height: 38,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: toolColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: toolColor.withOpacity(0.3), width: 1),
+              border: Border.all(color: toolColor.withOpacity(0.35), width: 1),
             ),
             alignment: Alignment.center,
             child: Icon(
               _getToolIcon(clientName),
               color: toolColor,
-              size: 18,
+              size: 20,
             ),
           ),
           const SizedBox(width: 12),
-          // 工具名称与标签
+          // 工具名称与 Token 统计
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +63,7 @@ class ToolCard extends StatelessWidget {
                       _formatToolName(clientName),
                       style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -78,29 +78,29 @@ class ToolCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   _formatTokens(tokenCount),
                   style: const TextStyle(
                     color: AppColors.cyan,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontFamily: 'monospace',
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
-          // 费用展示
+          // 今日金额展示
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                costStr,
+                costText,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                   fontFamily: 'monospace',
                 ),
               ),
@@ -119,26 +119,33 @@ class ToolCard extends StatelessWidget {
     );
   }
 
-  IconData _getToolIcon(String name) {
-    final lower = name.toLowerCase();
-    if (lower.contains('claude')) return Icons.bolt_rounded;
-    if (lower.contains('cursor') || lower.contains('code')) return Icons.terminal_rounded;
-    if (lower.contains('antigravity') || lower.contains('gemini')) return Icons.psychology_rounded;
-    if (lower.contains('deepseek')) return Icons.hub_rounded;
-    return Icons.code_rounded;
+  IconData _getToolIcon(String client) {
+    switch (client.toLowerCase()) {
+      case 'claude':
+        return Icons.psychology_rounded;
+      case 'cursor':
+        return Icons.code_rounded;
+      case 'codex':
+      case 'copilot':
+        return Icons.terminal_rounded;
+      case 'antigravity':
+        return Icons.psychology_rounded;
+      default:
+        return Icons.bolt_rounded;
+    }
   }
 
-  String _formatToolName(String name) {
-    if (name.isEmpty) return 'Tool';
-    return name[0].toUpperCase() + name.substring(1);
+  String _formatToolName(String client) {
+    if (client.isEmpty) return 'Unknown';
+    return client[0].toUpperCase() + client.substring(1);
   }
 
   String _formatTokens(int count) {
     if (count >= 1000000) {
-      return 'M Tokens';
+      return '${(count / 1000000.0).toStringAsFixed(2)}M Tokens';
     } else if (count >= 1000) {
-      return 'K Tokens';
+      return '${(count / 1000.0).toStringAsFixed(1)}K Tokens';
     }
-    return ' Tokens';
+    return '$count Tokens';
   }
 }

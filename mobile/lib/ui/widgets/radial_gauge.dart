@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 
@@ -22,6 +22,7 @@ class RadialGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = activeColor ?? _getColorByPercent(remainingPercent);
+    final percentInt = remainingPercent.clamp(0.0, 100.0).round();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -35,19 +36,24 @@ class RadialGauge extends StatelessWidget {
               CustomPaint(
                 size: Size(size, size),
                 painter: _GaugePainter(
-                  percent: remainingPercent / 100.0,
+                  percent: remainingPercent.clamp(0.0, 100.0) / 100.0,
                   activeColor: color,
                   trackColor: AppColors.surfaceLight,
                 ),
               ),
-              Text(
-                '%',
-                style: TextStyle(
-                  color: color,
-                  fontSize: size * 0.24,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: 'monospace',
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$percentInt%',
+                    style: TextStyle(
+                      color: color,
+                      fontSize: size * 0.22,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -63,16 +69,20 @@ class RadialGauge extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        if (subtitle != null) ...[
+        if (subtitle != null && subtitle!.isNotEmpty) ...[
           const SizedBox(height: 2),
-          Text(
-            subtitle!,
-            style: const TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 9,
+          SizedBox(
+            width: 90,
+            child: Text(
+              subtitle!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 9,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ],
@@ -99,36 +109,40 @@ class _GaugePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = size.width * 0.12;
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
+    final radius = (size.width - 8) / 2;
+    const strokeWidth = 5.0;
 
-    // 底环
+    // 背景底环
     final trackPaint = Paint()
       ..color = trackColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
     canvas.drawCircle(center, radius, trackPaint);
 
-    // 进度弧线
-    final progressPaint = Paint()
+    // 进度高亮环
+    final activePaint = Paint()
       ..color = activeColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    final sweepAngle = 2 * pi * percent.clamp(0.0, 1.0);
+    final sweepAngle = 2 * pi * percent;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -pi / 2,
       sweepAngle,
       false,
-      progressPaint,
+      activePaint,
     );
   }
 
   @override
   bool shouldRepaint(covariant _GaugePainter oldDelegate) {
-    return oldDelegate.percent != percent || oldDelegate.activeColor != activeColor;
+    return oldDelegate.percent != percent ||
+        oldDelegate.activeColor != activeColor ||
+        oldDelegate.trackColor != trackColor;
   }
 }
