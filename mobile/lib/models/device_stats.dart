@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 /// 单个时期的用量统计 (今日/本月/历史总计)
 class PeriodUsage {
@@ -88,15 +88,21 @@ class DeviceRecord {
   });
 
   factory DeviceRecord.fromJson(Map<String, dynamic> json) {
+    // 兼容 periods 嵌套与扁平结构
+    final periods = json['periods'] as Map<String, dynamic>?;
+    final todayMap = (periods?['today'] ?? json['today']) as Map<String, dynamic>?;
+    final monthMap = (periods?['month'] ?? json['month']) as Map<String, dynamic>?;
+    final allTimeMap = (periods?['allTime'] ?? json['allTime']) as Map<String, dynamic>?;
+
     return DeviceRecord(
       deviceId: json['deviceId']?.toString() ?? '',
       hostname: json['hostname']?.toString() ?? 'Unknown Device',
       platform: json['platform']?.toString() ?? 'unknown',
       updatedAt: json['updatedAt']?.toString() ?? '',
       agentVersion: json['agentVersion']?.toString(),
-      today: PeriodUsage.fromJson(json['today'] as Map<String, dynamic>?),
-      month: PeriodUsage.fromJson(json['month'] as Map<String, dynamic>?),
-      allTime: PeriodUsage.fromJson(json['allTime'] as Map<String, dynamic>?),
+      today: PeriodUsage.fromJson(todayMap),
+      month: PeriodUsage.fromJson(monthMap),
+      allTime: PeriodUsage.fromJson(allTimeMap),
       limits: json['limits'] as Map<String, dynamic>?,
     );
   }
@@ -132,15 +138,60 @@ class AggregateStats {
 
   factory AggregateStats.fromJson(Map<String, dynamic> json) {
     final totals = json['totals'] as Map<String, dynamic>? ?? json;
+    final periods = json['periods'] as Map<String, dynamic>?;
+
     final devicesList = (json['devices'] as List<dynamic>?)
             ?.map((e) => DeviceRecord.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [];
 
+    // 优先从根节点或 totals/periods 中提取今日/本月数据
+    var todayUsage = PeriodUsage.fromJson(
+      (periods?['today'] ?? totals['today'] ?? json['today']) as Map<String, dynamic>?,
+    );
+    var monthUsage = PeriodUsage.fromJson(
+      (periods?['month'] ?? totals['month'] ?? json['month']) as Map<String, dynamic>?,
+    );
+    var allTimeUsage = PeriodUsage.fromJson(
+      (periods?['allTime'] ?? totals['allTime'] ?? json['allTime']) as Map<String, dynamic>?,
+    );
+
+    // 如果聚合根节点为 0 但设备列表中有数据，自动聚合并汇总各设备
+    if (todayUsage.totalTokens == 0 && devicesList.isNotEmpty) {
+      int sumTokens = 0;
+      double sumCost = 0.0;
+      final Map<String, int> sumClients = {};
+      final Map<String, double> sumClientCosts = {};
+
+      for (var d in devicesList) {
+        sumTokens += d.today.totalTokens;
+        sumCost += d.today.costUsd;
+        d.today.clients.forEach((k, v) => sumClients[k] = (sumClients[k] ?? 0) + v);
+        d.today.clientCosts.forEach((k, v) => sumClientCosts[k] = (sumClientCosts[k] ?? 0.0) + v);
+      }
+
+      todayUsage = PeriodUsage(
+        totalTokens: sumTokens,
+        costUsd: sumCost,
+        clients: sumClients,
+        clientCosts: sumClientCosts,
+      );
+    }
+
+    if (monthUsage.totalTokens == 0 && devicesList.isNotEmpty) {
+      int sumTokens = 0;
+      double sumCost = 0.0;
+      for (var d in devicesList) {
+        sumTokens += d.month.totalTokens;
+        sumCost += d.month.costUsd;
+      }
+      monthUsage = PeriodUsage(totalTokens: sumTokens, costUsd: sumCost);
+    }
+
     return AggregateStats(
-      today: PeriodUsage.fromJson(totals['today'] as Map<String, dynamic>?),
-      month: PeriodUsage.fromJson(totals['month'] as Map<String, dynamic>?),
-      allTime: PeriodUsage.fromJson(totals['allTime'] as Map<String, dynamic>?),
+      today: todayUsage,
+      month: monthUsage,
+      allTime: allTimeUsage,
       devices: devicesList,
       updatedAt: json['updatedAt']?.toString() ?? DateTime.now().toIso8601String(),
     );

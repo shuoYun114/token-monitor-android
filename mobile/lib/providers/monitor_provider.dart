@@ -58,7 +58,6 @@ class MonitorProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. 先进行一次单次拉取
       final data = await _hubService.fetchStats(
         hubUrl: rawUrl,
         hubSecret: settings.hubSecret.trim(),
@@ -71,7 +70,6 @@ class MonitorProvider extends ChangeNotifier {
       _storage.saveSettings(settings);
       notifyListeners();
 
-      // 2. 开启 SSE 实时监听
       _hubService.startStreaming(
         hubUrl: rawUrl,
         hubSecret: settings.hubSecret.trim(),
@@ -81,12 +79,10 @@ class MonitorProvider extends ChangeNotifier {
           notifyListeners();
         },
         onError: (err) {
-          // SSE 出错降级为定时轮询
           _startPolling();
         },
       );
 
-      // 3. 触发直连 API 额度探测
       _probeDirectLimits();
     } catch (e) {
       syncStatus = currentStats != null ? SyncStatus.offlineCache : SyncStatus.error;
@@ -96,7 +92,6 @@ class MonitorProvider extends ChangeNotifier {
   }
 
   void _handleStatsPayload(Map<String, dynamic> payload) {
-    // 兼容 SSE 格式: {"type":"stats", "stats":{...}} 与普通 GET 格式: {...}
     final Map<String, dynamic> statsMap = (payload.containsKey('stats') && payload['stats'] is Map)
         ? payload['stats'] as Map<String, dynamic>
         : payload;
@@ -104,15 +99,36 @@ class MonitorProvider extends ChangeNotifier {
     currentStats = AggregateStats.fromJson(statsMap);
     _storage.saveCachedStats(currentStats!, statsMap);
 
-    // 解析 limits 数据
+    // 解析 limits 数据：支持根节点 limits 与各 devices[i].limits.providers
+    final List<LimitProviderItem> parsedLimits = [];
+
     if (statsMap['limits'] is List) {
-      final list = (statsMap['limits'] as List<dynamic>)
-          .map((e) => LimitProviderItem.fromJson(e as Map<String, dynamic>))
-          .toList();
-      if (list.isNotEmpty) {
-        limits = list;
-        _storage.saveCachedLimits(limits);
+      for (var e in statsMap['limits'] as List) {
+        if (e is Map<String, dynamic>) {
+          parsedLimits.add(LimitProviderItem.fromJson(e));
+        }
       }
+    }
+
+    if (currentStats != null) {
+      for (var dev in currentStats!.devices) {
+        if (dev.limits is Map && dev.limits!['providers'] is List) {
+          for (var p in dev.limits!['providers'] as List) {
+            if (p is Map<String, dynamic>) {
+              final item = LimitProviderItem.fromJson(p);
+              if (item.windows.isNotEmpty || item.status == 'ok') {
+                parsedLimits.removeWhere((x) => x.id == item.id && x.accountEmail == item.accountEmail);
+                parsedLimits.add(item);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (parsedLimits.isNotEmpty) {
+      limits = parsedLimits;
+      _storage.saveCachedLimits(limits);
     }
 
     // 触发 Android 桌面小组件刷新
@@ -197,7 +213,15 @@ class MonitorProvider extends ChangeNotifier {
     }
     final dev = currentStats!.devices.firstWhere(
       (d) => d.deviceId == selectedDeviceId,
-      orElse: () => currentStats!.devices.first,
+      orElse: () => currentStats!.devices.isNotEmpty ? currentStats!.devices.first : DeviceRecord(
+        deviceId: '',
+        hostname: '',
+        platform: '',
+        updatedAt: '',
+        today: PeriodUsage(),
+        month: PeriodUsage(),
+        allTime: PeriodUsage(),
+      ),
     );
     return dev.today;
   }
