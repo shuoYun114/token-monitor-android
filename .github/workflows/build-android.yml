@@ -5,8 +5,7 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
-permissions:
-  contents: write
+permissions: write-all
 
 jobs:
   build:
@@ -45,13 +44,14 @@ jobs:
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-      - name: Create or Update GitHub Release
+      - name: Publish Release APK
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/heads/master')
         with:
-          tag_name: latest-apk
-          name: "Token Monitor Android Latest APK (v1.0.2)"
-          body: "🚀 自动云编译最新版本 APK，手机直接点击下方 `app-release.apk` 即可下载安装！"
+          tag_name: v1.0.2
+          name: "Token Monitor Android v1.0.2"
+          body: "🚀 最新版本 Android APK 发布！包含深度嵌套数据解析修复与 AI 额度健康度展示。\n\n**下载方式**：直接点击下方 Assets 中的 `app-release.apk` 即可下载安装。"
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
