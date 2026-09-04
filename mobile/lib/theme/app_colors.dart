@@ -36,6 +36,12 @@ class AppColors {
   static const Color toolDeepSeek = Color(0xFF0284C7);
   static const Color toolKimi = Color(0xFF14B8A6);
   static const Color toolQwen = Color(0xFF8B5CF6);
+  static const Color toolAlibaba = Color(0xFFFF6A00);
+  static const Color toolZed = Color(0xFF22C55E);
+  static const Color toolUnsloth = Color(0xFFEC4899);
+  static const Color toolTrae = Color(0xFF3B82F6);
+  static const Color toolVolcengine = Color(0xFF06B6D4);
+  static const Color toolCopilot = Color(0xFF818CF8);
   static const Color toolGeneric = Color(0xFF64748B);
 
   static Color getToolColor(String clientName) {
@@ -47,7 +53,27 @@ class AppColors {
     if (lower.contains('opencode')) return toolOpenCode;
     if (lower.contains('deepseek')) return toolDeepSeek;
     if (lower.contains('kimi')) return toolKimi;
-    if (lower.contains('qwen')) return toolQwen;
+    if (lower.contains('qwen') || lower.contains('alibaba') || lower.contains('bailian')) return toolAlibaba;
+    if (lower.contains('zed')) return toolZed;
+    if (lower.contains('unsloth')) return toolUnsloth;
+    if (lower.contains('trae')) return toolTrae;
+    if (lower.contains('volcengine') || lower.contains('doubao')) return toolVolcengine;
+    if (lower.contains('copilot') || lower.contains('github')) return toolCopilot;
     return toolGeneric;
+  }
+
+  static Color getModelColor(String modelName) {
+    final lower = modelName.toLowerCase();
+    if (lower.contains('gemini')) return const Color(0xFF38BDF8); // 谷歌 Gemini 科技青
+    if (lower.contains('claude') || lower.contains('sonnet') || lower.contains('haiku') || lower.contains('opus')) {
+      return const Color(0xFFF97316); // Claude 珊瑚橙
+    }
+    if (lower.contains('gpt') || lower.contains('o1') || lower.contains('o3') || lower.contains('openai')) {
+      return const Color(0xFF10B981); // OpenAI 翡翠绿
+    }
+    if (lower.contains('deepseek')) return const Color(0xFF0284C7); // DeepSeek 深度蓝
+    if (lower.contains('qwen')) return const Color(0xFF8B5CF6); // 通义千问 霓虹紫
+    if (lower.contains('kimi') || lower.contains('moonshot')) return const Color(0xFF14B8A6); // Kimi 青绿
+    return const Color(0xFF94A3B8); // 默认灰蓝
   }
 }

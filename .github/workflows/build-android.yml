@@ -1,4 +1,4 @@
-﻿name: Build Android APK
+name: Build Android APK
 
 on:
   push:
@@ -47,9 +47,9 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.5
-          name: "Token Monitor Android v1.0.5 (汇率精确对齐版)"
-          body: "💱 **汇率精确对齐版 (v1.0.5)** 发布！\n\n- 集成 CurrencyService 动态汇率服务，与桌面端官方汇率源（6.7203 CNY/USD）保持 100% 同步，人民币金额显示完全一致！\n- 设置页支持查看汇率与一键刷新最新汇率。\n- 固化正式签名，支持直接覆盖安装升级。\n\n**下载方式**：直接点击下方 Assets 中的 `app-release.apk` 即可下载安装。"
+          tag_name: v1.0.6
+          name: "Token Monitor Android v1.0.6 (对齐电脑端 v0.53.0 最新规范)"
+          body: "🚀 **全新版本 (v1.0.6) 正式发布！**\n\n- 深度对齐电脑端 GitHub 最新版 (v0.53.0) 核心规范与数据协议\n- **新增「今日活跃模型分布与排行 (Models Breakdown)」**：直观查看各 AI 模型（Gemini 3.7 / Claude 3.7 / GPT / DeepSeek 等）用量、占比与花费\n- **升级「AI 额度健康度」**：完整支持 Antigravity 等 Provider 的多额度窗口（Gemini 85% 与 Claude/GPT 100% 并列大仪表盘）\n- **扩充最新工具与提供商支持**：新增阿里巴巴通义千问 (Alibaba/Qwen Token Plan)、Zed Editor、Unsloth Studio、Trae 等新工具识别\n- **多设备模型聚合优化**：跨设备统计时模型分布完全无缝汇总\n- **永久固化正式签名**：直接点击覆盖安装更新，无缝升级！\n\n**下载方式**：直接点击下方 Assets 中的 `app-release.apk` 即可极速安装。"
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false

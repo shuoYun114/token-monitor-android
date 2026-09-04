@@ -1,4 +1,4 @@
-﻿/// 应用本地配置模型
+/// 应用本地配置模型
 class AppSettings {
   String hubUrl;
   String hubSecret;

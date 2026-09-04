@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 
 /// 单个时期的用量统计 (今日/本月/历史总计)
 class PeriodUsage {
@@ -163,11 +163,16 @@ class AggregateStats {
       final Map<String, int> sumClients = {};
       final Map<String, double> sumClientCosts = {};
 
+      final Map<String, int> sumModels = {};
+      final Map<String, double> sumModelCosts = {};
+
       for (var d in devicesList) {
         sumTokens += d.today.totalTokens;
         sumCost += d.today.costUsd;
         d.today.clients.forEach((k, v) => sumClients[k] = (sumClients[k] ?? 0) + v);
         d.today.clientCosts.forEach((k, v) => sumClientCosts[k] = (sumClientCosts[k] ?? 0.0) + v);
+        d.today.models.forEach((k, v) => sumModels[k] = (sumModels[k] ?? 0) + v);
+        d.today.modelCosts.forEach((k, v) => sumModelCosts[k] = (sumModelCosts[k] ?? 0.0) + v);
       }
 
       todayUsage = PeriodUsage(
@@ -175,7 +180,29 @@ class AggregateStats {
         costUsd: sumCost,
         clients: sumClients,
         clientCosts: sumClientCosts,
+        models: sumModels,
+        modelCosts: sumModelCosts,
       );
+    } else if (todayUsage.models.isEmpty && devicesList.isNotEmpty) {
+      final Map<String, int> sumModels = {};
+      final Map<String, double> sumModelCosts = {};
+      for (var d in devicesList) {
+        d.today.models.forEach((k, v) => sumModels[k] = (sumModels[k] ?? 0) + v);
+        d.today.modelCosts.forEach((k, v) => sumModelCosts[k] = (sumModelCosts[k] ?? 0.0) + v);
+      }
+      if (sumModels.isNotEmpty) {
+        todayUsage = PeriodUsage(
+          totalTokens: todayUsage.totalTokens,
+          costUsd: todayUsage.costUsd,
+          clients: todayUsage.clients,
+          clientCosts: todayUsage.clientCosts,
+          models: sumModels,
+          modelCosts: sumModelCosts,
+          inputTokens: todayUsage.inputTokens,
+          outputTokens: todayUsage.outputTokens,
+          cacheReadTokens: todayUsage.cacheReadTokens,
+        );
+      }
     }
 
     if (monthUsage.totalTokens == 0 && devicesList.isNotEmpty) {

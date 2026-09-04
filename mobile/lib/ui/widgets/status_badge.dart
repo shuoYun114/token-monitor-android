@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../providers/monitor_provider.dart';
 import '../../theme/app_colors.dart';
 

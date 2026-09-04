@@ -1,4 +1,4 @@
-﻿/// AI 服务提供商额度窗口模型
+/// AI 服务提供商额度窗口模型
 class LimitWindow {
   final String label; // 5小时窗口 / 每周限额 / 月度限额
   final double usedPercent; // 已用百分比 0.0 - 100.0

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/monitor_provider.dart';
@@ -7,6 +7,7 @@ import '../widgets/glass_container.dart';
 import '../widgets/radial_gauge.dart';
 import '../widgets/status_badge.dart';
 import '../widgets/tool_card.dart';
+import '../widgets/model_breakdown_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -255,42 +256,90 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // AI 额度健康度
+            // AI 额度健康度 (支持同一 Provider 下的多额度窗口，如 Gemini + Claude/GPT)
             if (provider.limits.isNotEmpty) ...[
-              GlassContainer(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'AI 额度健康度',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+              Builder(
+                builder: (context) {
+                  // 收集所有有效额度展示项
+                  final List<Widget> gauges = [];
+                  for (final item in provider.limits) {
+                    if (item.windows.isNotEmpty) {
+                      for (final win in item.windows) {
+                        final title = item.windows.length > 1
+                            ? '${item.name} · ${win.label}'
+                            : item.name;
+                        gauges.add(
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: RadialGauge(
+                              remainingPercent: win.remainingPercent,
+                              title: title,
+                              subtitle: win.resetInFormatted ?? '在线',
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      gauges.add(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: RadialGauge(
+                            remainingPercent: 100.0,
+                            title: item.name,
+                            subtitle: '已就绪',
                           ),
                         ),
-                        Icon(Icons.shield_outlined, size: 16, color: AppColors.emerald),
+                      );
+                    }
+                  }
+
+                  if (gauges.isEmpty) return const SizedBox.shrink();
+
+                  return GlassContainer(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'AI 额度健康度',
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Icon(Icons.shield_outlined, size: 16, color: AppColors.emerald),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        gauges.length <= 3
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: gauges,
+                              )
+                            : SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(children: gauges),
+                              ),
                       ],
                     ),
-                    const SizedBox(height: 14),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: provider.limits.take(3).map((item) {
-                        final win = item.windows.isNotEmpty ? item.windows.first : null;
-                        final percent = win?.remainingPercent ?? 100.0;
-                        return RadialGauge(
-                          remainingPercent: percent,
-                          title: item.name,
-                          subtitle: win?.resetInFormatted ?? '在线',
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // 今日活跃模型分布与排行 (对齐电脑桌面版 v0.53.0 核心能力)
+            if (today.models.isNotEmpty) ...[
+              ModelBreakdownCard(
+                models: today.models,
+                modelCosts: today.modelCosts,
+                totalTokens: today.totalTokens,
+                currency: settings.currency,
+                rate: settings.usdToCnyRate,
               ),
               const SizedBox(height: 16),
             ],

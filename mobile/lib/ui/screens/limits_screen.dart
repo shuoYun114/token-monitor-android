@@ -62,7 +62,7 @@ class LimitsScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
-                                    Icons.bolt_rounded,
+                                    _getProviderIcon(item.id),
                                     size: 18,
                                     color: _getProviderColor(item.id),
                                   ),
@@ -206,11 +206,24 @@ class LimitsScreen extends StatelessWidget {
   }
 
   Color _getProviderColor(String id) {
+    return AppColors.getToolColor(id);
+  }
+
+  IconData _getProviderIcon(String id) {
     final lower = id.toLowerCase();
-    if (lower.contains('claude')) return AppColors.amber;
-    if (lower.contains('codex') || lower.contains('openai')) return AppColors.emerald;
-    if (lower.contains('deepseek')) return AppColors.cyan;
-    if (lower.contains('openrouter')) return AppColors.purple;
-    return AppColors.indigo;
+    if (lower.contains('claude')) return Icons.psychology_rounded;
+    if (lower.contains('cursor')) return Icons.code_rounded;
+    if (lower.contains('antigravity')) return Icons.auto_awesome_mosaic_rounded;
+    if (lower.contains('codex')) return Icons.terminal_rounded;
+    if (lower.contains('copilot') || lower.contains('github')) return Icons.hub_rounded;
+    if (lower.contains('alibaba') || lower.contains('qwen') || lower.contains('bailian')) return Icons.cloud_done_rounded;
+    if (lower.contains('zed')) return Icons.code_off_rounded;
+    if (lower.contains('unsloth')) return Icons.auto_awesome_rounded;
+    if (lower.contains('trae')) return Icons.integration_instructions_rounded;
+    if (lower.contains('volcengine') || lower.contains('doubao')) return Icons.bubble_chart_rounded;
+    if (lower.contains('deepseek')) return Icons.explore_rounded;
+    if (lower.contains('kimi')) return Icons.chat_bubble_outline_rounded;
+    if (lower.contains('openrouter')) return Icons.alt_route_rounded;
+    return Icons.bolt_rounded;
   }
 }

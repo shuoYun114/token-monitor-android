@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 /// 汇率服务：与桌面端保持一致，从公共 Currency API 获取实时动态汇率
