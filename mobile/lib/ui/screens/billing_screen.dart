@@ -6,6 +6,7 @@ import '../../providers/monitor_provider.dart';
 import '../../theme/app_colors.dart';
 import '../widgets/github_heatmap.dart';
 import '../widgets/glass_container.dart';
+import '../widgets/receipt_dialog.dart';
 
 /// Token 周期账单与每日流水屏幕 (支持 日/月/年 切换与 GitHub 热力图)
 class BillingScreen extends StatefulWidget {
@@ -148,6 +149,63 @@ class _BillingScreenState extends State<BillingScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: '出消费小票 (Token Receipt)',
+            icon: Icon(Icons.receipt_long_rounded, color: accent, size: 21),
+            onPressed: () {
+              final hostname = currentStats?.devices.isNotEmpty == true
+                  ? currentStats!.devices.first.hostname
+                  : 'Local Device';
+              final settings = provider.settings;
+
+              if (_selectedPeriodIndex == 0) {
+                final rec = activeDailyRecord;
+                final models = rec != null ? rec.models.map((k, v) => MapEntry(k, _extractTokens(v))) : (currentStats?.today.models ?? {});
+                final modelCosts = rec != null ? rec.modelCosts : (currentStats?.today.modelCosts ?? {});
+                final clients = rec != null ? rec.clients.map((k, v) => MapEntry(k, _extractTokens(v))) : (currentStats?.today.clients ?? {});
+                final clientCosts = rec != null ? rec.clientCosts : (currentStats?.today.clientCosts ?? {});
+                final primaryClient = clients.isNotEmpty ? clients.keys.first : null;
+
+                ReceiptDialog.show(
+                  context,
+                  ReceiptData(
+                    title: 'DAILY TOKEN RECEIPT',
+                    date: _selectedDateKey != null ? DateTime.tryParse(_selectedDateKey!) ?? DateTime.now() : DateTime.now(),
+                    hostname: hostname,
+                    totalTokens: rec?.totalTokens ?? currentStats?.today.totalTokens ?? 0,
+                    costUsd: rec?.costUsd ?? currentStats?.today.costUsd ?? 0.0,
+                    currency: settings.currency,
+                    usdToCnyRate: settings.usdToCnyRate,
+                    models: models,
+                    modelCosts: modelCosts,
+                    clients: clients,
+                    clientCosts: clientCosts,
+                    primaryClient: primaryClient,
+                  ),
+                );
+              } else {
+                final month = currentStats?.month;
+                final primaryClient = month?.clients.isNotEmpty == true ? month!.clients.keys.first : null;
+                ReceiptDialog.show(
+                  context,
+                  ReceiptData(
+                    title: _selectedPeriodIndex == 1 ? 'MONTHLY TOKEN RECEIPT' : 'ALL-TIME TOKEN RECEIPT',
+                    date: DateTime.now(),
+                    hostname: hostname,
+                    totalTokens: _selectedPeriodIndex == 1 ? (month?.totalTokens ?? 0) : (currentStats?.allTime.totalTokens ?? 0),
+                    costUsd: _selectedPeriodIndex == 1 ? (month?.costUsd ?? 0.0) : (currentStats?.allTime.costUsd ?? 0.0),
+                    currency: settings.currency,
+                    usdToCnyRate: settings.usdToCnyRate,
+                    models: _selectedPeriodIndex == 1 ? (month?.models ?? {}) : (currentStats?.allTime.models ?? {}),
+                    modelCosts: _selectedPeriodIndex == 1 ? (month?.modelCosts ?? {}) : (currentStats?.allTime.modelCosts ?? {}),
+                    clients: _selectedPeriodIndex == 1 ? (month?.clients ?? {}) : (currentStats?.allTime.clients ?? {}),
+                    clientCosts: _selectedPeriodIndex == 1 ? (month?.clientCosts ?? {}) : (currentStats?.allTime.clientCosts ?? {}),
+                    primaryClient: primaryClient,
+                  ),
+                );
+              }
+            },
+          ),
           IconButton(
             tooltip: '刷新账单流水',
             icon: Icon(Icons.refresh_rounded, color: secondaryText, size: 22),
@@ -688,6 +746,38 @@ class _BillingScreenState extends State<BillingScreen> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: Icon(Icons.receipt_outlined, size: 18, color: accent.withOpacity(0.85)),
+                      tooltip: '打出 ${day.date} 小票',
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.only(left: 6),
+                      onPressed: () {
+                        final hostname = currentStats?.devices.isNotEmpty == true
+                            ? currentStats!.devices.first.hostname
+                            : 'Local Device';
+                        final models = day.models.map((k, v) => MapEntry(k, _extractTokens(v)));
+                        final clients = day.clients.map((k, v) => MapEntry(k, _extractTokens(v)));
+                        final primaryClient = clients.isNotEmpty ? clients.keys.first : null;
+                        ReceiptDialog.show(
+                          context,
+                          ReceiptData(
+                            title: 'DAILY RECEIPT // ${day.date}',
+                            date: DateTime.tryParse(day.date) ?? DateTime.now(),
+                            hostname: hostname,
+                            totalTokens: day.totalTokens,
+                            costUsd: day.costUsd,
+                            currency: provider.settings.currency,
+                            usdToCnyRate: provider.settings.usdToCnyRate,
+                            models: models,
+                            modelCosts: day.modelCosts,
+                            clients: clients,
+                            clientCosts: day.clientCosts,
+                            primaryClient: primaryClient,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

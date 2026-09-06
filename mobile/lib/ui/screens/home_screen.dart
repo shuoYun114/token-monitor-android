@@ -10,6 +10,7 @@ import '../widgets/status_badge.dart';
 import '../widgets/tool_card.dart';
 import '../widgets/model_breakdown_card.dart';
 import '../widgets/chrono_aperture.dart';
+import '../widgets/receipt_dialog.dart';
 
 
 /// Token Monitor 顶级审美移动看板 (Bento Grid 非对称架构 + 黑曜石控制台质感)
@@ -96,8 +97,37 @@ class HomeScreen extends StatelessWidget {
         ),
 
         actions: [
+          IconButton(
+            tooltip: '出小票 (Token Receipt)',
+            icon: Icon(
+              Icons.receipt_long_rounded,
+              color: isLight ? AppColors.warmYellowDark : AppColors.cyan,
+              size: 21,
+            ),
+            onPressed: () {
+              final primaryClient = today.clients.isNotEmpty ? today.clients.keys.first : null;
+              final hostname = stats?.devices.isNotEmpty == true ? stats!.devices.first.hostname : 'Local Device';
+              ReceiptDialog.show(
+                context,
+                ReceiptData(
+                  title: 'TODAY TOKEN RECEIPT',
+                  date: DateTime.now(),
+                  hostname: hostname,
+                  totalTokens: today.totalTokens,
+                  costUsd: today.costUsd,
+                  currency: settings.currency,
+                  usdToCnyRate: settings.usdToCnyRate,
+                  models: today.models,
+                  modelCosts: today.modelCosts,
+                  clients: today.clients,
+                  clientCosts: today.clientCosts,
+                  primaryClient: primaryClient,
+                ),
+              );
+            },
+          ),
           Padding(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: 14),
             child: StatusBadge(
               status: provider.syncStatus,
               errorMessage: provider.errorMessage,

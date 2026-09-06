@@ -47,27 +47,27 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.2
-          name: "Token Monitor Android v1.1.2 (全息算力天体视窗与航天精密机械 UI 重构版)"
+          tag_name: v1.1.3
+          name: "Token Monitor Android v1.1.3 (AI Token 消费小票与毒舌神吐槽功能版)"
           body: |
-            🚀 **Token Monitor Android v1.1.2 重磅视觉重构发布！**
+            🧾 **Token Monitor Android v1.1.3 新特性发布！**
 
-            本次版本全面贯彻 `/frontend-design` 设计大师法则，彻底打破传统平庸模板，确立【航天遥测精密仪器 + 瑞士复杂机械腕表】双重物理微雕美学：
-            1. **核心灵魂视觉记忆点：全息算力天体视窗 (Chrono-Telemetry Aperture)**：
-               - 外环嵌合 60 单元激光精密微雕刻度，5 单元主副分度；
-               - 内环搭载物理阻尼陀飞轮自转双轨能量流光环；
-               - 巨幕等宽数值排版与嵌套式折合成本金属胶囊；
-               - 底部工业 LED 点阵状态遥测条（带微光阻尼呼吸）。
-            2. **航天机舱结构面板与微雕点缀 (Aerospace Telemetry Panels)**：
-               - Bento Grid 次级情报舱（左翼月度支出、右翼额度雷达）注入机舱四角紧固螺栓与 `TELEMETRY // L-01` 工业微刻标牌；
-               - 活跃工具列表升级为航天机架精密芯片插槽，加入专属流光指示色条；
-               - GitHub 贡献热力图、大数字审计看板、多设备集群全面融入工业仪表感。
-            3. **极致双色调校 (Obsidian / Ivory Crystal)**：
-               - 深色模式：黑曜岩与航天钛灰底座 + 冷冰极蓝发光管；
-               - 浅色模式：象牙暖白拉丝微晶 + 琥珀日光金刻度；
-               - 100% 消除任何色块补丁与对比度缺失。
+            本次版本参考开源项目 [Hchen1218/token-receipt](https://github.com/Hchen1218/token-receipt)，正式推出**「AI Token 消费小票与神吐槽 (Token Receipt with Punchline)」**功能：
+            1. **仿真热敏纸小票美学 (Thermal Receipt Aesthetic)**：
+               - 温润米白热敏纸质感底色，上下边缘带收银机锯齿撕纸效果；
+               - 经典 ASCII 像素 Logo（支持 Claude Code / Cursor / Token Monitor 专属艺术头图）；
+               - 收银台编号、结账时间、设备名称、模型与工具明细清单（Token 数量与折合金额）；
+               - 真实比例 ASCII 条形码与 Receipt 防伪编号。
+            2. **灵魂核心：毒舌/幽默神吐槽 (Receipt Punchlines)**：
+               - 内置精选分类神吐槽（涵盖改版迭代、视觉设计、Bug 调试、深度思考与掏空钱包）；
+               - “画面稳了，预算死了。”、“最后一版这个词，本来就不诚实。”、“Bug 修完了，费用继承了。”、“推理不免费，犹豫更贵。”；
+               - 支持“🎲 换一句”趣味交互，越看越上头！
+            3. **中英双语与一键复制分享**：
+               - 支持 `EN / 中文` 即时切换小票文案与吐槽；
+               - 一键复制纯文本 ASCII 小票，可直接粘贴分享至微信、即刻、朋友圈或 Discord；
+               - 首页与账单流水随时一键打出今日或任意历史日期的消费小票。
             4. **官方正式 keystore 签名**：
-               - 支持从 v1.1.0 / v1.1.1 直接免卸载平滑覆盖升级！
+               - 支持从历史版本直接免卸载平滑覆盖升级！
 
             **下载方式**：直接在下方 Assets 点击下载 `app-release.apk` 安装即可。
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
