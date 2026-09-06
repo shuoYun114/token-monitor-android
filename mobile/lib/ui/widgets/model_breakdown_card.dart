@@ -34,6 +34,8 @@ class ModelBreakdownCard extends StatelessWidget {
 
     return GlassContainer(
       padding: const EdgeInsets.all(16),
+      enableCornerBolts: true,
+      podTag: 'TELEMETRY // MODELS',
       topHighlightColor: AppColors.glassTopHighlightWarm,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

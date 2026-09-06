@@ -9,6 +9,7 @@ import '../widgets/radial_gauge.dart';
 import '../widgets/status_badge.dart';
 import '../widgets/tool_card.dart';
 import '../widgets/model_breakdown_card.dart';
+import '../widgets/chrono_aperture.dart';
 
 
 /// Token Monitor 顶级审美移动看板 (Bento Grid 非对称架构 + 黑曜石控制台质感)
@@ -145,283 +146,35 @@ class HomeScreen extends StatelessWidget {
             ],
 
             // =========================================================
-            // 1. Bento Grid 顶部 Hero 主视窗：实时算力与成本流动枢纽 (2:1 权重)
+            // 1. 核心灵魂记忆点：全息算力天体视窗 (Chrono-Telemetry Aperture)
             // =========================================================
-            GlassContainer(
-              glowColor: AppColors.glowCyan,
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 顶部微标与状态
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppColors.cyan.withOpacity(0.14),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppColors.cyan.withOpacity(0.3), width: 0.8),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.bolt_rounded, size: 12, color: AppColors.cyan),
-                                SizedBox(width: 3),
-                                Text(
-                                  '今日算力流动枢纽',
-                                  style: TextStyle(
-                                    color: AppColors.cyan,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: AppColors.emerald,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.emerald.withOpacity(0.8),
-                                  blurRadius: 4,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          const Text(
-                            'LIVE METRICS',
-                            style: TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'monospace',
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 算力 Token 巨幕与实时花费互锁视图
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // 左侧：今日消耗 Token 巨幕
-                      Expanded(
-                        flex: 6,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '今日消耗算力',
-                              style: TextStyle(
-                                color: isLight ? AppColors.lightTextSecondary : AppColors.textSecondary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
-                                children: [
-                                  Text(
-                                    shortTokensFormatted,
-                                    style: const TextStyle(
-                                      color: AppColors.cyan,
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.w900,
-                                      fontFamily: 'monospace',
-                                      letterSpacing: -1.0,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Tokens',
-                                    style: TextStyle(
-                                      color: isLight ? AppColors.lightTextSecondary : AppColors.warmWhiteSoft,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              exactTokensFormatted,
-                              style: TextStyle(
-                                color: isLight ? AppColors.lightTextMuted : AppColors.warmWhiteMuted,
-                                fontSize: 11,
-                                fontFamily: 'monospace',
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // 右侧：今日折合花费卡槽 (暖黄与暖白奢华互锁)
-                      Expanded(
-                        flex: 5,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: isLight ? const Color(0xFFFEF3C7).withOpacity(0.6) : AppColors.warmYellowCard,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isLight ? AppColors.warmYellowDark.withOpacity(0.3) : AppColors.warmYellowBorder,
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: (isLight ? AppColors.warmYellowDark : AppColors.warmYellow).withOpacity(0.08),
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: isLight ? AppColors.warmYellowDark : AppColors.warmYellow,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: (isLight ? AppColors.warmYellowDark : AppColors.warmYellow).withOpacity(0.8),
-                                          blurRadius: 4,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    '实时折合成本',
-                                    style: TextStyle(
-                                      color: isLight ? AppColors.warmYellowDark : AppColors.warmYellowSoft,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  costStr,
-                                  style: TextStyle(
-                                    color: isLight ? AppColors.warmYellowDark : AppColors.warmYellow,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w900,
-                                    fontFamily: 'monospace',
-                                    letterSpacing: -0.6,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 1),
-                              Text(
-                                secondaryCostStr,
-                                style: TextStyle(
-                                  color: isLight ? AppColors.lightTextMuted : AppColors.warmWhiteMuted.withOpacity(0.85),
-                                  fontSize: 10,
-                                  fontFamily: 'monospace',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // 底部模型微流光点缀 (如果今日有模型产生)
-                  if (today.models.isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    Divider(color: isLight ? const Color(0xFFE2E8F0) : AppColors.glassBorder, height: 1),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              '模型分布',
-                              style: TextStyle(
-                                color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
-                                fontSize: 10,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            ...today.models.keys.take(4).map((m) {
-                              final c = AppColors.getModelColor(m);
-                              return Container(
-                                margin: const EdgeInsets.only(right: 6),
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  color: c,
-                                  shape: BoxShape.circle,
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
-                        Text(
-                          '${today.models.length} 核心模型在载',
-                          style: TextStyle(
-                            color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
-                            fontSize: 10,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
+            ChronoApertureWidget(
+              totalTokens: today.totalTokens,
+              shortTokensText: shortTokensFormatted,
+              exactTokensText: exactTokensFormatted,
+              costText: costStr,
+              secondaryCostText: secondaryCostStr,
+              modelsCount: today.models.length,
+              clientsCount: today.clients.length,
+              isLight: isLight,
+              onTap: () => provider.refreshNow(),
             ),
             const SizedBox(height: 12),
 
             // =========================================================
-            // 2. Bento Grid 双列次级情报窗 (Bento Dual Wings)
+            // 2. Bento Grid 双列次级情报舱 (Bento Aerospace Pods)
             // =========================================================
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 左翼：本月支出与累计趋势 (暖黄价值核心与暖白微晶)
+                // 左翼：本月支出与累计趋势 (航天钛晶与琥珀金)
                 Expanded(
                   child: GlassContainer(
                     glowColor: AppColors.glowWarmYellow,
                     topHighlightColor: AppColors.glassTopHighlightWarm,
                     borderColor: (isLight ? AppColors.warmYellowDark : AppColors.warmYellow).withOpacity(0.28),
+                    enableCornerBolts: true,
+                    podTag: 'TELEMETRY // L-01',
                     padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,6 +255,9 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: GlassContainer(
                     glowColor: AppColors.glowEmerald,
+                    borderColor: AppColors.emerald.withOpacity(0.24),
+                    enableCornerBolts: true,
+                    podTag: 'QUOTA // R-02',
                     padding: const EdgeInsets.all(14),
                     child: _buildQuotaRadarWidget(provider, isLight),
                   ),
@@ -918,6 +674,10 @@ class HomeScreen extends StatelessWidget {
 
     return GlassContainer(
       padding: const EdgeInsets.all(16),
+      enableCornerBolts: true,
+      podTag: 'QUOTA RADAR // POD-03',
+      glowColor: AppColors.glowEmerald,
+      borderColor: AppColors.emerald.withOpacity(0.25),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

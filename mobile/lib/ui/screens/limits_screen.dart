@@ -50,6 +50,8 @@ class LimitsScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
+                    enableCornerBolts: true,
+                    podTag: '${item.id.toUpperCase()} // QUOTA',
                     borderColor: provColor.withOpacity(0.28),
                     glowColor: provColor.withOpacity(0.12),
                     topHighlightColor: AppColors.glassTopHighlightWarm,

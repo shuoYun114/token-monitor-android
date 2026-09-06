@@ -13,6 +13,8 @@ class GlassContainer extends StatelessWidget {
   final Color? glowColor;
   final Color? topHighlightColor;
   final bool enableTopHighlight;
+  final bool enableCornerBolts;
+  final String? podTag;
   final VoidCallback? onTap;
 
   const GlassContainer({
@@ -20,13 +22,15 @@ class GlassContainer extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.margin,
-    this.borderRadius = 20,
+    this.borderRadius = 16,
     this.backgroundColor,
     this.gradient,
     this.borderColor,
     this.glowColor,
     this.topHighlightColor,
     this.enableTopHighlight = true,
+    this.enableCornerBolts = false,
+    this.podTag,
     this.onTap,
   });
 
@@ -111,6 +115,34 @@ class GlassContainer extends StatelessWidget {
                 ),
               ),
 
+            // 航天精密四角螺栓点缀
+            if (enableCornerBolts)
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _ContainerBoltPainter(
+                    isLight: isLight,
+                    boltColor: isLight ? AppColors.aeroBoltLight : AppColors.aeroBoltDark,
+                  ),
+                ),
+              ),
+
+            // 工业遥测微刻标牌
+            if (podTag != null && podTag!.isNotEmpty)
+              Positioned(
+                top: 6,
+                right: 10,
+                child: Text(
+                  podTag!,
+                  style: TextStyle(
+                    color: isLight ? AppColors.lightTextMuted : AppColors.textMuted.withOpacity(0.6),
+                    fontSize: 7.5,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+
             // 主体内容
             Padding(
               padding: padding ?? const EdgeInsets.all(16),
@@ -130,4 +162,40 @@ class GlassContainer extends StatelessWidget {
     }
     return content;
   }
+}
+
+class _ContainerBoltPainter extends CustomPainter {
+  final bool isLight;
+  final Color boltColor;
+
+  _ContainerBoltPainter({required this.isLight, required this.boltColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final boltPaint = Paint()
+      ..color = boltColor.withOpacity(isLight ? 0.35 : 0.45)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+
+    final dotPaint = Paint()
+      ..color = boltColor.withOpacity(isLight ? 0.25 : 0.35)
+      ..style = PaintingStyle.fill;
+
+    final offset = 7.0;
+    final corners = [
+      Offset(offset, offset),
+      Offset(size.width - offset, offset),
+      Offset(offset, size.height - offset),
+      Offset(size.width - offset, size.height - offset),
+    ];
+
+    for (final c in corners) {
+      canvas.drawCircle(c, 2.2, boltPaint);
+      canvas.drawCircle(c, 0.8, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ContainerBoltPainter oldDelegate) =>
+      oldDelegate.isLight != isLight || oldDelegate.boltColor != boltColor;
 }

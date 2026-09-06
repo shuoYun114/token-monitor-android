@@ -66,6 +66,8 @@ class DevicesScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
+                    enableCornerBolts: true,
+                    podTag: '${dev.platform.toUpperCase()} // NODE',
                     glowColor: isOnline ? AppColors.glowCyan : null,
                     borderColor: isOnline ? AppColors.cyan.withOpacity(0.25) : AppColors.glassBorder,
                     topHighlightColor: AppColors.glassTopHighlightWarm,

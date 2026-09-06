@@ -37,13 +37,30 @@ class ToolCard extends StatelessWidget {
 
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      borderRadius: 16,
-      borderColor: isLight ? AppColors.lightGlassBorder : toolColor.withOpacity(0.22),
+      borderRadius: 14,
+      borderColor: isLight ? AppColors.lightGlassBorder : toolColor.withOpacity(0.24),
       backgroundColor: cardBg,
       topHighlightColor: AppColors.glassTopHighlightWarm,
       onTap: onTap,
       child: Row(
         children: [
+          // 左侧航天插槽微流光色条
+          Container(
+            width: 3,
+            height: 32,
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              color: toolColor,
+              borderRadius: BorderRadius.circular(2),
+              boxShadow: [
+                BoxShadow(
+                  color: toolColor.withOpacity(0.6),
+                  blurRadius: 6,
+                  spreadRadius: 0.5,
+                ),
+              ],
+            ),
+          ),
           // 工具专属图标 (带有内衬流光底板)
           Container(
             width: 42,

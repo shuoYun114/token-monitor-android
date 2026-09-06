@@ -9,6 +9,17 @@ class AppColors {
   static const Color surfaceLight = Color(0xFF161B2B);
   static const Color surfaceElevated = Color(0xFF1C2237);
   
+  // 航天精密机械与钛合金质感色阶 (Aerospace Telemetry Palette)
+  static const Color aeroTitanium = Color(0xFF1E2433); // 航天深钛灰
+  static const Color aeroMetalTrack = Color(0xFF2A344A); // 机械刻度金属底轨
+  static const Color aeroDialBorder = Color(0x3D38BDF8); // 陀飞轮发光外圈
+  static const Color aeroBezelDark = Color(0xFF141926); // 深色精密外圈
+  static const Color aeroBezelLight = Color(0xFFE5E9F0); // 浅色拉丝表圈
+  static const Color aeroBoltDark = Color(0xFF334155); // 深色精密紧固件螺栓
+  static const Color aeroBoltLight = Color(0xFF94A3B8); // 浅色精密紧固件螺栓
+  static const Color aeroTickDark = Color(0x6638BDF8); // 深色机械微刻度线
+  static const Color aeroTickLight = Color(0x80D97706); // 浅色机械微刻度线
+  
   // 毛玻璃面板与双层导光边框
   static const Color glassPanel = Color(0xCC111624);
   static const Color glassCard = Color(0x99161C2E);

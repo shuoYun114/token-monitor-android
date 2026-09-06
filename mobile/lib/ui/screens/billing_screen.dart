@@ -180,6 +180,8 @@ class _BillingScreenState extends State<BillingScreen> {
               padding: const EdgeInsets.all(16),
               borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
               glowColor: accent,
+              enableCornerBolts: true,
+              podTag: 'TELEMETRY // HEATMAP',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -397,6 +399,8 @@ class _BillingScreenState extends State<BillingScreen> {
       padding: const EdgeInsets.all(20),
       borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
       glowColor: accent,
+      enableCornerBolts: true,
+      podTag: 'AUDIT // BOARD',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -440,6 +444,7 @@ class _BillingScreenState extends State<BillingScreen> {
                   color: primaryText,
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
+                  fontFamily: 'monospace',
                   letterSpacing: -1,
                 ),
               ),
