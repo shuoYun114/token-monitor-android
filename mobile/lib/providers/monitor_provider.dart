@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/app_settings.dart';
 import '../models/device_stats.dart';
 import '../models/limit_provider.dart';
+import '../models/usage_history.dart';
 import '../services/currency_service.dart';
 import '../services/hub_client_service.dart';
 import '../services/limit_probe_service.dart';
@@ -19,10 +20,13 @@ class MonitorProvider extends ChangeNotifier {
 
   late AppSettings settings;
   AggregateStats? currentStats;
+  UsageHistory? history;
   List<LimitProviderItem> limits = [];
   SyncStatus syncStatus = SyncStatus.disconnected;
   String? errorMessage;
   String? selectedDeviceId;
+
+  bool get isLightTheme => settings.themeMode == 'light';
 
   Timer? _pollingTimer;
 
@@ -52,6 +56,7 @@ class MonitorProvider extends ChangeNotifier {
       notifyListeners();
     }
     limits = _storage.loadCachedLimits();
+    history = _storage.loadCachedHistory();
   }
 
   /// 连接 Hub
@@ -96,6 +101,7 @@ class MonitorProvider extends ChangeNotifier {
 
       _probeDirectLimits();
       _fetchLiveExchangeRate();
+      fetchHistory();
     } catch (e) {
       syncStatus = currentStats != null ? SyncStatus.offlineCache : SyncStatus.error;
       errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -195,6 +201,7 @@ class MonitorProvider extends ChangeNotifier {
       errorMessage = null;
       _probeDirectLimits();
       _fetchLiveExchangeRate();
+      fetchHistory();
       notifyListeners();
     } catch (e) {
       if (currentStats == null) {
@@ -205,6 +212,31 @@ class MonitorProvider extends ChangeNotifier {
       errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
     }
+  }
+
+  /// 拉取全量用量历史与每日流水
+  Future<void> fetchHistory() async {
+    final rawUrl = settings.hubUrl.trim();
+    if (rawUrl.isEmpty) return;
+    try {
+      final raw = await _hubService.fetchHistory(
+        hubUrl: rawUrl,
+        hubSecret: settings.hubSecret.trim(),
+      );
+      history = UsageHistory.fromJson(raw);
+      await _storage.saveCachedHistory(history!);
+      notifyListeners();
+    } catch (_) {
+      // 离线或旧版 Hub 静默降级
+    }
+  }
+
+  /// 切换主题模式 ('dark' or 'light')
+  void setThemeMode(String mode) {
+    if (settings.themeMode == mode) return;
+    settings.themeMode = mode;
+    _storage.saveSettings(settings);
+    notifyListeners();
   }
 
   void updateSettings(AppSettings newSettings) {

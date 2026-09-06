@@ -8,6 +8,7 @@ class AppSettings {
   double usdToCnyRate;
   int refreshIntervalSeconds;
   bool isConnected;
+  String themeMode; // 'dark' (深色黑曜石+淡蓝) or 'light' (纯白+暖黄)
 
   AppSettings({
     this.hubUrl = '',
@@ -18,6 +19,7 @@ class AppSettings {
     this.usdToCnyRate = 6.7203, // 与桌面端官方保持完全一致
     this.refreshIntervalSeconds = 15,
     this.isConnected = false,
+    this.themeMode = 'dark',
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class AppSettings {
       usdToCnyRate: (json['usdToCnyRate'] as num?)?.toDouble() ?? 6.7203,
       refreshIntervalSeconds: (json['refreshIntervalSeconds'] as num?)?.toInt() ?? 15,
       isConnected: json['isConnected'] == true,
+      themeMode: json['themeMode']?.toString() ?? 'dark',
     );
   }
 
@@ -42,5 +45,6 @@ class AppSettings {
     'usdToCnyRate': usdToCnyRate,
     'refreshIntervalSeconds': refreshIntervalSeconds,
     'isConnected': isConnected,
+    'themeMode': themeMode,
   };
 }

@@ -63,6 +63,31 @@ class HubClientService {
     }
   }
 
+  /// 单次拉取全量历史数据 (/api/history)
+  Future<Map<String, dynamic>> fetchHistory({
+    required String hubUrl,
+    required String hubSecret,
+  }) async {
+    final baseUrl = normalizeHubUrl(hubUrl);
+    final uri = Uri.parse('$baseUrl/api/history');
+    final headers = buildHeaders(hubSecret);
+
+    try {
+      final response = await http.get(uri, headers: headers).timeout(
+        const Duration(seconds: 10),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        return decoded;
+      } else {
+        throw Exception('拉取历史数据失败: HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// 建立 SSE 长连接实时流 (/api/stats/stream)
   void startStreaming({
     required String hubUrl,

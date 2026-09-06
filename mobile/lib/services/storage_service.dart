@@ -3,12 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_settings.dart';
 import '../models/device_stats.dart';
 import '../models/limit_provider.dart';
+import '../models/usage_history.dart';
 
 /// 负责 App 本地持久化与离线数据缓存
 class StorageService {
   static const String _keySettings = 'token_monitor_settings';
   static const String _keyCachedStats = 'token_monitor_cached_stats';
   static const String _keyCachedLimits = 'token_monitor_cached_limits';
+  static const String _keyCachedHistory = 'token_monitor_cached_history';
   static const String _keyLastSyncTime = 'token_monitor_last_sync_time';
 
   final SharedPreferences _prefs;
@@ -84,6 +86,21 @@ class StorageService {
       }).toList(),
     }).toList();
     await _prefs.setString(_keyCachedLimits, jsonEncode(listJson));
+  }
+
+  // 离线历史用量数据缓存
+  UsageHistory? loadCachedHistory() {
+    final raw = _prefs.getString(_keyCachedHistory);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return UsageHistory.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> saveCachedHistory(UsageHistory history) async {
+    await _prefs.setString(_keyCachedHistory, jsonEncode(history.toJson()));
   }
 
   String? getLastSyncTime() {
