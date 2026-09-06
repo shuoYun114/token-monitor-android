@@ -59,7 +59,52 @@ class AppColors {
   static const Color textPrimaryWarm = Color(0xFFFAF8F5); // 暖白主文字
   static const Color textSecondaryWarm = Color(0xFFA8A196); // 暖白次级文字
 
-  // 工具专属识别色 (与桌面版完全对齐)
+  // 浅色模式专属色系 (Light Amber - 纯净暖白 + 暖黄色)
+  static const Color lightBackground = Color(0xFFF8F9FB);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightSurfaceSecondary = Color(0xFFF1F5F9);
+  static const Color lightGlassCard = Color(0xF7FFFFFF);
+  static const Color lightGlassBorder = Color(0x1A0F172A);
+  static const Color lightTextPrimary = Color(0xFF0F172A);
+  static const Color lightTextSecondary = Color(0xFF475569);
+  static const Color lightTextMuted = Color(0xFF94A3B8);
+
+  // 黑主题专属冰蓝强调色阶 (Dark Theme: Ice Blue)
+  static const Color iceBlue = Color(0xFF38BDF8);
+  static const Color iceBlueLight = Color(0xFF7DD3FC);
+  static const Color iceBlueUltra = Color(0xFFBAE6FD);
+  static const Color iceBlueDark = Color(0xFF0284C7);
+
+  // GitHub 热力图 5 级色阶定义 (0: 无活动, 1: 轻度, 2: 中度, 3: 高频, 4: 极高)
+  // 黑主题 (深色底 + 冰蓝)
+  static const List<Color> darkHeatmapLevels = [
+    Color(0xFF161B2B), // Level 0: 熄灭晶体灰黑
+    Color(0xFF075985), // Level 1: 微光深蓝
+    Color(0xFF0284C7), // Level 2: 中度海蓝
+    Color(0xFF38BDF8), // Level 3: 鲜亮冰蓝
+    Color(0xFF7DD3FC), // Level 4: 极光高亮冰蓝
+  ];
+
+  // 白主题 (纯白底 + 暖黄)
+  static const List<Color> lightHeatmapLevels = [
+    Color(0xFFE2E8F0), // Level 0: 熄灭浅灰
+    Color(0xFFFEF3C7), // Level 1: 晨曦淡暖黄
+    Color(0xFFFDE68A), // Level 2: 柔和琥珀黄
+    Color(0xFFFBBF24), // Level 3: 鲜亮太阳暖黄
+    Color(0xFFD97706), // Level 4: 深邃流光金
+  ];
+
+  /// 根据主题获取热力图色阶
+  static List<Color> getHeatmapLevels(bool isLight) {
+    return isLight ? lightHeatmapLevels : darkHeatmapLevels;
+  }
+
+  /// 根据主题获取主品牌色 (黑主题淡蓝 / 白主题暖黄)
+  static Color getThemeAccent(bool isLight) {
+    return isLight ? warmYellowDark : iceBlue;
+  }
+
+  /// 工具专属识别色 (与桌面版完全对齐)
   static const Color toolClaude = Color(0xFFD97706);
   static const Color toolCodex = Color(0xFF10B981);
   static const Color toolCursor = Color(0xFF0EA5E9);
@@ -112,3 +157,4 @@ class AppColors {
     return const Color(0xFF94A3B8); // 默认灰蓝
   }
 }
+

@@ -12,17 +12,20 @@ class LimitsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<MonitorProvider>();
     final limits = provider.limits;
+    final isLight = provider.isLightTheme;
+    final accent = AppColors.getThemeAccent(isLight);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI 额度与余额'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.cyan),
+            icon: Icon(Icons.refresh_rounded, color: accent),
             onPressed: () => provider.refreshNow(),
           ),
         ],
       ),
+
       body: limits.isEmpty
           ? Center(
               child: Column(

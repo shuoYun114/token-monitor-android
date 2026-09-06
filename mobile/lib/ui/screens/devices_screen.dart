@@ -14,17 +14,20 @@ class DevicesScreen extends StatelessWidget {
     final stats = provider.currentStats;
     final settings = provider.settings;
     final devices = stats?.devices ?? [];
+    final isLight = provider.isLightTheme;
+    final accent = AppColors.getThemeAccent(isLight);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('已接入设备'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.cyan),
+            icon: Icon(Icons.refresh_rounded, color: accent),
             onPressed: () => provider.refreshNow(),
           ),
         ],
       ),
+
       body: devices.isEmpty
           ? const Center(
               child: Text('暂无接入设备信息', style: TextStyle(color: AppColors.textMuted)),

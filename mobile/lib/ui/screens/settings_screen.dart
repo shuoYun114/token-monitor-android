@@ -47,35 +47,202 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<MonitorProvider>();
     final settings = provider.settings;
+    final isLight = provider.isLightTheme;
+    final accent = AppColors.getThemeAccent(isLight);
+    final primaryText = isLight ? AppColors.lightTextPrimary : AppColors.textPrimary;
+    final secondaryText = isLight ? AppColors.lightTextSecondary : AppColors.textSecondary;
+    final mutedText = isLight ? AppColors.lightTextMuted : AppColors.textMuted;
+    final inputBg = isLight ? AppColors.lightSurfaceSecondary : AppColors.surfaceLight;
 
     return Scaffold(
+      backgroundColor: isLight ? AppColors.lightBackground : AppColors.background,
       appBar: AppBar(
-        title: const Text('系统设置与配对'),
+        title: Text(
+          '系统设置与配对',
+          style: TextStyle(color: primaryText, fontWeight: FontWeight.w700),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Hub 连接配置卡片
+          // 0. 主题模式切换卡片 (黑主题: 纯白+淡蓝 / 白主题: 纯白+暖黄)
           GlassContainer(
             padding: const EdgeInsets.all(16),
+            borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
+            glowColor: accent,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
+                      '界面主题风格',
+                      style: TextStyle(
+                        color: primaryText,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: accent.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        isLight ? '白主题 (暖黄)' : '黑主题 (冰蓝)',
+                        style: TextStyle(color: accent, fontSize: 11, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '随时在黑曜石深邃模式与晨曦极简白模式之间无缝切换',
+                  style: TextStyle(color: mutedText, fontSize: 11),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    // 黑主题选项
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => provider.setThemeMode('dark'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF080A10),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: !isLight ? AppColors.iceBlue : const Color(0x33FFFFFF),
+                              width: !isLight ? 2 : 1,
+                            ),
+                            boxShadow: !isLight
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.iceBlue.withOpacity(0.25),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                : null,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Icon(Icons.dark_mode_rounded, color: AppColors.iceBlue, size: 20),
+                                  if (!isLight)
+                                    const Icon(Icons.check_circle_rounded, color: AppColors.iceBlue, size: 16),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                '黑主题 (Dark)',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                '黑曜石底 + 冰蓝高光',
+                                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // 白主题选项
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => provider.setThemeMode('light'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFFFFF),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isLight ? AppColors.warmYellowDark : const Color(0x33CBD5E1),
+                              width: isLight ? 2 : 1,
+                            ),
+                            boxShadow: isLight
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.warmYellow.withOpacity(0.3),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                : null,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Icon(Icons.wb_sunny_rounded, color: AppColors.warmYellowDark, size: 20),
+                                  if (isLight)
+                                    const Icon(Icons.check_circle_rounded, color: AppColors.warmYellowDark, size: 16),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                '白主题 (Light)',
+                                style: TextStyle(
+                                  color: Color(0xFF0F172A),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                '纯白底 + 暖黄高光',
+                                style: TextStyle(color: Color(0xFF64748B), fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 1. Hub 连接配置卡片
+          GlassContainer(
+            padding: const EdgeInsets.all(16),
+            borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
                       'Hub 聚合中心配置',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.cyan.withOpacity(0.2),
-                        foregroundColor: AppColors.cyan,
+                        backgroundColor: accent.withOpacity(0.15),
+                        foregroundColor: accent,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       ),
@@ -98,9 +265,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _buildTextField('Hub URL (如 http://[2409:...]:17321)', _hubUrlController),
+                _buildTextField('Hub URL (如 http://[2409:...]:17321)', _hubUrlController, isLight: isLight, inputBg: inputBg),
                 const SizedBox(height: 10),
-                _buildTextField('Hub Secret 密钥 (在电脑端多设备同步查看)', _hubSecretController, obscureText: true),
+                _buildTextField('Hub Secret 密钥 (在电脑端多设备同步查看)', _hubSecretController, obscureText: true, isLight: isLight, inputBg: inputBg),
                 const SizedBox(height: 14),
 
                 if (provider.errorMessage != null && provider.syncStatus == SyncStatus.error) ...[
@@ -132,16 +299,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   height: 44,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.cyan,
-                      foregroundColor: Colors.black,
+                      backgroundColor: accent,
+                      foregroundColor: isLight ? Colors.white : Colors.black,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     onPressed: _isTesting ? null : () => _saveAndConnect(provider, settings),
                     child: _isTesting
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: isLight ? Colors.white : Colors.black,
+                            ),
                           )
                         : const Text('保存并连接 Hub', style: TextStyle(fontWeight: FontWeight.w700)),
                   ),
@@ -151,16 +321,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 货币与汇率设置
+          // 2. 货币与汇率设置
           GlassContainer(
             padding: const EdgeInsets.all(16),
+            borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '货币与实时汇率换算',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: primaryText,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -169,13 +340,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('显示币种', style: TextStyle(color: AppColors.textSecondary)),
+                    Text('显示币种', style: TextStyle(color: secondaryText)),
                     DropdownButton<String>(
                       value: settings.currency,
-                      dropdownColor: AppColors.surface,
-                      items: const [
-                        DropdownMenuItem(value: 'CNY', child: Text('人民币 (¥ CNY)')),
-                        DropdownMenuItem(value: 'USD', child: Text('美元 (\$ USD)')),
+                      dropdownColor: isLight ? AppColors.lightSurface : AppColors.surface,
+                      items: [
+                        DropdownMenuItem(
+                          value: 'CNY',
+                          child: Text('人民币 (¥ CNY)', style: TextStyle(color: primaryText)),
+                        ),
+                        DropdownMenuItem(
+                          value: 'USD',
+                          child: Text('美元 (\$ USD)', style: TextStyle(color: primaryText)),
+                        ),
                       ],
                       onChanged: (val) {
                         if (val != null) {
@@ -193,12 +370,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: TextField(
                         controller: _rateController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontFamily: 'monospace'),
+                        style: TextStyle(color: primaryText, fontSize: 13, fontFamily: 'monospace'),
                         decoration: InputDecoration(
                           labelText: 'USD/CNY 汇率 (与桌面端同步)',
-                          labelStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                          labelStyle: TextStyle(color: mutedText, fontSize: 12),
                           filled: true,
-                          fillColor: AppColors.surfaceLight,
+                          fillColor: inputBg,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                         ),
@@ -214,8 +391,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(width: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surfaceLight,
-                        foregroundColor: AppColors.cyan,
+                        backgroundColor: inputBg,
+                        foregroundColor: accent,
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -246,31 +423,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 独立 API 额度密钥
+          // 3. 独立 API 额度密钥
           GlassContainer(
             padding: const EdgeInsets.all(16),
+            borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '手机独立 API 额度探测 (可选)',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: primaryText,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 10),
-                _buildTextField('OpenRouter Management API Key', _openRouterKeyController, obscureText: true),
+                _buildTextField('OpenRouter Management API Key', _openRouterKeyController, obscureText: true, isLight: isLight, inputBg: inputBg),
                 const SizedBox(height: 10),
-                _buildTextField('DeepSeek API Key (查询余额)', _deepSeekKeyController, obscureText: true),
+                _buildTextField('DeepSeek API Key (查询余额)', _deepSeekKeyController, obscureText: true, isLight: isLight, inputBg: inputBg),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.cyan,
-                      side: const BorderSide(color: AppColors.cyan),
+                      foregroundColor: accent,
+                      side: BorderSide(color: accent),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     onPressed: () {
@@ -289,35 +467,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 版本与更新卡片
+          // 4. 版本与更新卡片
           GlassContainer(
             padding: const EdgeInsets.all(16),
+            borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       '关于与更新',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    Icon(Icons.verified_rounded, size: 16, color: AppColors.cyan),
+                    Icon(Icons.verified_rounded, size: 16, color: accent),
                   ],
                 ),
                 const SizedBox(height: 10),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('移动端版本', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                    Text('移动端版本', style: TextStyle(color: mutedText, fontSize: 12)),
                     Text(
-                      'v1.0.6 (永久固化签名版)',
+                      'v1.1.0 (永久固化签名版)',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'monospace',
@@ -326,11 +505,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('电脑端协议对齐', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                    Text(
+                    Text('电脑端协议对齐', style: TextStyle(color: mutedText, fontSize: 12)),
+                    const Text(
                       'v0.53.0 最新规范',
                       style: TextStyle(
                         color: AppColors.emerald,
@@ -346,30 +525,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.cyan,
-                      side: const BorderSide(color: AppColors.cyan),
+                      foregroundColor: accent,
+                      side: BorderSide(color: accent),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          backgroundColor: AppColors.surface,
+                          backgroundColor: isLight ? AppColors.lightSurface : AppColors.surface,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          title: const Text('Token Monitor 更新详情', style: TextStyle(color: AppColors.textPrimary)),
-                          content: const Text(
-                            'Token Monitor Android v1.0.7 修复与优化：\n\n'
-                            '• 修复「AI 额度与余额」页面中剩余百分比与重置倒计时数据缺失问题\n'
-                            '• 修复「已接入设备」页面中系统平台、版本号、今日花费与 Token 数量显示错误\n'
-                            '• 修复 Android 桌面小组件数据同步与配额展示\n'
-                            '• 深度对齐电脑端最新版 (v0.53.0) 核心规范与多设备聚合协议\n'
-                            '• 永久固化正式签名，随时直接覆盖安装更新',
-                            style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
+                          title: Text('Token Monitor 更新详情', style: TextStyle(color: primaryText)),
+                          content: Text(
+                            'Token Monitor Android v1.1.0 重大更新：\n\n'
+                            '• 新增「Token 账单」：支持切换日账单、月度账单、年度与全时期用量流水\n'
+                            '• 新增「GitHub 贡献热力图」：7 行周级活跃网格，直观呈现每天 Token 消耗强度与下钻\n'
+                            '• 新增「黑白双主题切换」：\n'
+                            '  - 黑主题：黑曜石深黑底 + 冰蓝高光 (#38BDF8)\n'
+                            '  - 白主题：纯净暖白底 + 暖黄高光 (#F59E0B / #FBBF24)\n'
+                            '• 修复多项跨设备状态与配额展示细节，支持持久化离线缓存\n'
+                            '• 永久固化官方签名，随时覆盖无缝升级',
+                            style: TextStyle(color: secondaryText, fontSize: 13, height: 1.5),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
-                              child: const Text('我知道了', style: TextStyle(color: AppColors.cyan)),
+                              child: Text('我知道了', style: TextStyle(color: accent)),
                             ),
                           ],
                         ),
@@ -384,11 +565,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 20),
 
-          const Center(
+          Center(
             child: Text(
-              'Token Monitor for Android v1.0.7\n跨设备 AI 编程工具用量监控看板',
+              'Token Monitor for Android v1.1.0\n跨设备 AI 编程工具用量监控看板',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+              style: TextStyle(color: mutedText, fontSize: 11),
             ),
           ),
         ],
@@ -428,16 +609,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {bool obscureText = false}) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    bool obscureText = false,
+    bool isLight = false,
+    Color? inputBg,
+  }) {
+    final textPrimary = isLight ? AppColors.lightTextPrimary : AppColors.textPrimary;
+    final textMuted = isLight ? AppColors.lightTextMuted : AppColors.textMuted;
     return TextField(
       controller: controller,
       obscureText: obscureText,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+      style: TextStyle(color: textPrimary, fontSize: 13),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+        labelStyle: TextStyle(color: textMuted, fontSize: 12),
         filled: true,
-        fillColor: AppColors.surfaceLight,
+        fillColor: inputBg ?? (isLight ? AppColors.lightSurfaceSecondary : AppColors.surfaceLight),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -447,3 +636,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+

@@ -47,22 +47,26 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.9
-          name: "Token Monitor Android v1.0.9 (暖色调白与暖黄色高级审美版)"
+          tag_name: v1.1.0
+          name: "Token Monitor Android v1.1.0 (Token账单流水 + GitHub贡献热力图 + 黑白双主题版)"
           body: |
-            ✨ **Token Monitor Android v1.0.9 正式发布！**
+            ✨ **Token Monitor Android v1.1.0 重磅发布！**
 
-            本次更新深度融入了**暖色调白色 (Ivory Warm White)** 与**暖黄色 (Amber Warm Yellow)** 奢华科技色彩系统，全面提升视觉温润感与算力价值感：
-            1. **暖色调白色系 (Warm White)**：引入象牙暖白 (`#FAF8F5`) 与高光纯暖白 (`#FFFDF8`)，替换刺眼冷白，应用于关键标题、大数字伴随单位与微晶玻璃导光受光线，大幅减轻视觉疲劳，尽显典雅；
-            2. **太阳暖黄色系 (Warm Yellow)**：引入明艳温润暖黄 (`#FBBF24`) 与弥散微光晕，重构「实时折合成本」卡槽、月度支出核心数值与工具消耗金额，赋予核心资产与成本概念天然的财富光环；
-            3. **冷暖对撞 (Warm-Cool Interlock)**：顶部 2:1 Bento 主视窗中「冷青算力流」与「暖黄价值成本」形成极具张力的冷暖交融；次级 Bento 双翼「左翼暖黄月度支出」与「右翼翡翠健康雷达」完美均衡；
-            4. **微晶导光线升级**：`GlassContainer` 支持物理微晶受光面暖白色与暖黄色导光反射；
-            5. **模型分段能量带**：增加极速/轻量模型专属暖黄色段，能量占比层次更鲜明；
-            6. **永久正式签名保证**：支持直接点击覆盖安装更新，无须卸载旧版本！
+            本次版本带来重大的核心功能升级与全新双主题视觉体验：
+            1. **Token 周期账单与每日流水**：新增全功能「账单」大屏，支持切换查看「日账单」、「月度账单」、「年度与全时期总览」，详细展示每天消耗的 Token 流水、模型消耗明细与活跃工具分布；
+            2. **GitHub 风格贡献热力图 (Activity Heatmap)**：7 行按周对齐的活跃网格，真实反映每日 Token 消耗强度（0-4 级色阶），支持水平平滑滑动浏览近 20 周轨迹，并支持点击任意方块下钻查看当日账单详情；
+            3. **黑白双主题自由切换**：
+               - **黑主题 (Dark Console)**：黑曜石深黑底 + 纯净白主字 + 冰蓝高光 (`#38BDF8`)；
+               - **白主题 (Light Amber)**：纯净暖白底 + 深石墨灰字 + 暖黄高光 (`#F59E0B` / `#FBBF24`)；
+               - 在【设置】中一键切换，全局即时生效并本地持久化存储；
+            4. **组件毛玻璃与全屏自适应**：`GlassContainer`、各种看板卡片与状态指示器全面自适应浅色与深色模式，兼顾冷艳科技感与温润品质感；
+            5. **历史用量持久化与离线容灾**：支持 `/api/history` 滚动数据与本地 SharedPreferences 缓存，断网或 Hub 离线时平滑展示；
+            6. **永久正式签名保证**：支持直接下载 `app-release.apk` 覆盖安装升级，免卸载保留所有配置！
 
             **下载方式**：直接在下方 Assets 点击下载 `app-release.apk` 安装即可。
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

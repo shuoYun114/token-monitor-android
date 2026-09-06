@@ -35,8 +35,11 @@ class HomeScreen extends StatelessWidget {
     final exactTokensFormatted = formatter.format(today.totalTokens);
     final shortTokensFormatted = _formatTokensShort(today.totalTokens);
 
+    final isLight = provider.isLightTheme;
+    final accent = AppColors.getThemeAccent(isLight);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isLight ? AppColors.lightBackground : AppColors.background,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -46,15 +49,17 @@ class HomeScreen extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [AppColors.cyan, Color(0xFF4F46E5)],
+                  colors: isLight
+                      ? [AppColors.warmYellowDark, AppColors.warmYellow]
+                      : [AppColors.iceBlue, const Color(0xFF4F46E5)],
                 ),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.cyan.withOpacity(0.35),
+                    color: (isLight ? AppColors.warmYellowDark : AppColors.iceBlue).withOpacity(0.35),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -63,13 +68,13 @@ class HomeScreen extends StatelessWidget {
               child: const Icon(Icons.speed_rounded, size: 19, color: Colors.white),
             ),
             const SizedBox(width: 10),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Token Monitor',
                   style: TextStyle(
-                    color: AppColors.warmWhite,
+                    color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhite,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
@@ -78,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                 Text(
                   'AI COMPUTE CONSOLE',
                   style: TextStyle(
-                    color: AppColors.textMuted,
+                    color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
@@ -88,6 +93,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
+
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),

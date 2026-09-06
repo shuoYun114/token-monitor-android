@@ -32,19 +32,25 @@ class GlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final defaultBg = isLight ? AppColors.lightGlassCard : AppColors.glassPanel;
+    final defaultBorder = isLight ? AppColors.lightGlassBorder : AppColors.glassBorder;
+    final defaultTopHighlight = isLight ? Colors.white : AppColors.glassTopHighlight;
+    final defaultShadowColor = isLight ? const Color(0x0D0F172A) : Colors.black.withOpacity(0.45);
+
     // 阴影组合：景深阴影 + 柔和环境光晕
     final List<BoxShadow> shadows = [
       BoxShadow(
-        color: Colors.black.withOpacity(0.45),
-        blurRadius: 20,
-        offset: const Offset(0, 10),
+        color: defaultShadowColor,
+        blurRadius: isLight ? 12 : 20,
+        offset: Offset(0, isLight ? 4 : 10),
       ),
     ];
 
     if (glowColor != null) {
       shadows.add(
         BoxShadow(
-          color: glowColor!.withOpacity(0.18),
+          color: glowColor!.withOpacity(isLight ? 0.12 : 0.18),
           blurRadius: 28,
           spreadRadius: -4,
           offset: const Offset(0, 4),
@@ -53,23 +59,29 @@ class GlassContainer extends StatelessWidget {
     }
 
     final boxDecoration = BoxDecoration(
-      color: gradient == null ? (backgroundColor ?? AppColors.glassPanel) : null,
+      color: gradient == null ? (backgroundColor ?? defaultBg) : null,
       gradient: gradient ??
           LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              backgroundColor ?? const Color(0xE6131828),
-              backgroundColor?.withOpacity(0.7) ?? const Color(0xD90E121E),
-            ],
+            colors: isLight
+                ? [
+                    backgroundColor ?? Colors.white,
+                    backgroundColor?.withOpacity(0.9) ?? const Color(0xF7FFFFFF),
+                  ]
+                : [
+                    backgroundColor ?? const Color(0xE6131828),
+                    backgroundColor?.withOpacity(0.7) ?? const Color(0xD90E121E),
+                  ],
           ),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: borderColor ?? AppColors.glassBorder,
+        color: borderColor ?? defaultBorder,
         width: 1,
       ),
       boxShadow: shadows,
     );
+
 
     Widget content = Container(
       margin: margin,

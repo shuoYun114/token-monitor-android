@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/monitor_provider.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
+import 'ui/screens/billing_screen.dart';
 import 'ui/screens/devices_screen.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/limits_screen.dart';
@@ -28,10 +29,13 @@ class TokenMonitorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<MonitorProvider>();
+    final isLight = provider.isLightTheme;
+
     return MaterialApp(
       title: 'Token Monitor',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: isLight ? AppTheme.lightTheme : AppTheme.darkTheme,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -58,6 +62,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
+    BillingScreen(),
     LimitsScreen(),
     DevicesScreen(),
     SettingsScreen(),
@@ -84,6 +89,11 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
             label: '总览',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long_outlined),
+            activeIcon: Icon(Icons.receipt_long_rounded),
+            label: '账单',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.speed_outlined),
             activeIcon: Icon(Icons.speed_rounded),
             label: '额度',
@@ -103,3 +113,4 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     );
   }
 }
+
