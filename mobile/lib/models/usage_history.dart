@@ -21,24 +21,23 @@ class DailyUsageRecord {
 
   DailyUsageRecord({
     required this.date,
-    this.tokens = 0,
-    this.cost = 0.0,
+    int? tokens,
+    double? cost,
     this.messages = 0,
     this.tokenIntensity = 0,
     this.costIntensity = 0,
-    this.perClient = const {},
-    this.perModel = const {},
+    Map<String, dynamic>? perClient,
+    Map<String, dynamic>? perModel,
     this.clientCosts = const {},
     this.modelCosts = const {},
     int? totalTokens,
     double? costUsd,
     Map<String, dynamic>? clients,
     Map<String, dynamic>? models,
-  })  : tokens = totalTokens ?? tokens,
-        cost = costUsd ?? cost,
-        perClient = clients ?? perClient,
-        perModel = models ?? perModel;
-
+  })  : tokens = totalTokens ?? tokens ?? 0,
+        cost = costUsd ?? cost ?? 0.0,
+        perClient = clients ?? perClient ?? const {},
+        perModel = models ?? perModel ?? const {};
 
   factory DailyUsageRecord.fromJson(Map<String, dynamic> json) {
     int parseNumToInt(dynamic v) {
@@ -92,14 +91,19 @@ class MonthlyUsageRecord {
 
   MonthlyUsageRecord({
     required this.month,
-    this.tokens = 0,
-    this.cost = 0.0,
-    this.perClient = const {},
-    this.perModel = const {},
+    int? tokens,
+    double? cost,
+    Map<String, dynamic>? perClient,
+    Map<String, dynamic>? perModel,
     int? totalTokens,
     double? costUsd,
-  })  : tokens = totalTokens ?? tokens,
-        cost = costUsd ?? cost;
+    Map<String, dynamic>? clients,
+    Map<String, dynamic>? models,
+  })  : tokens = totalTokens ?? tokens ?? 0,
+        cost = costUsd ?? cost ?? 0.0,
+        perClient = clients ?? perClient ?? const {},
+        perModel = models ?? perModel ?? const {};
+
 
   factory MonthlyUsageRecord.fromJson(Map<String, dynamic> json) {
     return MonthlyUsageRecord(
