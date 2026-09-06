@@ -16,8 +16,8 @@ class WidgetSyncService {
   }) async {
     try {
       final costFormatted = currency == 'CNY'
-          ? '¥'
-          : '\{today.costUsd.toStringAsFixed(2)}';
+          ? '¥${(today.costUsd * rate).toStringAsFixed(2)}'
+          : '\$${today.costUsd.toStringAsFixed(2)}';
 
       final tokenFormatted = _formatTokens(today.totalTokens);
 
@@ -27,10 +27,13 @@ class WidgetSyncService {
 
       for (var p in limits) {
         if (p.id.contains('claude') && p.windows.isNotEmpty) {
-          claudeQuota = '%';
+          claudeQuota = '${p.windows.first.remainingPercent.toStringAsFixed(0)}%';
         }
         if (p.id.contains('codex') && p.windows.isNotEmpty) {
-          codexQuota = '%';
+          codexQuota = '${p.windows.first.remainingPercent.toStringAsFixed(0)}%';
+        }
+        if (p.id.contains('antigravity') && p.windows.isNotEmpty && claudeQuota == '--') {
+          claudeQuota = '${p.windows.first.remainingPercent.toStringAsFixed(0)}%';
         }
       }
 
@@ -57,9 +60,9 @@ class WidgetSyncService {
 
   static String _formatTokens(int count) {
     if (count >= 1000000) {
-      return 'M';
+      return '${(count / 1000000).toStringAsFixed(1)}M';
     } else if (count >= 1000) {
-      return 'K';
+      return '${(count / 1000).toStringAsFixed(1)}K';
     }
     return count.toString();
   }

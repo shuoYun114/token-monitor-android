@@ -358,10 +358,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           title: const Text('Token Monitor 更新详情', style: TextStyle(color: AppColors.textPrimary)),
                           content: const Text(
-                            '已成功同步电脑端 GitHub 最新版 (v0.53.0) 核心规范：\n\n'
-                            '• 新增今日活跃模型分布与排行 (Models Breakdown)\n'
-                            '• 完美支持 Antigravity 等 Provider 的多额度窗口 (Gemini + Claude/GPT 并列仪表盘)\n'
-                            '• 扩充对 Alibaba(通义千问)、Zed Editor、Unsloth Studio、Trae 等最新工具的识别\n'
+                            'Token Monitor Android v1.0.7 修复与优化：\n\n'
+                            '• 修复「AI 额度与余额」页面中剩余百分比与重置倒计时数据缺失问题\n'
+                            '• 修复「已接入设备」页面中系统平台、版本号、今日花费与 Token 数量显示错误\n'
+                            '• 修复 Android 桌面小组件数据同步与配额展示\n'
+                            '• 深度对齐电脑端最新版 (v0.53.0) 核心规范与多设备聚合协议\n'
                             '• 永久固化正式签名，随时直接覆盖安装更新',
                             style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
                           ),
@@ -385,7 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Center(
             child: Text(
-              'Token Monitor for Android v1.0.6\n跨设备 AI 编程工具用量监控看板',
+              'Token Monitor for Android v1.0.7\n跨设备 AI 编程工具用量监控看板',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textMuted, fontSize: 11),
             ),

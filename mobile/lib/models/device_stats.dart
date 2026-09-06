@@ -68,8 +68,11 @@ class DeviceRecord {
   final String deviceId;
   final String hostname;
   final String platform;
+  final String? osName;
+  final String? osVersion;
   final String updatedAt;
   final String? agentVersion;
+  final bool stale;
   final PeriodUsage today;
   final PeriodUsage month;
   final PeriodUsage allTime;
@@ -79,8 +82,11 @@ class DeviceRecord {
     required this.deviceId,
     required this.hostname,
     required this.platform,
+    this.osName,
+    this.osVersion,
     required this.updatedAt,
     this.agentVersion,
+    this.stale = false,
     required this.today,
     required this.month,
     required this.allTime,
@@ -98,8 +104,11 @@ class DeviceRecord {
       deviceId: json['deviceId']?.toString() ?? '',
       hostname: json['hostname']?.toString() ?? 'Unknown Device',
       platform: json['platform']?.toString() ?? 'unknown',
+      osName: json['osName']?.toString(),
+      osVersion: json['osVersion']?.toString(),
       updatedAt: json['updatedAt']?.toString() ?? '',
       agentVersion: json['agentVersion']?.toString(),
+      stale: json['stale'] as bool? ?? false,
       today: PeriodUsage.fromJson(todayMap),
       month: PeriodUsage.fromJson(monthMap),
       allTime: PeriodUsage.fromJson(allTimeMap),
@@ -111,8 +120,11 @@ class DeviceRecord {
     'deviceId': deviceId,
     'hostname': hostname,
     'platform': platform,
+    'osName': osName,
+    'osVersion': osVersion,
     'updatedAt': updatedAt,
     'agentVersion': agentVersion,
+    'stale': stale,
     'today': today.toJson(),
     'month': month.toJson(),
     'allTime': allTime.toJson(),

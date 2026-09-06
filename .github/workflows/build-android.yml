@@ -47,9 +47,9 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.6
-          name: "Token Monitor Android v1.0.6 (对齐电脑端 v0.53.0 最新规范)"
-          body: "🚀 **全新版本 (v1.0.6) 正式发布！**\n\n- 深度对齐电脑端 GitHub 最新版 (v0.53.0) 核心规范与数据协议\n- **新增「今日活跃模型分布与排行 (Models Breakdown)」**：直观查看各 AI 模型（Gemini 3.7 / Claude 3.7 / GPT / DeepSeek 等）用量、占比与花费\n- **升级「AI 额度健康度」**：完整支持 Antigravity 等 Provider 的多额度窗口（Gemini 85% 与 Claude/GPT 100% 并列大仪表盘）\n- **扩充最新工具与提供商支持**：新增阿里巴巴通义千问 (Alibaba/Qwen Token Plan)、Zed Editor、Unsloth Studio、Trae 等新工具识别\n- **多设备模型聚合优化**：跨设备统计时模型分布完全无缝汇总\n- **永久固化正式签名**：直接点击覆盖安装更新，无缝升级！\n\n**下载方式**：直接点击下方 Assets 中的 `app-release.apk` 即可极速安装。"
+          tag_name: v1.0.7
+          name: "Token Monitor Android v1.0.7 (修复额度页数据与设备页显示错误)"
+          body: "🚀 **全新维护版本 (v1.0.7) 正式发布！**\n\n- **修复「AI 额度与余额」页面数据缺失**：解决因字符串插值丢失导致的仅显示「% 剩余」与「后重置」问题，新增高精度本地重置倒计时（如「4小时 59分 后重置」、「6天 6小时 后重置」）与剩余百分比实时展示\n- **修复「已接入设备」页面显示错误**：彻底修复平台与客户端版本展示（如「Windows 11 · v0.53.0」），花费支持人民币 (¥) 与美元 (\$) 实时汇率换算，正确格式化今日 Token 数量（如 1.8M）与活跃工具数\n- **修复 Android 桌面小组件数据同步**：修复 AppWidget 桌面插件的金额、Token 格式与配额百分比展示\n- **永久正式签名**：直接点击覆盖安装更新，无须卸载旧版本！\n\n**下载方式**：直接在下方 Assets 点击下载 `app-release.apk` 安装即可。"
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false

@@ -110,8 +110,9 @@ class LimitsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBalanceRow(dynamic win) {
+  Widget _buildBalanceRow(LimitWindow win) {
     final curSymbol = win.currency == 'CNY' ? '¥' : '\$';
+    final balStr = win.balance != null ? '$curSymbol${win.balance!.toStringAsFixed(2)}' : '--';
     return Container(
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -127,7 +128,7 @@ class LimitsScreen extends StatelessWidget {
             style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
           Text(
-            '',
+            balStr,
             style: const TextStyle(
               color: AppColors.cyan,
               fontSize: 14,
@@ -140,7 +141,8 @@ class LimitsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressRow(dynamic win, Color activeColor) {
+  Widget _buildProgressRow(LimitWindow win, Color activeColor) {
+    final resetText = win.formattedResetCountdown;
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Column(
@@ -154,7 +156,7 @@ class LimitsScreen extends StatelessWidget {
                 style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
               ),
               Text(
-                '% 剩余',
+                '${win.formattedPercent} 剩余',
                 style: TextStyle(
                   color: activeColor,
                   fontSize: 12,
@@ -168,17 +170,23 @@ class LimitsScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: win.remainingPercent / 100.0,
+              value: (win.remainingPercent / 100.0).clamp(0.0, 1.0),
               backgroundColor: AppColors.surfaceLight,
               valueColor: AlwaysStoppedAnimation<Color>(activeColor),
               minHeight: 6,
             ),
           ),
-          if (win.resetInFormatted != null) ...[
+          if (resetText != null && resetText.isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text(
-              ' 后重置',
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
+            Row(
+              children: [
+                const Icon(Icons.access_time_rounded, size: 10, color: AppColors.textMuted),
+                const SizedBox(width: 4),
+                Text(
+                  '$resetText 后重置',
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
+                ),
+              ],
             ),
           ],
         ],

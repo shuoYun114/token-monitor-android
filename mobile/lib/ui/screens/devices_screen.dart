@@ -11,11 +11,18 @@ class DevicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<MonitorProvider>();
     final stats = provider.currentStats;
+    final settings = provider.settings;
     final devices = stats?.devices ?? [];
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('已接入设备'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.cyan),
+            onPressed: () => provider.refreshNow(),
+          ),
+        ],
       ),
       body: devices.isEmpty
           ? const Center(
@@ -26,6 +33,31 @@ class DevicesScreen extends StatelessWidget {
               itemCount: devices.length,
               itemBuilder: (context, index) {
                 final dev = devices[index];
+                final isOnline = !dev.stale;
+
+                // 格式化平台与版本副标题
+                final platformName = (dev.osName != null && dev.osName!.isNotEmpty)
+                    ? dev.osName!
+                    : _formatPlatformName(dev.platform);
+                final versionText = (dev.agentVersion != null && dev.agentVersion!.isNotEmpty)
+                    ? 'v${dev.agentVersion}'
+                    : '';
+                final platformSubtitle = versionText.isNotEmpty
+                    ? '平台: $platformName · $versionText'
+                    : '平台: $platformName';
+
+                // 格式化今日花费
+                final costUsd = dev.today.costUsd;
+                final costFormatted = settings.currency == 'CNY'
+                    ? '¥${(costUsd * settings.usdToCnyRate).toStringAsFixed(2)}'
+                    : '\$${costUsd.toStringAsFixed(2)}';
+
+                // 格式化今日 Token
+                final tokensFormatted = _formatTokens(dev.today.totalTokens);
+
+                // 活跃客户端列表
+                final clientNames = dev.today.clients.keys.toList();
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
@@ -36,8 +68,8 @@ class DevicesScreen extends StatelessWidget {
                         Row(
                           children: [
                             Container(
-                              width: 36,
-                              height: 36,
+                              width: 38,
+                              height: 38,
                               decoration: BoxDecoration(
                                 color: AppColors.surfaceLight,
                                 borderRadius: BorderRadius.circular(10),
@@ -61,8 +93,9 @@ class DevicesScreen extends StatelessWidget {
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
+                                  const SizedBox(height: 2),
                                   Text(
-                                    '平台:  · v',
+                                    platformSubtitle,
                                     style: const TextStyle(
                                       color: AppColors.textMuted,
                                       fontSize: 11,
@@ -74,24 +107,59 @@ class DevicesScreen extends StatelessWidget {
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppColors.emerald,
+                              decoration: BoxDecoration(
+                                color: isOnline ? AppColors.emerald : AppColors.textMuted,
                                 shape: BoxShape.circle,
+                                boxShadow: isOnline
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.emerald.withOpacity(0.5),
+                                          blurRadius: 4,
+                                          spreadRadius: 1,
+                                        )
+                                      ]
+                                    : null,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 14),
                         const Divider(color: AppColors.glassBorder, height: 1),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildInfoCol('今日花费', '\{dev.today.costUsd.toStringAsFixed(2)}'),
-                            _buildInfoCol('今日 Token', 'K'),
-                            _buildInfoCol('活跃工具', ' 个'),
+                            _buildInfoCol('今日花费', costFormatted),
+                            _buildInfoCol('今日 Token', tokensFormatted),
+                            _buildInfoCol('活跃工具', '${clientNames.length} 个'),
                           ],
                         ),
+                        if (clientNames.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: clientNames.map((c) {
+                              final color = AppColors.getToolColor(c);
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: color.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+                                ),
+                                child: Text(
+                                  c,
+                                  style: TextStyle(
+                                    color: color,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -106,18 +174,35 @@ class DevicesScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
-        const SizedBox(height: 2),
+        const SizedBox(height: 3),
         Text(
           value,
           style: const TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             fontFamily: 'monospace',
           ),
         ),
       ],
     );
+  }
+
+  String _formatPlatformName(String platform) {
+    final lower = platform.toLowerCase();
+    if (lower.startsWith('win')) return 'Windows';
+    if (lower.startsWith('darwin') || lower.contains('mac')) return 'macOS';
+    if (lower.startsWith('linux')) return 'Linux';
+    return platform;
+  }
+
+  String _formatTokens(int count) {
+    if (count >= 1000000) {
+      return '${(count / 1000000).toStringAsFixed(1)}M';
+    } else if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}K';
+    }
+    return count.toString();
   }
 
   IconData _getPlatformIcon(String platform) {

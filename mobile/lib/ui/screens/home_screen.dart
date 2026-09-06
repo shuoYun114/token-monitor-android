@@ -274,7 +274,9 @@ class HomeScreen extends StatelessWidget {
                             child: RadialGauge(
                               remainingPercent: win.remainingPercent,
                               title: title,
-                              subtitle: win.resetInFormatted ?? '在线',
+                              subtitle: (win.formattedResetCountdown != null && win.formattedResetCountdown!.isNotEmpty)
+                                  ? win.formattedResetCountdown!
+                                  : '正常',
                             ),
                           ),
                         );
