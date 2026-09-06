@@ -31,24 +31,32 @@ class ToolCard extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       borderRadius: 16,
+      borderColor: toolColor.withOpacity(0.22),
       backgroundColor: AppColors.glassCard,
       onTap: onTap,
       child: Row(
         children: [
-          // 工具专属图标
+          // 工具专属图标 (带有内衬流光底板)
           Container(
-            width: 40,
-            height: 40,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: toolColor.withOpacity(0.15),
+              color: toolColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: toolColor.withOpacity(0.35), width: 1),
+              border: Border.all(color: toolColor.withOpacity(0.38), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: toolColor.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             alignment: Alignment.center,
             child: Icon(
               _getToolIcon(clientName),
               color: toolColor,
-              size: 20,
+              size: 22,
             ),
           ),
           const SizedBox(width: 12),
@@ -71,14 +79,21 @@ class ToolCard extends StatelessWidget {
                     Container(
                       width: 6,
                       height: 6,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: AppColors.emerald,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.emerald.withOpacity(0.8),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   _formatTokens(tokenCount),
                   style: const TextStyle(
@@ -100,13 +115,14 @@ class ToolCard extends StatelessWidget {
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   fontFamily: 'monospace',
+                  letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(height: 2),
               const Text(
-                '今日用量',
+                '今日消耗',
                 style: TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 10,

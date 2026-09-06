@@ -54,11 +54,42 @@ class ModelBreakdownCard extends StatelessWidget {
                 style: const TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 11,
+                  fontFamily: 'monospace',
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
+
+          // 贯穿式多模型全景分段能量带 (西瓜同学 Energy Viz 法则)
+          Container(
+            height: 7,
+            width: double.infinity,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              children: sortedEntries.map((e) {
+                final p = totalTokens > 0 ? (e.value / totalTokens) : 0.0;
+                if (p <= 0.005) return const SizedBox.shrink();
+                final c = AppColors.getModelColor(e.key);
+                return Expanded(
+                  flex: (p * 1000).round().clamp(1, 1000),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 0.6),
+                    decoration: BoxDecoration(
+                      color: c,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 14),
+
           ...sortedEntries.map((entry) {
             final modelName = entry.key;
             final tokens = entry.value;
@@ -82,15 +113,15 @@ class ModelBreakdownCard extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 6,
-                        height: 6,
+                        width: 7,
+                        height: 7,
                         decoration: BoxDecoration(
                           color: color,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: color.withOpacity(0.5),
-                              blurRadius: 4,
+                              color: color.withOpacity(0.6),
+                              blurRadius: 5,
                               spreadRadius: 1,
                             ),
                           ],
@@ -123,9 +154,9 @@ class ModelBreakdownCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
+                          color: color.withOpacity(0.14),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+                          border: Border.all(color: color.withOpacity(0.35), width: 0.6),
                         ),
                         child: Text(
                           '$percentStr%',
@@ -140,7 +171,7 @@ class ModelBreakdownCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  // 进度条
+                  // 精致能量槽
                   Stack(
                     children: [
                       Container(
@@ -157,16 +188,23 @@ class ModelBreakdownCard extends StatelessWidget {
                           height: 4,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [color.withOpacity(0.7), color],
+                              colors: [color.withOpacity(0.5), color],
                             ),
                             borderRadius: BorderRadius.circular(2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ],
                   ),
                   if (costStr != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(

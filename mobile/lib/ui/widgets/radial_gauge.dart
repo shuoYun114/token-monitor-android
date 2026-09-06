@@ -24,68 +24,102 @@ class RadialGauge extends StatelessWidget {
     final color = activeColor ?? _getColorByPercent(remainingPercent);
     final percentInt = remainingPercent.clamp(0.0, 100.0).round();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: size,
-          height: size,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CustomPaint(
-                size: Size(size, size),
-                painter: _GaugePainter(
-                  percent: remainingPercent.clamp(0.0, 100.0) / 100.0,
-                  activeColor: color,
-                  trackColor: AppColors.surfaceLight,
-                ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$percentInt%',
-                    style: TextStyle(
-                      color: color,
-                      fontSize: size * 0.22,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          title,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        if (subtitle != null && subtitle!.isNotEmpty) ...[
-          const SizedBox(height: 2),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.18), width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
           SizedBox(
-            width: 90,
+            width: size,
+            height: size,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: Size(size, size),
+                  painter: _GaugePainter(
+                    percent: remainingPercent.clamp(0.0, 100.0) / 100.0,
+                    activeColor: color,
+                    trackColor: AppColors.surfaceLight.withOpacity(0.6),
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          '$percentInt',
+                          style: TextStyle(
+                            color: color,
+                            fontSize: size * 0.26,
+                            fontWeight: FontWeight.w800,
+                            fontFamily: 'monospace',
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Text(
+                          '%',
+                          style: TextStyle(
+                            color: color.withOpacity(0.7),
+                            fontSize: size * 0.14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 86,
             child: Text(
-              subtitle!,
+              title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 9,
+                color: AppColors.textPrimary,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (subtitle != null && subtitle!.isNotEmpty) ...[
+            const SizedBox(height: 3),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                subtitle!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'monospace',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -110,10 +144,10 @@ class _GaugePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - 8) / 2;
-    const strokeWidth = 5.0;
+    final radius = (size.width - 10) / 2;
+    const strokeWidth = 5.5;
 
-    // 背景底环
+    // 1. 底层轨道 (微晶暗环)
     final trackPaint = Paint()
       ..color = trackColor
       ..style = PaintingStyle.stroke
@@ -122,12 +156,15 @@ class _GaugePainter extends CustomPainter {
 
     canvas.drawCircle(center, radius, trackPaint);
 
-    // 进度高亮环
-    final activePaint = Paint()
-      ..color = activeColor
+    if (percent <= 0.001) return;
+
+    // 2. 霓虹发光光晕层 (Blur)
+    final glowPaint = Paint()
+      ..color = activeColor.withOpacity(0.35)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = strokeWidth + 4
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
     final sweepAngle = 2 * pi * percent;
     canvas.drawArc(
@@ -135,8 +172,31 @@ class _GaugePainter extends CustomPainter {
       -pi / 2,
       sweepAngle,
       false,
+      glowPaint,
+    );
+
+    // 3. 高亮主线环
+    final activePaint = Paint()
+      ..color = activeColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      sweepAngle,
+      false,
       activePaint,
     );
+
+    // 4. 端点发光圆珠 (Head Dot)
+    final endAngle = -pi / 2 + sweepAngle;
+    final dotX = center.dx + radius * cos(endAngle);
+    final dotY = center.dy + radius * sin(endAngle);
+
+    final dotPaint = Paint()..color = Colors.white;
+    canvas.drawCircle(Offset(dotX, dotY), strokeWidth * 0.45, dotPaint);
   }
 
   @override

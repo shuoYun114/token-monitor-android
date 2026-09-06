@@ -2,16 +2,26 @@ import 'package:flutter/material.dart';
 
 /// Token Monitor 移动端专属配色系统 (深色黑曜石 + 赛博毛玻璃霓虹)
 class AppColors {
-  // 背景色
-  static const Color background = Color(0xFF090A0F);
-  static const Color surface = Color(0xFF11141D);
-  static const Color surfaceLight = Color(0xFF191E30);
+  // 背景色 (黑曜石深黑，杜绝OLED刺眼纯黑，增强景深)
+  static const Color background = Color(0xFF07090E);
+  static const Color consoleBg = Color(0xFF080A10);
+  static const Color surface = Color(0xFF101420);
+  static const Color surfaceLight = Color(0xFF161B2B);
+  static const Color surfaceElevated = Color(0xFF1C2237);
   
-  // 毛玻璃面板与边框
-  static const Color glassPanel = Color(0xBF121622);
-  static const Color glassCard = Color(0x99191E30);
-  static const Color glassBorder = Color(0x1AFFFFFF);
-  static const Color glassBorderHighlight = Color(0x33FFFFFF);
+  // 毛玻璃面板与双层导光边框
+  static const Color glassPanel = Color(0xCC111624);
+  static const Color glassCard = Color(0x99161C2E);
+  static const Color glassBorder = Color(0x1FFFFFFF);
+  static const Color glassBorderHighlight = Color(0x40FFFFFF);
+  static const Color glassTopHighlight = Color(0x38FFFFFF);
+
+  // 环境光晕色 (Ambient Glow)
+  static const Color glowCyan = Color(0x2B38BDF8);
+  static const Color glowEmerald = Color(0x2B10B981);
+  static const Color glowAmber = Color(0x2BF59E0B);
+  static const Color glowPurple = Color(0x2BA855F7);
+  static const Color glowRose = Color(0x2BF43F5E);
 
   // 核心强调色与霓虹
   static const Color cyan = Color(0xFF38BDF8);
@@ -22,10 +32,11 @@ class AppColors {
   static const Color rose = Color(0xFFF43F5E);
   static const Color indigo = Color(0xFF6366F1);
 
-  // 文字颜色
+  // 文字颜色 (层级分明的科技字阶)
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
   static const Color textMuted = Color(0xFF64748B);
+  static const Color textGhost = Color(0xFF475569);
 
   // 工具专属识别色 (与桌面版完全对齐)
   static const Color toolClaude = Color(0xFFD97706);

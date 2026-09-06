@@ -62,22 +62,32 @@ class DevicesScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
+                    glowColor: isOnline ? AppColors.glowCyan : null,
+                    borderColor: isOnline ? AppColors.cyan.withOpacity(0.25) : AppColors.glassBorder,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             Container(
-                              width: 38,
-                              height: 38,
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
                                 color: AppColors.surfaceLight,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.cyan.withOpacity(0.3), width: 1),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.cyan.withOpacity(0.15),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Icon(
                                 _getPlatformIcon(dev.platform),
                                 color: AppColors.cyan,
-                                size: 20,
+                                size: 22,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -89,8 +99,9 @@ class DevicesScreen extends StatelessWidget {
                                     dev.hostname,
                                     style: const TextStyle(
                                       color: AppColors.textPrimary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.2,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -99,26 +110,53 @@ class DevicesScreen extends StatelessWidget {
                                     style: const TextStyle(
                                       color: AppColors.textMuted,
                                       fontSize: 11,
+                                      fontFamily: 'monospace',
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             Container(
-                              width: 8,
-                              height: 8,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: isOnline ? AppColors.emerald : AppColors.textMuted,
-                                shape: BoxShape.circle,
-                                boxShadow: isOnline
-                                    ? [
-                                        BoxShadow(
-                                          color: AppColors.emerald.withOpacity(0.5),
-                                          blurRadius: 4,
-                                          spreadRadius: 1,
-                                        )
-                                      ]
-                                    : null,
+                                color: (isOnline ? AppColors.emerald : AppColors.textMuted).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: (isOnline ? AppColors.emerald : AppColors.textMuted).withOpacity(0.3),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: isOnline ? AppColors.emerald : AppColors.textMuted,
+                                      shape: BoxShape.circle,
+                                      boxShadow: isOnline
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.emerald.withOpacity(0.8),
+                                                blurRadius: 5,
+                                                spreadRadius: 1,
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    isOnline ? 'ONLINE' : 'OFFLINE',
+                                    style: TextStyle(
+                                      color: isOnline ? AppColors.emerald : AppColors.textMuted,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -129,16 +167,16 @@ class DevicesScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildInfoCol('今日花费', costFormatted),
-                            _buildInfoCol('今日 Token', tokensFormatted),
-                            _buildInfoCol('活跃工具', '${clientNames.length} 个'),
+                            _buildInfoCol('今日花费', costFormatted, AppColors.amber),
+                            _buildInfoCol('今日 Token', tokensFormatted, AppColors.cyan),
+                            _buildInfoCol('活跃工具', '${clientNames.length} 款', AppColors.textPrimary),
                           ],
                         ),
                         if (clientNames.isNotEmpty) ...[
                           const SizedBox(height: 12),
                           Wrap(
                             spacing: 6,
-                            runSpacing: 4,
+                            runSpacing: 5,
                             children: clientNames.map((c) {
                               final color = AppColors.getToolColor(c);
                               return Container(
@@ -146,14 +184,15 @@ class DevicesScreen extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: color.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+                                  border: Border.all(color: color.withOpacity(0.35), width: 0.6),
                                 ),
                                 child: Text(
                                   c,
                                   style: TextStyle(
                                     color: color,
                                     fontSize: 10,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'monospace',
                                   ),
                                 ),
                               );
@@ -169,19 +208,20 @@ class DevicesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCol(String label, String value) {
+  Widget _buildInfoCol(String label, String value, Color valueColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
+        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
         const SizedBox(height: 3),
         Text(
           value,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          style: TextStyle(
+            color: valueColor,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
             fontFamily: 'monospace',
+            letterSpacing: -0.3,
           ),
         ),
       ],
