@@ -33,6 +33,7 @@ class ToolCard extends StatelessWidget {
       borderRadius: 16,
       borderColor: toolColor.withOpacity(0.22),
       backgroundColor: AppColors.glassCard,
+      topHighlightColor: AppColors.glassTopHighlightWarm,
       onTap: onTap,
       child: Row(
         children: [
@@ -70,7 +71,7 @@ class ToolCard extends StatelessWidget {
                     Text(
                       _formatToolName(clientName),
                       style: const TextStyle(
-                        color: AppColors.textPrimary,
+                        color: AppColors.warmWhite,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -106,14 +107,14 @@ class ToolCard extends StatelessWidget {
               ],
             ),
           ),
-          // 今日金额展示
+          // 今日金额展示 (大于0展示温润暖黄)
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 costText,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: (costUsd > 0) ? AppColors.warmYellow : AppColors.warmWhite,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   fontFamily: 'monospace',

@@ -49,6 +49,7 @@ class LimitsScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     borderColor: provColor.withOpacity(0.28),
                     glowColor: provColor.withOpacity(0.12),
+                    topHighlightColor: AppColors.glassTopHighlightWarm,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -85,7 +86,7 @@ class LimitsScreen extends StatelessWidget {
                                     Text(
                                       item.name,
                                       style: const TextStyle(
-                                        color: AppColors.textPrimary,
+                                        color: AppColors.warmWhite,
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -129,21 +130,21 @@ class LimitsScreen extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.8),
+        color: AppColors.warmYellowCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: provColor.withOpacity(0.2), width: 1),
+        border: Border.all(color: AppColors.warmYellowBorder, width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             win.label,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
+            style: const TextStyle(color: AppColors.warmWhiteSoft, fontSize: 12, fontWeight: FontWeight.w600),
           ),
           Text(
             balStr,
-            style: TextStyle(
-              color: provColor,
+            style: const TextStyle(
+              color: AppColors.warmYellow,
               fontSize: 16,
               fontWeight: FontWeight.w900,
               fontFamily: 'monospace',

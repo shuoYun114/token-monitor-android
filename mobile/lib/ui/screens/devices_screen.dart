@@ -65,6 +65,7 @@ class DevicesScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     glowColor: isOnline ? AppColors.glowCyan : null,
                     borderColor: isOnline ? AppColors.cyan.withOpacity(0.25) : AppColors.glassBorder,
+                    topHighlightColor: AppColors.glassTopHighlightWarm,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -99,7 +100,7 @@ class DevicesScreen extends StatelessWidget {
                                   Text(
                                     dev.hostname,
                                     style: const TextStyle(
-                                      color: AppColors.textPrimary,
+                                      color: AppColors.warmWhite,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: -0.2,
@@ -149,12 +150,11 @@ class DevicesScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 5),
                                   Text(
-                                    isOnline ? 'ONLINE' : 'OFFLINE',
+                                    isOnline ? '在线同步' : '离线',
                                     style: TextStyle(
                                       color: isOnline ? AppColors.emerald : AppColors.textMuted,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w800,
-                                      fontFamily: 'monospace',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ],
@@ -168,9 +168,9 @@ class DevicesScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildInfoCol('今日花费', costFormatted, AppColors.amber),
+                            _buildInfoCol('今日花费', costFormatted, AppColors.warmYellow),
                             _buildInfoCol('今日 Token', tokensFormatted, AppColors.cyan),
-                            _buildInfoCol('活跃工具', '${clientNames.length} 款', AppColors.textPrimary),
+                            _buildInfoCol('活跃工具', '${clientNames.length} 款', AppColors.warmWhite),
                           ],
                         ),
                         if (clientNames.isNotEmpty) ...[

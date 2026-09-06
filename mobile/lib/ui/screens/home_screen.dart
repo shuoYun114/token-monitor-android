@@ -69,6 +69,7 @@ class HomeScreen extends StatelessWidget {
                 Text(
                   'Token Monitor',
                   style: TextStyle(
+                    color: AppColors.warmWhite,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
@@ -251,7 +252,7 @@ class HomeScreen extends StatelessWidget {
                                   const Text(
                                     'Tokens',
                                     style: TextStyle(
-                                      color: AppColors.textMuted,
+                                      color: AppColors.warmWhiteSoft,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -263,7 +264,7 @@ class HomeScreen extends StatelessWidget {
                             Text(
                               exactTokensFormatted,
                               style: const TextStyle(
-                                color: AppColors.textMuted,
+                                color: AppColors.warmWhiteMuted,
                                 fontSize: 11,
                                 fontFamily: 'monospace',
                                 letterSpacing: 0.2,
@@ -272,15 +273,22 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // 右侧：今日折合花费卡槽
+                      // 右侧：今日折合花费卡槽 (暖黄与暖白奢华互锁)
                       Expanded(
                         flex: 5,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
-                            color: AppColors.surface.withOpacity(0.8),
+                            color: AppColors.warmYellowCard,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
+                            border: Border.all(color: AppColors.warmYellowBorder, width: 1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.warmYellow.withOpacity(0.08),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -291,18 +299,25 @@ class HomeScreen extends StatelessWidget {
                                   Container(
                                     width: 6,
                                     height: 6,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.amber,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.warmYellow,
                                       shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.warmYellow.withOpacity(0.8),
+                                          blurRadius: 4,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   const SizedBox(width: 5),
                                   const Text(
                                     '实时折合成本',
                                     style: TextStyle(
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.warmYellowSoft,
                                       fontSize: 10,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ],
@@ -314,7 +329,7 @@ class HomeScreen extends StatelessWidget {
                                 child: Text(
                                   costStr,
                                   style: const TextStyle(
-                                    color: AppColors.textPrimary,
+                                    color: AppColors.warmYellow,
                                     fontSize: 22,
                                     fontWeight: FontWeight.w900,
                                     fontFamily: 'monospace',
@@ -325,8 +340,8 @@ class HomeScreen extends StatelessWidget {
                               const SizedBox(height: 1),
                               Text(
                                 secondaryCostStr,
-                                style: const TextStyle(
-                                  color: AppColors.textMuted,
+                                style: TextStyle(
+                                  color: AppColors.warmWhiteMuted.withOpacity(0.85),
                                   fontSize: 10,
                                   fontFamily: 'monospace',
                                 ),
@@ -389,22 +404,24 @@ class HomeScreen extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 左翼：本月支出与累计趋势
+                // 左翼：本月支出与累计趋势 (暖黄价值核心与暖白微晶)
                 Expanded(
                   child: GlassContainer(
-                    glowColor: AppColors.glowAmber,
+                    glowColor: AppColors.glowWarmYellow,
+                    topHighlightColor: AppColors.glassTopHighlightWarm,
+                    borderColor: AppColors.warmYellow.withOpacity(0.28),
                     padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.calendar_month_rounded, size: 14, color: AppColors.amber),
+                            Icon(Icons.calendar_month_rounded, size: 14, color: AppColors.warmYellow),
                             SizedBox(width: 6),
                             Text(
                               '本月累计',
                               style: TextStyle(
-                                color: AppColors.textSecondary,
+                                color: AppColors.warmWhiteSoft,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -418,7 +435,7 @@ class HomeScreen extends StatelessWidget {
                           child: Text(
                             _formatCost(stats?.month.costUsd ?? 0.0, settings),
                             style: const TextStyle(
-                              color: AppColors.textPrimary,
+                              color: AppColors.warmWhitePure,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               fontFamily: 'monospace',
@@ -436,7 +453,7 @@ class HomeScreen extends StatelessWidget {
                             Text(
                               _formatTokensShort(stats?.month.totalTokens ?? 0),
                               style: const TextStyle(
-                                color: AppColors.cyan,
+                                color: AppColors.warmYellow,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 fontFamily: 'monospace',
@@ -513,7 +530,7 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       '活跃工具控制台',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: AppColors.warmWhite,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.2,

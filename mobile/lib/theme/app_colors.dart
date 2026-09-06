@@ -15,6 +15,8 @@ class AppColors {
   static const Color glassBorder = Color(0x1FFFFFFF);
   static const Color glassBorderHighlight = Color(0x40FFFFFF);
   static const Color glassTopHighlight = Color(0x38FFFFFF);
+  static const Color glassTopHighlightWarm = Color(0x40FFFDF5); // 物理微晶玻璃受光面暖白导光高光线
+  static const Color glassBorderWarm = Color(0x26FAF8F5);
 
   // 环境光晕色 (Ambient Glow)
   static const Color glowCyan = Color(0x2B38BDF8);
@@ -22,6 +24,8 @@ class AppColors {
   static const Color glowAmber = Color(0x2BF59E0B);
   static const Color glowPurple = Color(0x2BA855F7);
   static const Color glowRose = Color(0x2BF43F5E);
+  static const Color glowWarmYellow = Color(0x36FBBF24); // 暖黄弥散环境光晕
+  static const Color glowWarmWhite = Color(0x22FAF8F5); // 暖白微晶光晕
 
   // 核心强调色与霓虹
   static const Color cyan = Color(0xFF38BDF8);
@@ -32,11 +36,28 @@ class AppColors {
   static const Color rose = Color(0xFFF43F5E);
   static const Color indigo = Color(0xFF6366F1);
 
-  // 文字颜色 (层级分明的科技字阶)
+  // 暖黄色系 (Warm Yellow / Warm Gold - 太阳暖黄/琥珀温润金，赋予算力价值与奢华感)
+  static const Color warmYellow = Color(0xFFFBBF24); // 经典温润暖黄
+  static const Color warmYellowBright = Color(0xFFFACC15); // 日光高亮暖黄
+  static const Color warmYellowSoft = Color(0xFFFDE68A); // 柔和浅暖黄
+  static const Color warmYellowDark = Color(0xFFD97706); // 琥珀深金
+  static const Color warmYellowCard = Color(0x1AFBBF24); // 暖黄微晶卡槽背景
+  static const Color warmYellowBorder = Color(0x4DFBBF24); // 暖黄卡槽边框
+  static const Color warmYellowBadgeBg = Color(0x26FBBF24); // 暖黄胶囊背景
+
+  // 文字颜色 (层级分明的科技字阶 + 暖白温润字阶)
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
   static const Color textMuted = Color(0xFF64748B);
   static const Color textGhost = Color(0xFF475569);
+
+  // 暖色调白色系 (Warm White Series - 象牙暖白/温润奶白，消除冷光刺眼，提升典雅质感)
+  static const Color warmWhite = Color(0xFFFAF8F5); // 象牙暖白
+  static const Color warmWhitePure = Color(0xFFFFFDF8); // 纯净高光暖白
+  static const Color warmWhiteSoft = Color(0xFFF3EFE6); // 柔和微晶暖白
+  static const Color warmWhiteMuted = Color(0xFFD5CEC2); // 次级次级暖白
+  static const Color textPrimaryWarm = Color(0xFFFAF8F5); // 暖白主文字
+  static const Color textSecondaryWarm = Color(0xFFA8A196); // 暖白次级文字
 
   // 工具专属识别色 (与桌面版完全对齐)
   static const Color toolClaude = Color(0xFFD97706);
@@ -75,6 +96,9 @@ class AppColors {
 
   static Color getModelColor(String modelName) {
     final lower = modelName.toLowerCase();
+    if (lower.contains('flash') || lower.contains('mini') || lower.contains('lite')) {
+      return const Color(0xFFFBBF24); // 极速/轻量模型 太阳暖黄
+    }
     if (lower.contains('gemini')) return const Color(0xFF38BDF8); // 谷歌 Gemini 科技青
     if (lower.contains('claude') || lower.contains('sonnet') || lower.contains('haiku') || lower.contains('opus')) {
       return const Color(0xFFF97316); // Claude 珊瑚橙

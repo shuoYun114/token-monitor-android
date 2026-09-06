@@ -11,6 +11,7 @@ class GlassContainer extends StatelessWidget {
   final Gradient? gradient;
   final Color? borderColor;
   final Color? glowColor;
+  final Color? topHighlightColor;
   final bool enableTopHighlight;
   final VoidCallback? onTap;
 
@@ -24,6 +25,7 @@ class GlassContainer extends StatelessWidget {
     this.gradient,
     this.borderColor,
     this.glowColor,
+    this.topHighlightColor,
     this.enableTopHighlight = true,
     this.onTap,
   });
@@ -87,9 +89,9 @@ class GlassContainer extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.white.withOpacity(0.0),
-                        AppColors.glassTopHighlight,
-                        Colors.white.withOpacity(0.0),
+                        (topHighlightColor ?? Colors.white).withOpacity(0.0),
+                        topHighlightColor ?? AppColors.glassTopHighlight,
+                        (topHighlightColor ?? Colors.white).withOpacity(0.0),
                       ],
                       stops: const [0.0, 0.5, 1.0],
                     ),

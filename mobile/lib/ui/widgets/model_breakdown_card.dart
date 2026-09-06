@@ -29,6 +29,7 @@ class ModelBreakdownCard extends StatelessWidget {
 
     return GlassContainer(
       padding: const EdgeInsets.all(16),
+      topHighlightColor: AppColors.glassTopHighlightWarm,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,7 +43,7 @@ class ModelBreakdownCard extends StatelessWidget {
                   Text(
                     '今日活跃模型',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AppColors.warmWhite,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -132,7 +133,7 @@ class ModelBreakdownCard extends StatelessWidget {
                         child: Text(
                           modelName,
                           style: const TextStyle(
-                            color: AppColors.textPrimary,
+                            color: AppColors.warmWhite,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'monospace',
@@ -210,9 +211,10 @@ class ModelBreakdownCard extends StatelessWidget {
                       child: Text(
                         costStr,
                         style: const TextStyle(
-                          color: AppColors.textMuted,
+                          color: AppColors.warmYellowSoft,
                           fontSize: 10,
                           fontFamily: 'monospace',
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
