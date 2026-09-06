@@ -771,6 +771,7 @@ class _BillingScreenState extends State<BillingScreen> {
                             : 'Local Device';
                         final models = day.models;
                         final clients = day.clients;
+                        final primaryClient = clients.isNotEmpty ? clients.keys.first : null;
                         final isToday = day.date == DateTime.now().toIso8601String().substring(0, 10);
                         final todayUsage = isToday ? provider.currentStats?.today : null;
                         ReceiptDialog.show(
