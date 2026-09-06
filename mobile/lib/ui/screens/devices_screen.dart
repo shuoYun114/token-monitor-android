@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/monitor_provider.dart';
+import '../../models/device_stats.dart';
 import '../../theme/app_colors.dart';
 import '../widgets/glass_container.dart';
 
