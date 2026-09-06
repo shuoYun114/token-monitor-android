@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../models/device_stats.dart';
 import '../../theme/app_colors.dart';
 
 /// 小票数据传输载体
@@ -17,6 +18,12 @@ class ReceiptData {
   final Map<String, dynamic> clients;
   final Map<String, dynamic> clientCosts;
   final String? primaryClient;
+  final int cacheReadTokens;
+  final int outputTokens;
+  final int unclassifiedTokens;
+  final Map<String, dynamic> modelCacheReads;
+  final Map<String, dynamic> modelOutputs;
+  final Map<String, dynamic> modelUnclassifiedTokens;
 
   const ReceiptData({
     required this.title,
@@ -31,7 +38,37 @@ class ReceiptData {
     this.clients = const {},
     this.clientCosts = const {},
     this.primaryClient,
+    this.cacheReadTokens = 0,
+    this.outputTokens = 0,
+    this.unclassifiedTokens = 0,
+    this.modelCacheReads = const {},
+    this.modelOutputs = const {},
+    this.modelUnclassifiedTokens = const {},
   });
+
+  /// 票据全局输入/输出与缓存细分
+  TokenBreakdown get breakdown => TokenBreakdown.calculate(
+        totalTokens: totalTokens,
+        cacheReadTokens: cacheReadTokens,
+        outputTokens: outputTokens,
+        unclassifiedTokens: unclassifiedTokens,
+      );
+
+  /// 单个模型的细分
+  TokenBreakdown modelBreakdown(String model) {
+    int safeInt(dynamic v) {
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v) ?? 0;
+      return 0;
+    }
+
+    return TokenBreakdown.calculate(
+      totalTokens: safeInt(models[model]),
+      cacheReadTokens: safeInt(modelCacheReads[model]),
+      outputTokens: safeInt(modelOutputs[model]),
+      unclassifiedTokens: safeInt(modelUnclassifiedTokens[model]),
+    );
+  }
 }
 
 /// 毒舌与幽默神吐槽语料库 (基于 Hchen1218/token-receipt 灵魂灵感)
@@ -57,6 +94,19 @@ class ReceiptPunchlines {
     {
       'zh': '再改一版，先死一笔。',
       'en': 'ONE MORE ITERATION, ONE MORE INVOICE.',
+    },
+    // 缓存与输入输出
+    {
+      'zh': '缓存命中100%，省钱省得像在白嫖。',
+      'en': '100% CACHE HIT. CHEATING THE BILLING DEPT.',
+    },
+    {
+      'zh': '输入几千万，输出两百字。',
+      'en': 'TENS OF MILLIONS IN, TWO HUNDRED WORDS OUT.',
+    },
+    {
+      'zh': '缓存零命中，真金白银喂显卡。',
+      'en': 'ZERO CACHE HIT. DIRECT WIRE TRANSFER TO NVIDIA.',
     },
     // 调试与 Bug
     {
@@ -266,6 +316,11 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
         final tokStr = _formatTokens(tokens).padLeft(7);
         final costStr = _formatCost(cost).padLeft(9);
         buffer.writeln('$name $tokStr $costStr');
+
+        final mBd = widget.data.modelBreakdown(model);
+        if (mBd.cacheRead > 0 || mBd.output > 0) {
+          buffer.writeln('  [IN(HIT): ${_formatTokens(mBd.cacheRead)} (${mBd.hitPct}%)  OUT: ${_formatTokens(mBd.output)}]');
+        }
       });
     } else {
       widget.data.clients.forEach((client, rawTokens) {
@@ -280,6 +335,15 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
 
     buffer.writeln('----------------------------------------');
     buffer.writeln('TOTAL TOKENS : ${_formatTokens(widget.data.totalTokens)}');
+    final bd = widget.data.breakdown;
+    if (bd.cacheRead > 0 || bd.output > 0) {
+      buffer.writeln('  - INPUT (CACHE HIT) : ${_formatTokens(bd.cacheRead)} (${bd.hitPct}%)');
+      buffer.writeln('  - INPUT (CACHE MISS): ${_formatTokens(bd.cacheMiss)} (${bd.missPct}%)');
+      buffer.writeln('  - OUTPUT TOKENS     : ${_formatTokens(bd.output)}');
+      if (bd.unclassified > 0) {
+        buffer.writeln('  - UNCLASSIFIED      : ${_formatTokens(bd.unclassified)}');
+      }
+    }
     buffer.writeln('TOTAL AMOUNT : ${_formatCost(widget.data.costUsd)} (USD: \$${widget.data.costUsd.toStringAsFixed(3)})');
     buffer.writeln('========================================');
     buffer.writeln('PUNCHLINE:');
@@ -562,7 +626,8 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                             ...widget.data.models.entries.map((e) {
                               final cost = _safeDoubleCost(widget.data.modelCosts[e.key]);
                               final tokens = _safeIntTokens(e.value);
-                              return _buildItemRow(e.key, tokens, cost);
+                              final mBd = widget.data.modelBreakdown(e.key);
+                              return _buildItemRow(e.key, tokens, cost, breakdown: mBd);
                             }),
                           ] else if (widget.data.clients.isNotEmpty) ...[
                             ...widget.data.clients.entries.map((e) {
@@ -611,6 +676,44 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                                 ),
                               ),
                             ],
+                          ),
+                          // 细分遥测：输入(缓存命中/未命中)、输出与未分类
+                          Builder(
+                            builder: (context) {
+                              final bd = widget.data.breakdown;
+                              if (bd.cacheRead == 0 && bd.output == 0 && bd.cacheMiss == 0) {
+                                return const SizedBox.shrink();
+                              }
+                              return Container(
+                                margin: const EdgeInsets.only(top: 5, bottom: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.04),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Column(
+                                  children: [
+                                    _buildSummarySubRow(
+                                      _isEnglish ? 'Input (Cache Hit)' : '输入 (缓存命中)',
+                                      '${_formatTokens(bd.cacheRead)} (${bd.hitPct}%)',
+                                    ),
+                                    _buildSummarySubRow(
+                                      _isEnglish ? 'Input (Direct)' : '输入 (缓存未命中)',
+                                      '${_formatTokens(bd.cacheMiss)} (${bd.missPct}%)',
+                                    ),
+                                    _buildSummarySubRow(
+                                      _isEnglish ? 'Output Tokens' : '输出 Tokens',
+                                      _formatTokens(bd.output),
+                                    ),
+                                    if (bd.unclassified > 0)
+                                      _buildSummarySubRow(
+                                        _isEnglish ? 'Unclassified' : '未分类',
+                                        _formatTokens(bd.unclassified),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 4),
                           Row(
@@ -777,44 +880,90 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     );
   }
 
-  Widget _buildItemRow(String name, int tokens, double costUsd) {
+  Widget _buildItemRow(String name, int tokens, double costUsd, {TokenBreakdown? breakdown}) {
     final displayName = name.length > 18 ? '${name.substring(0, 16)}..' : name;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  displayName,
+                  style: const TextStyle(
+                    color: Color(0xFF27272A),
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _formatTokens(tokens),
+                style: const TextStyle(
+                  color: Color(0xFF18181B),
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Text(
+                _formatCost(costUsd),
+                style: const TextStyle(
+                  color: Color(0xFF18181B),
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          if (breakdown != null && (breakdown.cacheRead > 0 || breakdown.output > 0)) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 1),
+              child: Text(
+                '↳ ${_isEnglish ? "IN(HIT)" : "输入缓存"}: ${_formatTokens(breakdown.cacheRead)} (${breakdown.hitPct}%)  ${_isEnglish ? "OUT" : "输出"}: ${_formatTokens(breakdown.output)}',
+                style: const TextStyle(
+                  color: Color(0xFF71717A),
+                  fontSize: 8.5,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummarySubRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1.2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Text(
-              displayName,
-              style: const TextStyle(
-                color: Color(0xFF27272A),
-                fontSize: 10,
-                fontFamily: 'monospace',
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF71717A),
+              fontSize: 9,
+              fontFamily: 'monospace',
             ),
           ),
-          const SizedBox(width: 8),
           Text(
-            _formatTokens(tokens),
+            value,
             style: const TextStyle(
-              color: Color(0xFF18181B),
-              fontSize: 10,
-              fontFamily: 'monospace',
+              color: Color(0xFF27272A),
+              fontSize: 9,
               fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Text(
-            _formatCost(costUsd),
-            style: const TextStyle(
-              color: Color(0xFF18181B),
-              fontSize: 10,
               fontFamily: 'monospace',
-              fontWeight: FontWeight.w700,
             ),
           ),
         ],

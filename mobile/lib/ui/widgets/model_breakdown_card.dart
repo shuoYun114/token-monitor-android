@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../models/device_stats.dart';
 import '../../theme/app_colors.dart';
 import 'glass_container.dart';
 
-/// 活跃模型用量与占比排行卡片
-class ModelBreakdownCard extends StatelessWidget {
+/// 活跃模型用量与占比排行卡片 (支持手风琴展开查看输入/输出/缓存细分遥测)
+class ModelBreakdownCard extends StatefulWidget {
   final Map<String, int> models;
   final Map<String, double> modelCosts;
+  final Map<String, int> modelCacheReads;
+  final Map<String, int> modelOutputs;
+  final Map<String, int> modelUnclassifiedTokens;
   final int totalTokens;
   final String currency;
   final double rate;
@@ -14,14 +18,35 @@ class ModelBreakdownCard extends StatelessWidget {
     super.key,
     required this.models,
     this.modelCosts = const {},
+    this.modelCacheReads = const {},
+    this.modelOutputs = const {},
+    this.modelUnclassifiedTokens = const {},
     required this.totalTokens,
     this.currency = 'CNY',
     this.rate = 6.7203,
   });
 
   @override
+  State<ModelBreakdownCard> createState() => _ModelBreakdownCardState();
+}
+
+class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
+  // 记录当前展开手风琴的模型集合
+  final Set<String> _expandedModels = {};
+
+  void _toggleExpand(String modelName) {
+    setState(() {
+      if (_expandedModels.contains(modelName)) {
+        _expandedModels.remove(modelName);
+      } else {
+        _expandedModels.add(modelName);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (models.isEmpty) return const SizedBox.shrink();
+    if (widget.models.isEmpty) return const SizedBox.shrink();
 
     final isLight = Theme.of(context).brightness == Brightness.light;
     final primaryTextColor = isLight ? AppColors.lightTextPrimary : AppColors.warmWhite;
@@ -29,7 +54,7 @@ class ModelBreakdownCard extends StatelessWidget {
     final trackColor = isLight ? const Color(0xFFE2E8F0) : AppColors.surfaceLight;
 
     // 按 Token 消耗量从高到低排序
-    final sortedEntries = models.entries.toList()
+    final sortedEntries = widget.models.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return GlassContainer(
@@ -58,10 +83,10 @@ class ModelBreakdownCard extends StatelessWidget {
                 ],
               ),
               Text(
-                '已记录 ${sortedEntries.length} 款模型',
+                '点击条目展开细分',
                 style: TextStyle(
                   color: mutedTextColor,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontFamily: 'monospace',
                 ),
               ),
@@ -80,7 +105,7 @@ class ModelBreakdownCard extends StatelessWidget {
             ),
             child: Row(
               children: sortedEntries.map((e) {
-                final p = totalTokens > 0 ? (e.value / totalTokens) : 0.0;
+                final p = widget.totalTokens > 0 ? (e.value / widget.totalTokens) : 0.0;
                 if (p <= 0.005) return const SizedBox.shrink();
                 final c = AppColors.getModelColor(e.key);
                 return Expanded(
@@ -101,138 +126,292 @@ class ModelBreakdownCard extends StatelessWidget {
           ...sortedEntries.map((entry) {
             final modelName = entry.key;
             final tokens = entry.value;
-            final percent = totalTokens > 0 ? (tokens / totalTokens) : 0.0;
+            final percent = widget.totalTokens > 0 ? (tokens / widget.totalTokens) : 0.0;
             final percentStr = (percent * 100).toStringAsFixed(percent >= 0.995 ? 0 : 1);
             final color = AppColors.getModelColor(modelName);
+            final isExpanded = _expandedModels.contains(modelName);
 
-            final cost = modelCosts[modelName];
+            final cost = widget.modelCosts[modelName];
             String? costStr;
             if (cost != null && cost > 0) {
-              costStr = currency == 'CNY'
-                  ? '¥${(cost * rate).toStringAsFixed(2)}'
+              costStr = widget.currency == 'CNY'
+                  ? '¥${(cost * widget.rate).toStringAsFixed(2)}'
                   : '\$${cost.toStringAsFixed(2)}';
             }
 
+            final breakdown = TokenBreakdown.calculate(
+              totalTokens: tokens,
+              cacheReadTokens: widget.modelCacheReads[modelName] ?? 0,
+              outputTokens: widget.modelOutputs[modelName] ?? 0,
+              unclassifiedTokens: widget.modelUnclassifiedTokens[modelName] ?? 0,
+            );
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: color.withOpacity(0.6),
-                              blurRadius: 5,
-                              spreadRadius: 1,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _toggleExpand(modelName),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isExpanded
+                          ? (isLight ? Colors.black.withOpacity(0.025) : Colors.white.withOpacity(0.035))
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                      border: isExpanded
+                          ? Border.all(
+                              color: color.withOpacity(0.35),
+                              width: 0.8,
+                            )
+                          : null,
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isExpanded ? 8 : 0,
+                      vertical: isExpanded ? 8 : 2,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: color.withOpacity(0.6),
+                                    blurRadius: 5,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                modelName,
+                                style: TextStyle(
+                                  color: primaryTextColor,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'monospace',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              _formatTokens(tokens),
+                              style: TextStyle(
+                                color: isLight ? AppColors.warmYellowDark : AppColors.cyan,
+                                fontSize: 12,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.14),
+                                borderRadius: BorderRadius.circular(5),
+                                border: Border.all(color: color.withOpacity(0.35), width: 0.6),
+                              ),
+                              child: Text(
+                                '$percentStr%',
+                                style: TextStyle(
+                                  color: color,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                              size: 16,
+                              color: mutedTextColor.withOpacity(0.7),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          modelName,
-                          style: TextStyle(
-                            color: primaryTextColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'monospace',
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        _formatTokens(tokens),
-                        style: TextStyle(
-                          color: isLight ? AppColors.warmYellowDark : AppColors.cyan,
-                          fontSize: 12,
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.14),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: color.withOpacity(0.35), width: 0.6),
-                        ),
-                        child: Text(
-                          '$percentStr%',
-                          style: TextStyle(
-                            color: color,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  // 精致能量槽
-                  Stack(
-                    children: [
-                      Container(
-                        height: 4,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: trackColor,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      FractionallySizedBox(
-                        widthFactor: percent.clamp(0.01, 1.0),
-                        child: Container(
-                          height: 4,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [color.withOpacity(0.5), color],
-                            ),
-                            borderRadius: BorderRadius.circular(2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: color.withOpacity(0.3),
-                                blurRadius: 4,
-                                offset: const Offset(0, 1),
+                        const SizedBox(height: 6),
+                        // 精致能量槽
+                        Stack(
+                          children: [
+                            Container(
+                              height: 3.5,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: trackColor,
+                                borderRadius: BorderRadius.circular(2),
                               ),
-                            ],
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: percent.clamp(0.01, 1.0),
+                              child: Container(
+                                height: 3.5,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [color.withOpacity(0.5), color],
+                                  ),
+                                  borderRadius: BorderRadius.circular(2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: color.withOpacity(0.3),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (costStr != null) ...[
+                          const SizedBox(height: 3),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              costStr,
+                              style: TextStyle(
+                                color: isLight ? AppColors.warmYellowDark : AppColors.warmYellowSoft,
+                                fontSize: 10,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (costStr != null) ...[
-                    const SizedBox(height: 3),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        costStr,
-                        style: TextStyle(
-                          color: isLight ? AppColors.warmYellowDark : AppColors.warmYellowSoft,
-                          fontSize: 10,
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                        ],
+
+                        // =======================================================
+                        // 展开手风琴：输入(缓存命中/未命中)、输出与未分类微晶面板
+                        // 完全对齐桌面版 Token Monitor 模型页显示规范
+                        // =======================================================
+                        if (isExpanded) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isLight ? Colors.white.withOpacity(0.8) : const Color(0xFF141A22),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isLight ? const Color(0xFFE2E8F0) : const Color(0xFF263238),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                _buildDetailRow(
+                                  label: '输入 (缓存命中)',
+                                  badge: '${breakdown.hitPct}%',
+                                  badgeColor: isLight ? AppColors.warmYellowDark : AppColors.cyan,
+                                  tokens: breakdown.cacheRead,
+                                  primaryTextColor: primaryTextColor,
+                                  mutedTextColor: mutedTextColor,
+                                ),
+                                const SizedBox(height: 6),
+                                _buildDetailRow(
+                                  label: '输入 (缓存未命中)',
+                                  badge: '${breakdown.missPct}%',
+                                  badgeColor: mutedTextColor,
+                                  tokens: breakdown.cacheMiss,
+                                  primaryTextColor: primaryTextColor,
+                                  mutedTextColor: mutedTextColor,
+                                ),
+                                const SizedBox(height: 6),
+                                _buildDetailRow(
+                                  label: '输出',
+                                  badge: null,
+                                  badgeColor: null,
+                                  tokens: breakdown.output,
+                                  primaryTextColor: primaryTextColor,
+                                  mutedTextColor: mutedTextColor,
+                                ),
+                                if (breakdown.unclassified > 0) ...[
+                                  const SizedBox(height: 6),
+                                  _buildDetailRow(
+                                    label: '未分类',
+                                    badge: null,
+                                    badgeColor: null,
+                                    tokens: breakdown.unclassified,
+                                    primaryTextColor: primaryTextColor,
+                                    mutedTextColor: mutedTextColor,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ],
+                  ),
+                ),
               ),
             );
           }),
 
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailRow({
+    required String label,
+    required String? badge,
+    required Color? badgeColor,
+    required int tokens,
+    required Color primaryTextColor,
+    required Color mutedTextColor,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: mutedTextColor,
+                fontSize: 11,
+                fontFamily: 'monospace',
+              ),
+            ),
+            if (badge != null) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0.5),
+                decoration: BoxDecoration(
+                  color: (badgeColor ?? mutedTextColor).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  badge,
+                  style: TextStyle(
+                    color: badgeColor ?? mutedTextColor,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        Text(
+          _formatExactTokens(tokens),
+          style: TextStyle(
+            color: primaryTextColor,
+            fontSize: 11.5,
+            fontFamily: 'monospace',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 
@@ -243,5 +422,11 @@ class ModelBreakdownCard extends StatelessWidget {
       return '${(count / 1000.0).toStringAsFixed(1)}K';
     }
     return count.toString();
+  }
+
+  String _formatExactTokens(int count) {
+    final str = count.toString();
+    final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return str.replaceAllMapped(reg, (Match m) => '${m[1]},');
   }
 }

@@ -181,6 +181,12 @@ class _BillingScreenState extends State<BillingScreen> {
                     clients: clients,
                     clientCosts: clientCosts,
                     primaryClient: primaryClient,
+                    cacheReadTokens: currentStats?.today.cacheReadTokens ?? 0,
+                    outputTokens: currentStats?.today.outputTokens ?? 0,
+                    unclassifiedTokens: currentStats?.today.unclassifiedTokens ?? 0,
+                    modelCacheReads: currentStats?.today.modelCacheReads ?? {},
+                    modelOutputs: currentStats?.today.modelOutputs ?? {},
+                    modelUnclassifiedTokens: currentStats?.today.modelUnclassifiedTokens ?? {},
                   ),
                 );
               } else {
@@ -201,6 +207,12 @@ class _BillingScreenState extends State<BillingScreen> {
                     clients: _selectedPeriodIndex == 1 ? (month?.clients ?? {}) : (currentStats?.allTime.clients ?? {}),
                     clientCosts: _selectedPeriodIndex == 1 ? (month?.clientCosts ?? {}) : (currentStats?.allTime.clientCosts ?? {}),
                     primaryClient: primaryClient,
+                    cacheReadTokens: _selectedPeriodIndex == 1 ? (month?.cacheReadTokens ?? 0) : (currentStats?.allTime.cacheReadTokens ?? 0),
+                    outputTokens: _selectedPeriodIndex == 1 ? (month?.outputTokens ?? 0) : (currentStats?.allTime.outputTokens ?? 0),
+                    unclassifiedTokens: _selectedPeriodIndex == 1 ? (month?.unclassifiedTokens ?? 0) : (currentStats?.allTime.unclassifiedTokens ?? 0),
+                    modelCacheReads: _selectedPeriodIndex == 1 ? (month?.modelCacheReads ?? {}) : (currentStats?.allTime.modelCacheReads ?? {}),
+                    modelOutputs: _selectedPeriodIndex == 1 ? (month?.modelOutputs ?? {}) : (currentStats?.allTime.modelOutputs ?? {}),
+                    modelUnclassifiedTokens: _selectedPeriodIndex == 1 ? (month?.modelUnclassifiedTokens ?? {}) : (currentStats?.allTime.modelUnclassifiedTokens ?? {}),
                   ),
                 );
               }
@@ -759,7 +771,8 @@ class _BillingScreenState extends State<BillingScreen> {
                             : 'Local Device';
                         final models = day.models;
                         final clients = day.clients;
-                        final primaryClient = clients.isNotEmpty ? clients.keys.first : null;
+                        final isToday = day.date == DateTime.now().toIso8601String().substring(0, 10);
+                        final todayUsage = isToday ? provider.currentStats?.today : null;
                         ReceiptDialog.show(
                           context,
                           ReceiptData(
@@ -775,6 +788,12 @@ class _BillingScreenState extends State<BillingScreen> {
                             clients: clients,
                             clientCosts: day.clientCosts,
                             primaryClient: primaryClient,
+                            cacheReadTokens: todayUsage?.cacheReadTokens ?? 0,
+                            outputTokens: todayUsage?.outputTokens ?? 0,
+                            unclassifiedTokens: todayUsage?.unclassifiedTokens ?? 0,
+                            modelCacheReads: todayUsage?.modelCacheReads ?? {},
+                            modelOutputs: todayUsage?.modelOutputs ?? {},
+                            modelUnclassifiedTokens: todayUsage?.modelUnclassifiedTokens ?? {},
                           ),
                         );
                       },

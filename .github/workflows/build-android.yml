@@ -29,6 +29,9 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Setup Gradle Build Cache
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Get Dependencies
         working-directory: mobile
         run: flutter pub get
@@ -47,17 +50,22 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.3
-          name: "Token Monitor Android v1.1.3 (AI Token 消费小票与毒舌神吐槽功能版)"
+          tag_name: v1.1.4
+          name: "Token Monitor Android v1.1.4 (输入输出与缓存细分遥测 + 消费小票完整版)"
           body: |
-            🧾 **Token Monitor Android v1.1.3 新特性发布！**
+            📊 **Token Monitor Android v1.1.4 发布！全面对齐桌面版模型细分遥测与小票！**
 
-            本次版本参考开源项目 [Hchen1218/token-receipt](https://github.com/Hchen1218/token-receipt)，正式推出**「AI Token 消费小票与神吐槽 (Token Receipt with Punchline)」**功能：
-            1. **仿真热敏纸小票美学 (Thermal Receipt Aesthetic)**：
-               - 温润米白热敏纸质感底色，上下边缘带收银机锯齿撕纸效果；
-               - 经典 ASCII 像素 Logo（支持 Claude Code / Cursor / Token Monitor 专属艺术头图）；
-               - 收银台编号、结账时间、设备名称、模型与工具明细清单（Token 数量与折合金额）；
-               - 真实比例 ASCII 条形码与 Receipt 防伪编号。
+            1. **模型细分遥测手风琴 (Model Breakdown Accordion)**：
+               - 完全复刻桌面版模型页：支持点击各模型条目展开微晶遥测面板；
+               - 精准展示：输入(缓存命中及命中率 %)、输入(缓存未命中及 %)、输出 Tokens、未分类 Tokens；
+               - 带有双色发光微徽章与等宽微刻数字排版。
+            2. **消费小票输入/输出/缓存全打印 (Token Receipt with Cache Details)**：
+               - 热敏小票各模型条目下方打印 `IN(HIT)` 与 `OUT` 细分；
+               - 票据汇总区 (TOTAL TOKENS) 下方打印总输入(缓存命中/未命中)与总输出数据块；
+               - 纯文本 ASCII 复制小票同步输出完整细分；
+               - 增加关于“缓存命中100%”、“输入几千万输出两百字”等灵魂幽默神吐槽。
+            3. **构建加速优化**：
+               - 流水线引入 Gradle Build Cache，大幅提升云端构建效率。
             2. **灵魂核心：毒舌/幽默神吐槽 (Receipt Punchlines)**：
                - 内置精选分类神吐槽（涵盖改版迭代、视觉设计、Bug 调试、深度思考与掏空钱包）；
                - “画面稳了，预算死了。”、“最后一版这个词，本来就不诚实。”、“Bug 修完了，费用继承了。”、“推理不免费，犹豫更贵。”；

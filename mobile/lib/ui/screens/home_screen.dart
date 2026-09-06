@@ -122,6 +122,12 @@ class HomeScreen extends StatelessWidget {
                   clients: today.clients,
                   clientCosts: today.clientCosts,
                   primaryClient: primaryClient,
+                  cacheReadTokens: today.cacheReadTokens,
+                  outputTokens: today.outputTokens,
+                  unclassifiedTokens: today.unclassifiedTokens,
+                  modelCacheReads: today.modelCacheReads,
+                  modelOutputs: today.modelOutputs,
+                  modelUnclassifiedTokens: today.modelUnclassifiedTokens,
                 ),
               );
             },
@@ -311,6 +317,9 @@ class HomeScreen extends StatelessWidget {
               ModelBreakdownCard(
                 models: today.models,
                 modelCosts: today.modelCosts,
+                modelCacheReads: today.modelCacheReads,
+                modelOutputs: today.modelOutputs,
+                modelUnclassifiedTokens: today.modelUnclassifiedTokens,
                 totalTokens: today.totalTokens,
                 currency: settings.currency,
                 rate: settings.usdToCnyRate,
