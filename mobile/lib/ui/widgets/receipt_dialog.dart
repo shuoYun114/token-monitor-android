@@ -12,10 +12,10 @@ class ReceiptData {
   final double costUsd;
   final String currency;
   final double usdToCnyRate;
-  final Map<String, int> models;
-  final Map<String, double> modelCosts;
-  final Map<String, int> clients;
-  final Map<String, double> clientCosts;
+  final Map<String, dynamic> models;
+  final Map<String, dynamic> modelCosts;
+  final Map<String, dynamic> clients;
+  final Map<String, dynamic> clientCosts;
   final String? primaryClient;
 
   const ReceiptData({
@@ -218,6 +218,28 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     return '\$${costUsd.toStringAsFixed(3)}';
   }
 
+  int _safeIntTokens(dynamic v) {
+    if (v is num) return v.toInt();
+    if (v is Map) {
+      final t = v['tokens'] ?? v['totalTokens'];
+      if (t is num) return t.toInt();
+      if (t is String) return int.tryParse(t) ?? 0;
+    }
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
+  double _safeDoubleCost(dynamic v) {
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
+    if (v is Map) {
+      final c = v['cost'] ?? v['costUsd'];
+      if (c is num) return c.toDouble();
+      if (c is String) return double.tryParse(c) ?? 0.0;
+    }
+    return 0.0;
+  }
+
   /// 构建纯文本 ASCII 小票字符串用于复制分享
   String _buildAsciiReceipt() {
     final buffer = StringBuffer();
@@ -237,16 +259,18 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     buffer.writeln('----------------------------------------');
 
     if (widget.data.models.isNotEmpty) {
-      widget.data.models.forEach((model, tokens) {
-        final cost = widget.data.modelCosts[model] ?? 0.0;
+      widget.data.models.forEach((model, rawTokens) {
+        final cost = _safeDoubleCost(widget.data.modelCosts[model]);
+        final tokens = _safeIntTokens(rawTokens);
         final name = model.length > 20 ? model.substring(0, 19) : model.padRight(20);
         final tokStr = _formatTokens(tokens).padLeft(7);
         final costStr = _formatCost(cost).padLeft(9);
         buffer.writeln('$name $tokStr $costStr');
       });
     } else {
-      widget.data.clients.forEach((client, tokens) {
-        final cost = widget.data.clientCosts[client] ?? 0.0;
+      widget.data.clients.forEach((client, rawTokens) {
+        final cost = _safeDoubleCost(widget.data.clientCosts[client]);
+        final tokens = _safeIntTokens(rawTokens);
         final name = client.length > 20 ? client.substring(0, 19) : client.padRight(20);
         final tokStr = _formatTokens(tokens).padLeft(7);
         final costStr = _formatCost(cost).padLeft(9);
@@ -536,13 +560,15 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                           // 4. 明细条目清单
                           if (widget.data.models.isNotEmpty) ...[
                             ...widget.data.models.entries.map((e) {
-                              final cost = widget.data.modelCosts[e.key] ?? 0.0;
-                              return _buildItemRow(e.key, e.value, cost);
+                              final cost = _safeDoubleCost(widget.data.modelCosts[e.key]);
+                              final tokens = _safeIntTokens(e.value);
+                              return _buildItemRow(e.key, tokens, cost);
                             }),
                           ] else if (widget.data.clients.isNotEmpty) ...[
                             ...widget.data.clients.entries.map((e) {
-                              final cost = widget.data.clientCosts[e.key] ?? 0.0;
-                              return _buildItemRow(e.key, e.value, cost);
+                              final cost = _safeDoubleCost(widget.data.clientCosts[e.key]);
+                              final tokens = _safeIntTokens(e.value);
+                              return _buildItemRow(e.key, tokens, cost);
                             }),
                           ] else ...[
                             Padding(

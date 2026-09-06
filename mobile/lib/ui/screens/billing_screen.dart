@@ -160,9 +160,9 @@ class _BillingScreenState extends State<BillingScreen> {
 
               if (_selectedPeriodIndex == 0) {
                 final rec = activeDailyRecord;
-                final models = rec != null ? rec.models.map((k, v) => MapEntry(k, _extractTokens(v))) : (currentStats?.today.models ?? {});
+                final models = rec != null ? rec.models : (currentStats?.today.models ?? {});
                 final modelCosts = rec != null ? rec.modelCosts : (currentStats?.today.modelCosts ?? {});
-                final clients = rec != null ? rec.clients.map((k, v) => MapEntry(k, _extractTokens(v))) : (currentStats?.today.clients ?? {});
+                final clients = rec != null ? rec.clients : (currentStats?.today.clients ?? {});
                 final clientCosts = rec != null ? rec.clientCosts : (currentStats?.today.clientCosts ?? {});
                 final primaryClient = clients.isNotEmpty ? clients.keys.first : null;
 
@@ -754,11 +754,11 @@ class _BillingScreenState extends State<BillingScreen> {
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.only(left: 6),
                       onPressed: () {
-                        final hostname = currentStats?.devices.isNotEmpty == true
-                            ? currentStats!.devices.first.hostname
+                        final hostname = provider.currentStats?.devices.isNotEmpty == true
+                            ? provider.currentStats!.devices.first.hostname
                             : 'Local Device';
-                        final models = day.models.map((k, v) => MapEntry(k, _extractTokens(v)));
-                        final clients = day.clients.map((k, v) => MapEntry(k, _extractTokens(v)));
+                        final models = day.models;
+                        final clients = day.clients;
                         final primaryClient = clients.isNotEmpty ? clients.keys.first : null;
                         ReceiptDialog.show(
                           context,
