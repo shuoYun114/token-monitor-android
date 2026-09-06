@@ -21,15 +21,23 @@ class RadialGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     final color = activeColor ?? _getColorByPercent(remainingPercent);
     final percentInt = remainingPercent.clamp(0.0, 100.0).round();
+
+    final cardBg = isLight ? const Color(0xFFF1F5F9) : AppColors.surface.withOpacity(0.5);
+    final trackColor = isLight ? const Color(0xFFE2E8F0) : AppColors.surfaceLight.withOpacity(0.6);
+    final titleColor = isLight ? AppColors.lightTextPrimary : AppColors.textPrimary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.5),
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.18), width: 1),
+        border: Border.all(
+          color: isLight ? AppColors.lightGlassBorder : color.withOpacity(0.18),
+          width: 1,
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -45,7 +53,7 @@ class RadialGauge extends StatelessWidget {
                   painter: _GaugePainter(
                     percent: remainingPercent.clamp(0.0, 100.0) / 100.0,
                     activeColor: color,
-                    trackColor: AppColors.surfaceLight.withOpacity(0.6),
+                    trackColor: trackColor,
                   ),
                 ),
                 Column(
@@ -87,8 +95,8 @@ class RadialGauge extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: titleColor,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -96,6 +104,7 @@ class RadialGauge extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+
           if (subtitle != null && subtitle!.isNotEmpty) ...[
             const SizedBox(height: 3),
             Container(

@@ -78,7 +78,7 @@ class DevicesScreen extends StatelessWidget {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: AppColors.surfaceLight,
+                                color: isLight ? const Color(0xFFF1F5F9) : AppColors.surfaceLight,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: AppColors.cyan.withOpacity(0.3), width: 1),
                                 boxShadow: [
@@ -102,8 +102,8 @@ class DevicesScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     dev.hostname,
-                                    style: const TextStyle(
-                                      color: AppColors.warmWhite,
+                                    style: TextStyle(
+                                      color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhite,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: -0.2,
@@ -112,8 +112,8 @@ class DevicesScreen extends StatelessWidget {
                                   const SizedBox(height: 2),
                                   Text(
                                     platformSubtitle,
-                                    style: const TextStyle(
-                                      color: AppColors.textMuted,
+                                    style: TextStyle(
+                                      color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
                                       fontSize: 11,
                                       fontFamily: 'monospace',
                                     ),
@@ -166,14 +166,14 @@ class DevicesScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 14),
-                        const Divider(color: AppColors.glassBorder, height: 1),
+                        Divider(color: isLight ? const Color(0xFFE2E8F0) : AppColors.glassBorder, height: 1),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildInfoCol('今日花费', costFormatted, AppColors.warmYellow),
-                            _buildInfoCol('今日 Token', tokensFormatted, AppColors.cyan),
-                            _buildInfoCol('活跃工具', '${clientNames.length} 款', AppColors.warmWhite),
+                            _buildInfoCol('今日花费', costFormatted, isLight ? AppColors.warmYellowDark : AppColors.warmYellow, isLight),
+                            _buildInfoCol('今日 Token', tokensFormatted, AppColors.cyan, isLight),
+                            _buildInfoCol('活跃工具', '${clientNames.length} 款', isLight ? AppColors.lightTextPrimary : AppColors.warmWhite, isLight),
                           ],
                         ),
                         if (clientNames.isNotEmpty) ...[
@@ -212,11 +212,18 @@ class DevicesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCol(String label, String value, Color valueColor) {
+  Widget _buildInfoCol(String label, String value, Color valueColor, bool isLight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: TextStyle(
+            color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 3),
         Text(
           value,

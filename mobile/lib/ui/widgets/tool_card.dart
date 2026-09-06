@@ -23,16 +23,23 @@ class ToolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     final toolColor = AppColors.getToolColor(clientName);
     final costText = currency == 'CNY'
         ? '¥${(costUsd * rate).toStringAsFixed(2)}'
         : '\$${costUsd.toStringAsFixed(2)}';
 
+    final cardBg = isLight ? AppColors.lightGlassCard : AppColors.glassCard;
+    final toolNameColor = isLight ? AppColors.lightTextPrimary : AppColors.warmWhite;
+    final costColor = isLight
+        ? AppColors.warmYellowDark
+        : ((costUsd > 0) ? AppColors.warmYellow : AppColors.warmWhite);
+
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       borderRadius: 16,
-      borderColor: toolColor.withOpacity(0.22),
-      backgroundColor: AppColors.glassCard,
+      borderColor: isLight ? AppColors.lightGlassBorder : toolColor.withOpacity(0.22),
+      backgroundColor: cardBg,
       topHighlightColor: AppColors.glassTopHighlightWarm,
       onTap: onTap,
       child: Row(
@@ -70,8 +77,8 @@ class ToolCard extends StatelessWidget {
                   children: [
                     Text(
                       _formatToolName(clientName),
-                      style: const TextStyle(
-                        color: AppColors.warmWhite,
+                      style: TextStyle(
+                        color: toolNameColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -97,8 +104,8 @@ class ToolCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   _formatTokens(tokenCount),
-                  style: const TextStyle(
-                    color: AppColors.cyan,
+                  style: TextStyle(
+                    color: isLight ? AppColors.lightTextSecondary : AppColors.cyan,
                     fontSize: 12,
                     fontFamily: 'monospace',
                     fontWeight: FontWeight.w600,
@@ -114,7 +121,7 @@ class ToolCard extends StatelessWidget {
               Text(
                 costText,
                 style: TextStyle(
-                  color: (costUsd > 0) ? AppColors.warmYellow : AppColors.warmWhite,
+                  color: costColor,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   fontFamily: 'monospace',
@@ -122,10 +129,10 @@ class ToolCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              const Text(
+              Text(
                 '今日消耗',
                 style: TextStyle(
-                  color: AppColors.textMuted,
+                  color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
                   fontSize: 10,
                 ),
               ),
@@ -135,6 +142,7 @@ class ToolCard extends StatelessWidget {
       ),
     );
   }
+
 
   IconData _getToolIcon(String client) {
     final lower = client.toLowerCase();

@@ -105,8 +105,8 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: RefreshIndicator(
-        color: AppColors.cyan,
-        backgroundColor: AppColors.surface,
+        color: isLight ? AppColors.warmYellowDark : AppColors.cyan,
+        backgroundColor: isLight ? AppColors.lightSurface : AppColors.surface,
         onRefresh: () async {
           await provider.refreshNow();
         },
@@ -140,7 +140,7 @@ class HomeScreen extends StatelessWidget {
 
             // 硬件设备多维透视切换卡扣 (Horizon Perspective)
             if (stats != null && stats.devices.isNotEmpty) ...[
-              _buildDeviceSelector(context, provider),
+              _buildDeviceSelector(context, provider, isLight),
               const SizedBox(height: 14),
             ],
 
@@ -228,10 +228,10 @@ class HomeScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               '今日消耗算力',
                               style: TextStyle(
-                                color: AppColors.textSecondary,
+                                color: isLight ? AppColors.lightTextSecondary : AppColors.textSecondary,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -255,10 +255,10 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  const Text(
+                                  Text(
                                     'Tokens',
                                     style: TextStyle(
-                                      color: AppColors.warmWhiteSoft,
+                                      color: isLight ? AppColors.lightTextSecondary : AppColors.warmWhiteSoft,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -269,8 +269,8 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               exactTokensFormatted,
-                              style: const TextStyle(
-                                color: AppColors.warmWhiteMuted,
+                              style: TextStyle(
+                                color: isLight ? AppColors.lightTextMuted : AppColors.warmWhiteMuted,
                                 fontSize: 11,
                                 fontFamily: 'monospace',
                                 letterSpacing: 0.2,
@@ -285,12 +285,15 @@ class HomeScreen extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
-                            color: AppColors.warmYellowCard,
+                            color: isLight ? const Color(0xFFFEF3C7).withOpacity(0.6) : AppColors.warmYellowCard,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: AppColors.warmYellowBorder, width: 1),
+                            border: Border.all(
+                              color: isLight ? AppColors.warmYellowDark.withOpacity(0.3) : AppColors.warmYellowBorder,
+                              width: 1,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.warmYellow.withOpacity(0.08),
+                                color: (isLight ? AppColors.warmYellowDark : AppColors.warmYellow).withOpacity(0.08),
                                 blurRadius: 10,
                                 offset: const Offset(0, 2),
                               ),
@@ -306,11 +309,11 @@ class HomeScreen extends StatelessWidget {
                                     width: 6,
                                     height: 6,
                                     decoration: BoxDecoration(
-                                      color: AppColors.warmYellow,
+                                      color: isLight ? AppColors.warmYellowDark : AppColors.warmYellow,
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: AppColors.warmYellow.withOpacity(0.8),
+                                          color: (isLight ? AppColors.warmYellowDark : AppColors.warmYellow).withOpacity(0.8),
                                           blurRadius: 4,
                                           spreadRadius: 1,
                                         ),
@@ -318,10 +321,10 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 5),
-                                  const Text(
+                                  Text(
                                     '实时折合成本',
                                     style: TextStyle(
-                                      color: AppColors.warmYellowSoft,
+                                      color: isLight ? AppColors.warmYellowDark : AppColors.warmYellowSoft,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -334,8 +337,8 @@ class HomeScreen extends StatelessWidget {
                                 alignment: Alignment.centerRight,
                                 child: Text(
                                   costStr,
-                                  style: const TextStyle(
-                                    color: AppColors.warmYellow,
+                                  style: TextStyle(
+                                    color: isLight ? AppColors.warmYellowDark : AppColors.warmYellow,
                                     fontSize: 22,
                                     fontWeight: FontWeight.w900,
                                     fontFamily: 'monospace',
@@ -347,7 +350,7 @@ class HomeScreen extends StatelessWidget {
                               Text(
                                 secondaryCostStr,
                                 style: TextStyle(
-                                  color: AppColors.warmWhiteMuted.withOpacity(0.85),
+                                  color: isLight ? AppColors.lightTextMuted : AppColors.warmWhiteMuted.withOpacity(0.85),
                                   fontSize: 10,
                                   fontFamily: 'monospace',
                                 ),
@@ -362,16 +365,19 @@ class HomeScreen extends StatelessWidget {
                   // 底部模型微流光点缀 (如果今日有模型产生)
                   if (today.models.isNotEmpty) ...[
                     const SizedBox(height: 14),
-                    const Divider(color: AppColors.glassBorder, height: 1),
+                    Divider(color: isLight ? const Color(0xFFE2E8F0) : AppColors.glassBorder, height: 1),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: [
-                            const Text(
+                            Text(
                               '模型分布',
-                              style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+                              style: TextStyle(
+                                color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+                                fontSize: 10,
+                              ),
                             ),
                             const SizedBox(width: 8),
                             ...today.models.keys.take(4).map((m) {
@@ -390,8 +396,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                         Text(
                           '${today.models.length} 核心模型在载',
-                          style: const TextStyle(
-                            color: AppColors.textMuted,
+                          style: TextStyle(
+                            color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
                             fontSize: 10,
                             fontFamily: 'monospace',
                           ),
@@ -415,19 +421,19 @@ class HomeScreen extends StatelessWidget {
                   child: GlassContainer(
                     glowColor: AppColors.glowWarmYellow,
                     topHighlightColor: AppColors.glassTopHighlightWarm,
-                    borderColor: AppColors.warmYellow.withOpacity(0.28),
+                    borderColor: (isLight ? AppColors.warmYellowDark : AppColors.warmYellow).withOpacity(0.28),
                     padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.calendar_month_rounded, size: 14, color: AppColors.warmYellow),
-                            SizedBox(width: 6),
+                            const Icon(Icons.calendar_month_rounded, size: 14, color: AppColors.warmYellow),
+                            const SizedBox(width: 6),
                             Text(
                               '本月累计',
                               style: TextStyle(
-                                color: AppColors.warmWhiteSoft,
+                                color: isLight ? AppColors.lightTextSecondary : AppColors.warmWhiteSoft,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -440,8 +446,8 @@ class HomeScreen extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             _formatCost(stats?.month.costUsd ?? 0.0, settings),
-                            style: const TextStyle(
-                              color: AppColors.warmWhitePure,
+                            style: TextStyle(
+                              color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhitePure,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               fontFamily: 'monospace',
@@ -452,14 +458,17 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Text(
+                            Text(
                               'Token: ',
-                              style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+                              style: TextStyle(
+                                color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+                                fontSize: 10,
+                              ),
                             ),
                             Text(
                               _formatTokensShort(stats?.month.totalTokens ?? 0),
-                              style: const TextStyle(
-                                color: AppColors.warmYellow,
+                              style: TextStyle(
+                                color: isLight ? AppColors.warmYellowDark : AppColors.warmYellow,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 fontFamily: 'monospace',
@@ -471,13 +480,13 @@ class HomeScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceLight,
+                            color: isLight ? const Color(0xFFEDF2F7) : AppColors.surfaceLight,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             '共 ${today.clients.length} 款工具活跃',
-                            style: const TextStyle(
-                              color: AppColors.textMuted,
+                            style: TextStyle(
+                              color: isLight ? AppColors.lightTextSecondary : AppColors.textMuted,
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
                             ),
@@ -494,7 +503,7 @@ class HomeScreen extends StatelessWidget {
                   child: GlassContainer(
                     glowColor: AppColors.glowEmerald,
                     padding: const EdgeInsets.all(14),
-                    child: _buildQuotaRadarWidget(provider),
+                    child: _buildQuotaRadarWidget(provider, isLight),
                   ),
                 ),
               ],
@@ -505,7 +514,7 @@ class HomeScreen extends StatelessWidget {
             // 3. AI 额度健康全景舱 (如果配置了多提供商，展开展示)
             // =========================================================
             if (provider.limits.isNotEmpty) ...[
-              _buildLimitsOverviewPod(provider),
+              _buildLimitsOverviewPod(provider, isLight),
               const SizedBox(height: 14),
             ],
 
@@ -529,14 +538,14 @@ class HomeScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.terminal_rounded, size: 16, color: AppColors.cyan),
-                    SizedBox(width: 6),
+                    const Icon(Icons.terminal_rounded, size: 16, color: AppColors.cyan),
+                    const SizedBox(width: 6),
                     Text(
                       '活跃工具控制台',
                       style: TextStyle(
-                        color: AppColors.warmWhite,
+                        color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhite,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.2,
@@ -547,14 +556,17 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
+                    color: isLight ? const Color(0xFFEDF2F7) : AppColors.surfaceLight,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.glassBorder, width: 0.8),
+                    border: Border.all(
+                      color: isLight ? const Color(0xFFCBD5E1) : AppColors.glassBorder,
+                      width: 0.8,
+                    ),
                   ),
                   child: Text(
                     '已就绪 ${today.clients.length} 款',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: isLight ? AppColors.lightTextSecondary : AppColors.textSecondary,
                       fontSize: 11,
                       fontFamily: 'monospace',
                       fontWeight: FontWeight.w600,
@@ -604,7 +616,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   /// 硬件设备多维透视卡扣 (Horizon Perspective)
-  Widget _buildDeviceSelector(BuildContext context, MonitorProvider provider) {
+  Widget _buildDeviceSelector(BuildContext context, MonitorProvider provider, bool isLight) {
     final devices = provider.currentStats?.devices ?? [];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -614,6 +626,7 @@ class HomeScreen extends StatelessWidget {
             label: '全部集群 (${devices.length})',
             icon: Icons.grid_view_rounded,
             isSelected: provider.selectedDeviceId == null,
+            isLight: isLight,
             onTap: () => provider.setSelectedDevice(null),
           ),
           const SizedBox(width: 8),
@@ -625,6 +638,7 @@ class HomeScreen extends StatelessWidget {
                 label: d.hostname,
                 icon: Icons.developer_board_rounded,
                 isSelected: isSel,
+                isLight: isLight,
                 onTap: () => provider.setSelectedDevice(d.deviceId),
               ),
             );
@@ -638,23 +652,29 @@ class HomeScreen extends StatelessWidget {
     required String label,
     required IconData icon,
     required bool isSelected,
+    required bool isLight,
     required VoidCallback onTap,
   }) {
+    final chipAccent = isLight ? AppColors.warmYellowDark : AppColors.cyan;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.cyan.withOpacity(0.16) : AppColors.surface,
+          color: isSelected
+              ? chipAccent.withOpacity(0.16)
+              : (isLight ? const Color(0xFFEDF2F7) : AppColors.surface),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? AppColors.cyan : AppColors.glassBorder,
+            color: isSelected
+                ? chipAccent
+                : (isLight ? const Color(0xFFCBD5E1) : AppColors.glassBorder),
             width: 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.cyan.withOpacity(0.25),
+                    color: chipAccent.withOpacity(0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -667,13 +687,17 @@ class HomeScreen extends StatelessWidget {
             Icon(
               icon,
               size: 13,
-              color: isSelected ? AppColors.cyan : AppColors.textMuted,
+              color: isSelected
+                  ? chipAccent
+                  : (isLight ? AppColors.lightTextSecondary : AppColors.textMuted),
             ),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.cyan : AppColors.textSecondary,
+                color: isSelected
+                    ? chipAccent
+                    : (isLight ? AppColors.lightTextPrimary : AppColors.textSecondary),
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
@@ -685,19 +709,19 @@ class HomeScreen extends StatelessWidget {
   }
 
   /// 右翼 Bento：额度雷达微组件
-  Widget _buildQuotaRadarWidget(MonitorProvider provider) {
+  Widget _buildQuotaRadarWidget(MonitorProvider provider, bool isLight) {
     if (provider.limits.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.shield_outlined, size: 14, color: AppColors.emerald),
-              SizedBox(width: 6),
+              const Icon(Icons.shield_outlined, size: 14, color: AppColors.emerald),
+              const SizedBox(width: 6),
               Text(
                 '额度健康',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: isLight ? AppColors.lightTextSecondary : AppColors.textSecondary,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -715,9 +739,12 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             '所有服务正常',
-            style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+            style: TextStyle(
+              color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+              fontSize: 10,
+            ),
           ),
           const SizedBox(height: 6),
           Container(
@@ -762,14 +789,14 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.shield_outlined, size: 14, color: AppColors.emerald),
-                SizedBox(width: 6),
+                const Icon(Icons.shield_outlined, size: 14, color: AppColors.emerald),
+                const SizedBox(width: 6),
                 Text(
                   '额度雷达',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: isLight ? AppColors.lightTextSecondary : AppColors.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
@@ -817,8 +844,8 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           winLabel,
-          style: const TextStyle(
-            color: AppColors.textMuted,
+          style: TextStyle(
+            color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
             fontSize: 10,
           ),
           maxLines: 1,
@@ -850,7 +877,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   /// AI 额度健康全景舱组件
-  Widget _buildLimitsOverviewPod(MonitorProvider provider) {
+  Widget _buildLimitsOverviewPod(MonitorProvider provider, bool isLight) {
     final List<Widget> gauges = [];
     for (final item in provider.limits) {
       if (item.windows.isNotEmpty) {
@@ -894,17 +921,17 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  Icon(Icons.speed_rounded, size: 16, color: AppColors.emerald),
-                  SizedBox(width: 6),
+                  const Icon(Icons.speed_rounded, size: 16, color: AppColors.emerald),
+                  const SizedBox(width: 6),
                   Text(
                     'AI 额度全景舱',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: isLight ? AppColors.lightTextPrimary : AppColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
@@ -914,7 +941,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 '多窗口监控',
                 style: TextStyle(
-                  color: AppColors.textMuted,
+                  color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
                   fontSize: 10,
                   fontFamily: 'monospace',
                 ),

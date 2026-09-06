@@ -23,6 +23,11 @@ class ModelBreakdownCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (models.isEmpty) return const SizedBox.shrink();
 
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final primaryTextColor = isLight ? AppColors.lightTextPrimary : AppColors.warmWhite;
+    final mutedTextColor = isLight ? AppColors.lightTextMuted : AppColors.textMuted;
+    final trackColor = isLight ? const Color(0xFFE2E8F0) : AppColors.surfaceLight;
+
     // 按 Token 消耗量从高到低排序
     final sortedEntries = models.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -36,14 +41,14 @@ class ModelBreakdownCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.hub_outlined, size: 16, color: AppColors.cyan),
-                  SizedBox(width: 6),
+                  Icon(Icons.hub_outlined, size: 16, color: isLight ? AppColors.warmYellowDark : AppColors.cyan),
+                  const SizedBox(width: 6),
                   Text(
                     '今日活跃模型',
                     style: TextStyle(
-                      color: AppColors.warmWhite,
+                      color: primaryTextColor,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -52,8 +57,8 @@ class ModelBreakdownCard extends StatelessWidget {
               ),
               Text(
                 '已记录 ${sortedEntries.length} 款模型',
-                style: const TextStyle(
-                  color: AppColors.textMuted,
+                style: TextStyle(
+                  color: mutedTextColor,
                   fontSize: 11,
                   fontFamily: 'monospace',
                 ),
@@ -68,7 +73,7 @@ class ModelBreakdownCard extends StatelessWidget {
             width: double.infinity,
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: AppColors.surfaceLight,
+              color: trackColor,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(
@@ -132,8 +137,8 @@ class ModelBreakdownCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           modelName,
-                          style: const TextStyle(
-                            color: AppColors.warmWhite,
+                          style: TextStyle(
+                            color: primaryTextColor,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'monospace',
@@ -144,8 +149,8 @@ class ModelBreakdownCard extends StatelessWidget {
                       ),
                       Text(
                         _formatTokens(tokens),
-                        style: const TextStyle(
-                          color: AppColors.cyan,
+                        style: TextStyle(
+                          color: isLight ? AppColors.warmYellowDark : AppColors.cyan,
                           fontSize: 12,
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.w700,
@@ -179,7 +184,7 @@ class ModelBreakdownCard extends StatelessWidget {
                         height: 4,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceLight,
+                          color: trackColor,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -210,8 +215,8 @@ class ModelBreakdownCard extends StatelessWidget {
                       alignment: Alignment.centerRight,
                       child: Text(
                         costStr,
-                        style: const TextStyle(
-                          color: AppColors.warmYellowSoft,
+                        style: TextStyle(
+                          color: isLight ? AppColors.warmYellowDark : AppColors.warmYellowSoft,
                           fontSize: 10,
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.w600,
@@ -223,6 +228,7 @@ class ModelBreakdownCard extends StatelessWidget {
               ),
             );
           }),
+
         ],
       ),
     );

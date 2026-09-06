@@ -88,8 +88,8 @@ class LimitsScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       item.name,
-                                      style: const TextStyle(
-                                        color: AppColors.warmWhite,
+                                      style: TextStyle(
+                                        color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhite,
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -97,8 +97,8 @@ class LimitsScreen extends StatelessWidget {
                                     if (item.account != null)
                                       Text(
                                         item.account!,
-                                        style: const TextStyle(
-                                          color: AppColors.textMuted,
+                                        style: TextStyle(
+                                          color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
                                           fontSize: 11,
                                           fontFamily: 'monospace',
                                         ),
@@ -113,9 +113,9 @@ class LimitsScreen extends StatelessWidget {
                         const SizedBox(height: 14),
                         ...item.windows.map((win) {
                           if (win.metric == 'credits' && win.balance != null) {
-                            return _buildBalanceRow(win, provColor);
+                            return _buildBalanceRow(win, provColor, isLight);
                           }
-                          return _buildProgressRow(win, provColor);
+                          return _buildProgressRow(win, provColor, isLight);
                         }),
                       ],
                     ),
@@ -126,28 +126,35 @@ class LimitsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBalanceRow(LimitWindow win, Color provColor) {
+  Widget _buildBalanceRow(LimitWindow win, Color provColor, bool isLight) {
     final curSymbol = win.currency == 'CNY' ? '¥' : '\$';
     final balStr = win.balance != null ? '$curSymbol${win.balance!.toStringAsFixed(2)}' : '--';
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.warmYellowCard,
+        color: isLight ? const Color(0xFFFEF3C7).withOpacity(0.6) : AppColors.warmYellowCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.warmYellowBorder, width: 1),
+        border: Border.all(
+          color: isLight ? AppColors.warmYellowDark.withOpacity(0.3) : AppColors.warmYellowBorder,
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             win.label,
-            style: const TextStyle(color: AppColors.warmWhiteSoft, fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhiteSoft,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Text(
             balStr,
-            style: const TextStyle(
-              color: AppColors.warmYellow,
+            style: TextStyle(
+              color: isLight ? AppColors.warmYellowDark : AppColors.warmYellow,
               fontSize: 16,
               fontWeight: FontWeight.w900,
               fontFamily: 'monospace',
@@ -159,7 +166,7 @@ class LimitsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressRow(LimitWindow win, Color activeColor) {
+  Widget _buildProgressRow(LimitWindow win, Color activeColor, bool isLight) {
     final resetText = win.formattedResetCountdown;
     final percentVal = (win.remainingPercent / 100.0).clamp(0.0, 1.0);
     return Padding(
@@ -172,7 +179,11 @@ class LimitsScreen extends StatelessWidget {
             children: [
               Text(
                 win.label,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: isLight ? AppColors.lightTextSecondary : AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -188,9 +199,12 @@ class LimitsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 3),
-                  const Text(
+                  Text(
                     '剩余',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+                    style: TextStyle(
+                      color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+                      fontSize: 10,
+                    ),
                   ),
                 ],
               ),
@@ -204,7 +218,7 @@ class LimitsScreen extends StatelessWidget {
                 height: 6,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
+                  color: isLight ? const Color(0xFFE2E8F0) : AppColors.surfaceLight,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -233,12 +247,16 @@ class LimitsScreen extends StatelessWidget {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.access_time_rounded, size: 11, color: AppColors.textMuted),
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 11,
+                  color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '$resetText 后重置',
-                  style: const TextStyle(
-                    color: AppColors.textMuted,
+                  style: TextStyle(
+                    color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
                     fontSize: 10,
                     fontFamily: 'monospace',
                   ),

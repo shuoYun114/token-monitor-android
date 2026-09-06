@@ -47,21 +47,26 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.0
-          name: "Token Monitor Android v1.1.0 (Token账单流水 + GitHub贡献热力图 + 黑白双主题版)"
+          tag_name: v1.1.1
+          name: "Token Monitor Android v1.1.1 (白主题底色与对比度全面修复版)"
           body: |
-            ✨ **Token Monitor Android v1.1.0 重磅发布！**
+            ✨ **Token Monitor Android v1.1.1 修复版本发布！**
 
-            本次版本带来重大的核心功能升级与全新双主题视觉体验：
-            1. **Token 周期账单与每日流水**：新增全功能「账单」大屏，支持切换查看「日账单」、「月度账单」、「年度与全时期总览」，详细展示每天消耗的 Token 流水、模型消耗明细与活跃工具分布；
-            2. **GitHub 风格贡献热力图 (Activity Heatmap)**：7 行按周对齐的活跃网格，真实反映每日 Token 消耗强度（0-4 级色阶），支持水平平滑滑动浏览近 20 周轨迹，并支持点击任意方块下钻查看当日账单详情；
-            3. **黑白双主题自由切换**：
-               - **黑主题 (Dark Console)**：黑曜石深黑底 + 纯净白主字 + 冰蓝高光 (`#38BDF8`)；
-               - **白主题 (Light Amber)**：纯净暖白底 + 深石墨灰字 + 暖黄高光 (`#F59E0B` / `#FBBF24`)；
-               - 在【设置】中一键切换，全局即时生效并本地持久化存储；
-            4. **组件毛玻璃与全屏自适应**：`GlassContainer`、各种看板卡片与状态指示器全面自适应浅色与深色模式，兼顾冷艳科技感与温润品质感；
-            5. **历史用量持久化与离线容灾**：支持 `/api/history` 滚动数据与本地 SharedPreferences 缓存，断网或 Hub 离线时平滑展示；
-            6. **永久正式签名保证**：支持直接下载 `app-release.apk` 覆盖安装升级，免卸载保留所有配置！
+            本次版本重点全面修复浅色白主题（Light Amber）下的视觉缺陷与对比度问题：
+            1. **彻底消除底色黑块补丁**：
+               - 修复顶部设备选择器卡扣（Horizon Perspective）未选中时突兀深黑底色问题，改为柔和微晶浅灰白；
+               - 修复次级 Bento 左翼“本月累计”中“共 X 款活跃工具”胶囊深黑底色问题；
+               - 修复“活跃工具控制台”右上角“已就绪 X 款”胶囊深黑底色问题；
+               - 修复 AI 额度全景舱与提供商列表中的能量槽底轨深黑问题。
+            2. **彻底解决白底白字对比度缺失**：
+               - 修复次级 Bento 左翼“本月累计”金额大数字在白色卡片上隐形的问题，自适应为高对比度深石墨灰；
+               - 修复 Hero 视窗中的“Tokens”单位、精确数值与折合成本副标题文字颜色；
+               - 修复模型能量槽与活跃工具名称在浅色模式下的字色适配。
+            3. **继承 v1.1.0 的全部全新特性**：
+               - 日/月/年周期 Token 账单与每日用量流水明细；
+               - GitHub 风格贡献热力图 (Activity Heatmap)；
+               - 黑主题（冰蓝）与白主题（暖黄）自由切换；
+               - 永久正式 keystore 签名，支持直接覆盖升级！
 
             **下载方式**：直接在下方 Assets 点击下载 `app-release.apk` 安装即可。
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
