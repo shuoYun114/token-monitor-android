@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import '../../models/device_stats.dart';
 import '../../theme/app_colors.dart';
@@ -227,14 +229,24 @@ class ReceiptDialog extends StatefulWidget {
 
 class _ReceiptDialogState extends State<ReceiptDialog> {
   bool _isEnglish = false;
+  bool _isCapturing = false;
   late Map<String, String> _currentPunchline;
   late String _receiptId;
+  final GlobalKey _receiptCaptureKey = GlobalKey();
+  final ScrollController _scrollController = ScrollController();
+  static const MethodChannel _imageChannel = MethodChannel('com.javis.tokenmonitor/image_saver');
 
   @override
   void initState() {
     super.initState();
     _currentPunchline = ReceiptPunchlines.getRandomPunchline();
     _receiptId = _generateReceiptId();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   String _generateReceiptId() {
@@ -378,6 +390,209 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     );
   }
 
+  /// 截取小票生成高清 PNG 并直接写入系统相册 (Pictures/TokenMonitor)
+  Future<void> _captureAndSaveReceipt() async {
+    if (_isCapturing) return;
+
+    setState(() {
+      _isCapturing = true;
+    });
+
+    try {
+      // 稍微等待一帧以确保任何可能的排版渲染完成
+      await Future.delayed(const Duration(milliseconds: 60));
+
+      final boundary = _receiptCaptureKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        throw Exception(_isEnglish ? 'Failed to locate receipt view' : '无法获取小票渲染节点');
+      }
+
+      // 采用 3.0 超采样像素比，确保热敏纸上的 ASCII 图案与小字在高分屏上纤毫毕现
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        throw Exception(_isEnglish ? 'Failed to encode PNG image' : '小票图片编码失败');
+      }
+
+      final Uint8List pngBytes = byteData.buffer.asUint8List();
+      final filename = 'TokenReceipt_${_receiptId}_${DateTime.now().millisecondsSinceEpoch}';
+
+      // 调用 Android 原生 MethodChannel 将图片安全写入系统相册
+      final String? savedPath = await _imageChannel.invokeMethod<String>(
+        'saveImageToGallery',
+        {
+          'imageBytes': pngBytes,
+          'filename': filename,
+        },
+      );
+
+      if (!mounted) return;
+
+      if (savedPath != null) {
+        // 浮动成功提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: AppColors.cyan, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _isEnglish
+                        ? 'Receipt saved to gallery (Pictures/TokenMonitor)!'
+                        : '小票已保存到系统相册 (Pictures/TokenMonitor)！',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF1E293B),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            duration: const Duration(milliseconds: 2500),
+          ),
+        );
+
+        // 唤起全屏/弹窗长图预览，支持交互手势缩放
+        _showReceiptImagePreview(pngBytes, savedPath);
+      } else {
+        throw Exception(_isEnglish ? 'Failed to save image to gallery' : '保存图片到相册失败');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded, color: AppColors.rose, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _isEnglish ? 'Failed to save receipt: $e' : '保存小票失败: $e',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF2D1216),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(milliseconds: 3000),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCapturing = false;
+        });
+      }
+    }
+  }
+
+  /// 弹出小票高清图片预览弹窗，支持双指缩放拖拽
+  void _showReceiptImagePreview(Uint8List pngBytes, String savedPath) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.85),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 顶部标题控制栏
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF131826).withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle_rounded, size: 18, color: AppColors.cyan),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _isEnglish ? 'Receipt Saved to Gallery' : '小票已保存到系统相册',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            _isEnglish ? 'Pictures/TokenMonitor' : '已存入相册: Pictures/TokenMonitor',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.55),
+                              fontSize: 10,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white70),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 高清图片预览与手势缩放区
+              Flexible(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B0F19),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: InteractiveViewer(
+                      minScale: 0.5,
+                      maxScale: 4.0,
+                      child: Center(
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Image.memory(
+                              pngBytes,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // 底部轻量交互提示
+              Text(
+                _isEnglish ? 'Double-tap or pinch to zoom details' : '可双指捏合缩放或拖拽查看细节',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 11,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final d = widget.data.date;
@@ -392,10 +607,10 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
         children: [
           // 顶部快捷控制操作条
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF131826).withOpacity(0.92),
+              color: const Color(0xFF131826).withOpacity(0.94),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
               boxShadow: [
@@ -406,117 +621,160 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                 ),
               ],
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 语言切换
-                GestureDetector(
-                  onTap: () => setState(() => _isEnglish = !_isEnglish),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: _isEnglish ? AppColors.cyan.withOpacity(0.2) : Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.translate_rounded,
-                          size: 13,
-                          color: _isEnglish ? AppColors.cyan : Colors.white70,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          _isEnglish ? 'EN' : '中文',
-                          style: TextStyle(
-                            color: _isEnglish ? AppColors.cyan : Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'monospace',
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 1. 语言切换
+                  GestureDetector(
+                    onTap: () => setState(() => _isEnglish = !_isEnglish),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: _isEnglish ? AppColors.cyan.withOpacity(0.2) : Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.translate_rounded,
+                            size: 13,
+                            color: _isEnglish ? AppColors.cyan : Colors.white70,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            _isEnglish ? 'EN' : '中文',
+                            style: TextStyle(
+                              color: _isEnglish ? AppColors.cyan : Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 7),
 
-                // 换一句吐槽
-                GestureDetector(
-                  onTap: _nextPunchline,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.amber.withOpacity(0.18),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.casino_outlined, size: 13, color: AppColors.amber),
-                        const SizedBox(width: 4),
-                        Text(
-                          _isEnglish ? 'Punchline' : '换句吐槽',
-                          style: const TextStyle(
-                            color: AppColors.amber,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                  // 2. 换一句吐槽
+                  GestureDetector(
+                    onTap: _nextPunchline,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppColors.amber.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.casino_outlined, size: 13, color: AppColors.amber),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isEnglish ? 'Punchline' : '换句吐槽',
+                            style: const TextStyle(
+                              color: AppColors.amber,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 7),
 
-                // 复制 ASCII 文本
-                GestureDetector(
-                  onTap: _copyToClipboard,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.emerald.withOpacity(0.18),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.copy_rounded, size: 13, color: AppColors.emerald),
-                        const SizedBox(width: 4),
-                        Text(
-                          _isEnglish ? 'Copy' : '复制小票',
-                          style: const TextStyle(
-                            color: AppColors.emerald,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                  // 3. 复制 ASCII 文本
+                  GestureDetector(
+                    onTap: _copyToClipboard,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppColors.emerald.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.copy_rounded, size: 13, color: AppColors.emerald),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isEnglish ? 'Copy' : '复制小票',
+                            style: const TextStyle(
+                              color: AppColors.emerald,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 6),
+                  const SizedBox(width: 7),
 
-                // 关闭按钮
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 18, color: Colors.white70),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
+                  // 4. 截图保存至相册
+                  GestureDetector(
+                    onTap: _isCapturing ? null : _captureAndSaveReceipt,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6366F1).withOpacity(0.22),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF818CF8).withOpacity(0.35), width: 0.8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_isCapturing)
+                            const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.6,
+                                color: Color(0xFFA5B4FC),
+                              ),
+                            )
+                          else
+                            const Icon(Icons.camera_alt_rounded, size: 13, color: Color(0xFFA5B4FC)),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isCapturing
+                                ? (_isEnglish ? 'Saving...' : '保存中...')
+                                : (_isEnglish ? 'Save Image' : '截图存相册'),
+                            style: const TextStyle(
+                              color: Color(0xFFA5B4FC),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+
+                  // 5. 关闭按钮
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 18, color: Colors.white70),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
             ),
           ),
 
           // 小票主体 (仿真热敏纸张)
           Flexible(
             child: SingleChildScrollView(
+              controller: _scrollController,
               physics: const BouncingScrollPhysics(),
               child: Container(
-                width: 320,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFAF8F5), // 真实收银机热敏纸米白色
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.55),
@@ -526,20 +784,28 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 顶部收银机锯齿撕纸边
-                    CustomPaint(
-                      size: const Size(320, 8),
-                      painter: _ReceiptJaggedEdgePainter(isTop: true),
-                    ),
+                child: RepaintBoundary(
+                  key: _receiptCaptureKey,
+                  child: Container(
+                    width: 320,
+                    color: Colors.transparent,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 顶部收银机锯齿撕纸边
+                        CustomPaint(
+                          size: const Size(320, 8),
+                          painter: _ReceiptJaggedEdgePainter(isTop: true),
+                        ),
 
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
+                        // 小票正文主体
+                        Container(
+                          width: 320,
+                          color: const Color(0xFFFAF8F5), // 真实收银机热敏纸米白色
+                          padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
                           // 1. ASCII 艺术 Logo 区
                           _buildAsciiLogo(widget.data.primaryClient),
 
@@ -846,9 +1112,11 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
               ),
             ),
           ),
-        ],
+        ),
       ),
-    );
+    ],
+  ),
+);
   }
 
   Widget _buildMetaRow(String label, String value) {

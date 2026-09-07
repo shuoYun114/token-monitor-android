@@ -50,32 +50,23 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.4
-          name: "Token Monitor Android v1.1.4 (输入输出与缓存细分遥测 + 消费小票完整版)"
+          tag_name: v1.1.5
+          name: "Token Monitor Android v1.1.5 (AI 消费小票一键截图存相册 + 真实热敏撕纸)"
           body: |
-            📊 **Token Monitor Android v1.1.4 发布！全面对齐桌面版模型细分遥测与小票！**
+            📸 **Token Monitor Android v1.1.5 发布！新增消费小票一键截图并保存系统相册！**
 
-            1. **模型细分遥测手风琴 (Model Breakdown Accordion)**：
-               - 完全复刻桌面版模型页：支持点击各模型条目展开微晶遥测面板；
-               - 精准展示：输入(缓存命中及命中率 %)、输入(缓存未命中及 %)、输出 Tokens、未分类 Tokens；
-               - 带有双色发光微徽章与等宽微刻数字排版。
-            2. **消费小票输入/输出/缓存全打印 (Token Receipt with Cache Details)**：
-               - 热敏小票各模型条目下方打印 `IN(HIT)` 与 `OUT` 细分；
-               - 票据汇总区 (TOTAL TOKENS) 下方打印总输入(缓存命中/未命中)与总输出数据块；
-               - 纯文本 ASCII 复制小票同步输出完整细分；
-               - 增加关于“缓存命中100%”、“输入几千万输出两百字”等灵魂幽默神吐槽。
-            3. **构建加速优化**：
-               - 流水线引入 Gradle Build Cache，大幅提升云端构建效率。
-            2. **灵魂核心：毒舌/幽默神吐槽 (Receipt Punchlines)**：
-               - 内置精选分类神吐槽（涵盖改版迭代、视觉设计、Bug 调试、深度思考与掏空钱包）；
-               - “画面稳了，预算死了。”、“最后一版这个词，本来就不诚实。”、“Bug 修完了，费用继承了。”、“推理不免费，犹豫更贵。”；
-               - 支持“🎲 换一句”趣味交互，越看越上头！
-            3. **中英双语与一键复制分享**：
-               - 支持 `EN / 中文` 即时切换小票文案与吐槽；
-               - 一键复制纯文本 ASCII 小票，可直接粘贴分享至微信、即刻、朋友圈或 Discord；
-               - 首页与账单流水随时一键打出今日或任意历史日期的消费小票。
+            1. **小票高保真截图与相册直存 (Receipt Snapshot & Gallery Export)**：
+               - 小票顶部操作栏新增「📸 截图存相册」按钮；
+               - 采用 3.0x 超采样像素比，将热敏纸、ASCII Logo、输入输出细分数据与毒舌吐槽完美渲染为高清位图；
+               - 原生对接 Android `MediaStore`，图片直接存入手机系统相册（`Pictures/TokenMonitor`），系统相册即时可见；
+               - 保存后唤起交互式全景大图预览弹窗，支持双指自由缩放与拖拽查看细节。
+            2. **真实收银机热敏撕纸视觉 (Realistic Jagged Thermal Paper)**：
+               - 上下撕纸锯齿齿槽真正镂空透明，导出图片带完整物理撕裂感；
+               - 分享至微信好友、朋友圈或社交媒体宛如真实打印票据。
+            3. **模型输入/输出与缓存命中遥测 (Breakdown Telemetry)**：
+               - 完整支持展开模型手风琴查看缓存命中/未命中、输出 Tokens 与未分类 Tokens。
             4. **官方正式 keystore 签名**：
-               - 支持从历史版本直接免卸载平滑覆盖升级！
+               - 支持从历史版本免卸载直接平滑覆盖安装升级！
 
             **下载方式**：直接在下方 Assets 点击下载 `app-release.apk` 安装即可。
           files: mobile/build/app/outputs/flutter-apk/app-release.apk
