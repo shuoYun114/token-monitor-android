@@ -5,13 +5,13 @@
 
 ## 📌 一、当前版本号信息 (Version Info)
 
-* **Git Release Tag**: `v1.1.6`
-* **Release Name**: `Token Monitor Android v1.1.6 (新增 AI Passport 随身硬件副屏 BLE 中继)`
+* **Git Release Tag**: `v1.1.7`
+* **Release Name**: `Token Monitor Android v1.1.7 (支持手机端直接修改 AI Passport 副屏个人信息与工牌档案)`
 * **Android Gradle 配置** (`mobile/android/app/build.gradle`):
-  * `versionCode`: **`8`** (上一版本为 7)
-  * `versionName`: **`"1.1.6"`** (上一版本为 "1.0.6")
+  * `versionCode`: **`9`** (上一版本为 8)
+  * `versionName`: **`"1.1.7"`** (上一版本为 "1.1.6")
 * **Flutter pubspec.yaml** (`mobile/pubspec.yaml`):
-  * `version`: **`1.1.6+17`** (上一版本为 1.1.5+16)
+  * `version`: **`1.1.7+18`** (上一版本为 1.1.6+17)
 * **签名体系**: 保持使用工程内的官方正式 `release.keystore`（密码一致），支持平滑覆盖安装。
 
 ---
@@ -48,15 +48,26 @@
 
 ### 4. 界面与交互层
 * **`mobile/lib/ui/widgets/passport_relay_card.dart`**:
-  * 遵循微晶毛玻璃与机能风设计，提供呼吸状态指示、设备标识码、一键直连、手动测试同步与断开按钮。
+  * 遵循微晶毛玻璃与机能风设计，提供呼吸状态指示、设备标识码、一键直连、手动测试同步与断开按钮；
+  * **v1.1.7 新增「工牌身份档案 (Identity Profile)」折叠/内嵌卡片**：
+    * 提供「极客昵称 (Name)」与「通行证账号/邮箱 (Owner)」编辑框；
+    * 限长 30 字符，符合开发板固件 `BUDDY_NAME_MAX` / `BUDDY_OWNER_MAX` 边界；
+    * 点击「保存并下发至副屏工牌」按钮后，通过 BLE 逐条写入并由底层分包下发，完成后即时 SnackBar 反馈；
+    * 输入内容由 `AppSettings` & `StorageService` 自动保存到本地 `SharedPreferences`，无需反复输入。
 * **`mobile/lib/ui/screens/settings_screen.dart`**:
   * 设置页面列表开头常驻 `PassportRelayCard`。
 * **`mobile/lib/ui/screens/home_screen.dart`**:
   * AppBar 右侧操作栏新增随身副屏快捷按钮（未连接灰显、已连接微光绿显），点击唤出底部控制面板。
 
-### 5. 云端 CI/CD 自动化工作流
+### 5. 个人信息与固件 NVS 写入协议规范 (v1.1.7 新增)
+* 开发板固件协议支持接收特定 JSON 指令并固化至 NVS 闪存：
+  * **昵称更新**: `{"cmd": "name", "name": "<昵称>", "value": "<昵称>"}\n`
+  * **账号更新**: `{"cmd": "owner", "name": "<账号>", "owner": "<账号>", "value": "<账号>"}\n`
+* 手机端在 `PassportRelayService.updateProfile` 中自动处理两包分立发送及安全切片延时，开发板收到后调用 `app_save_buddy_profile()` 写入 Flash 并触发即时重绘，无需重启即可在个人信息主页实时生效。
+
+### 6. 云端 CI/CD 自动化工作流
 * **`.github/workflows/build-android.yml`**:
-  * Release 发布说明与 Tag 更新为 `v1.1.6`。
+  * Release 发布说明与 Tag 更新为 `v1.1.7`。
 
 ---
 
@@ -77,8 +88,11 @@
    * 4x2、2x2 原生 AppWidget，支持桌面常驻显示今日 Token 与限额状态。
 5. **黑白双主题切换**:
    * 黑曜石冰蓝 / 暖白色暖黄双套高质感配色。
-6. **AI Passport 随身极客副屏 BLE 中继 (本次新增)**:
+6. **AI Passport 随身极客副屏 BLE 中继**:
    * 随身外出携带场景下的无线低功耗中继与自动对时。
+7. **随身工牌身份档案无线修改与 NVS 固化 (v1.1.7)**:
+   * 支持在手机 App 内直连编辑开发板工牌上的极客昵称 (Name) 与账号/邮箱 (Owner)；
+   * 通过 BLE 将指令下发并固化写入 ESP32 内部 NVS 闪存，即改即显，掉电不丢。
 
 ---
 
