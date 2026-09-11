@@ -50,20 +50,19 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.6
-          name: "Token Monitor Android v1.1.6 (新增 AI Passport 随身硬件副屏 BLE 中继)"
+          tag_name: v1.1.7
+          name: "Token Monitor Android v1.1.7 (支持手机端直接修改 AI Passport 副屏个人信息)"
           body: |
-            📟 **Token Monitor Android v1.1.6 发布！新增 AI Passport 随身极客副屏 BLE 蓝牙中继支持！**
+            📟 **Token Monitor Android v1.1.7 发布！支持手机端直接修改 AI Passport 硬件副屏个人信息与工牌档案！**
 
-            1. **AI Passport 随身硬件副屏 BLE 蓝牙中继 (Hardware BLE Relay)**：
-               - 针对出门随身携带开发板场景，手机端 App 成为移动数据中继桥梁；
-               - 深度对接 Nordic UART Service (NUS) 串口透传协议与 ESP32-C3 固件；
-               - 首次建立连接自动对齐网络授时与当前时区 (`{"time": [ts, offset]}`)；
-               - 手机端流式或轮询获取到最新 Token 消耗、费用与主力模型额度时，全自动分片推送到副屏；
-               - 包含高可靠 64 字节 Chunking 与安全延迟机制，杜绝数据丢包。
-            2. **极客遥测控制卡片 (Hardware Relay Card)**：
-               - 设置页面与首页 AppBar 增加微晶玻璃控制卡片与状态呼吸指示；
-               - 支持一键自动扫描、直连、手动强制下发测试与断开管理。
+            1. **副屏工牌个人信息实时修改与 Flash 持久化 (Hardware Profile Editor)**：
+               - 手机 App 连上开发板后，可自由修改「极客昵称 (Name)」与「通行证账号/邮箱 (Owner)」；
+               - 点击「保存并下发至副屏工牌」后，数据通过 BLE 秒级写入开发板并调用 ESP32 NVS 闪存接口永久持久化；
+               - 副屏个人智能主页卡片即刻刷新，断电、关机重启后依然永久保留；
+               - 手机本地自动持久化记忆上次输入的个人档案。
+            2. **随身硬件 BLE 中继 (Hardware BLE Relay)**：
+               - 出门随身携带开发板场景，手机端 App 成为移动数据中继桥梁；
+               - 自动授时校对时钟与全自动 64 字节安全分片流式推送。
             3. **官方正式 Keystore 签名**：
                - 支持从历史版本免卸载直接平滑覆盖安装升级！
 

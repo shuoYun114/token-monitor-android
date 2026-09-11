@@ -191,6 +191,45 @@ class PassportRelayService {
     await _sendRawPayload(payload);
   }
 
+  /// 向开发板下发更新工牌个人档案信息 (姓名与账号/邮箱，ESP32 接收后将持久化写入 NVS Flash)
+  Future<bool> updateProfile({
+    required String name,
+    required String owner,
+  }) async {
+    if (!isConnected || _rxCharacteristic == null) return false;
+
+    try {
+      final cleanName = name.trim().isEmpty
+          ? "syhx114514"
+          : (name.trim().length > 30 ? name.trim().substring(0, 30) : name.trim());
+      final cleanOwner = owner.trim().isEmpty
+          ? "syhx114514@gmail.com"
+          : (owner.trim().length > 30 ? owner.trim().substring(0, 30) : owner.trim());
+
+      // 严格匹配固件协议: {"cmd": "name", "name": "...", "value": "..."} 与 {"cmd": "owner", ...}
+      final pName = jsonEncode({
+        "cmd": "name",
+        "name": cleanName,
+        "value": cleanName,
+      }) + "\n";
+
+      final pOwner = jsonEncode({
+        "cmd": "owner",
+        "name": cleanOwner,
+        "owner": cleanOwner,
+        "value": cleanOwner,
+      }) + "\n";
+
+      await _sendRawPayload(pName);
+      await Future.delayed(const Duration(milliseconds: 60));
+      await _sendRawPayload(pOwner);
+      return true;
+    } catch (e) {
+      debugPrint("[PassportRelay] 个人信息同步失败: $e");
+      return false;
+    }
+  }
+
   /// 将手机端的聚合统计数据构建成与固件 100% 匹配的 JSON 并推送
   Future<bool> pushStatsSnapshot({
     required AggregateStats stats,

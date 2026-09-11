@@ -48,6 +48,14 @@ class PassportRelayProvider extends ChangeNotifier {
     await _service.syncCurrentTime();
   }
 
+  /// 向开发板下发更新工牌个人信息 (极客昵称与账号邮箱)
+  Future<bool> updateProfile({
+    required String name,
+    required String owner,
+  }) async {
+    return await _service.updateProfile(name: name, owner: owner);
+  }
+
   /// 立即手动推送当前最新 Token 数据至副屏
   Future<bool> pushNow({
     required AggregateStats stats,

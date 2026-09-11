@@ -9,6 +9,8 @@ class AppSettings {
   int refreshIntervalSeconds;
   bool isConnected;
   String themeMode; // 'dark' (深色黑曜石+淡蓝) or 'light' (纯白+暖黄)
+  String passportName; // AI Passport 随身副屏极客昵称 (展示在工牌中央顶部，最大30字符)
+  String passportOwner; // AI Passport 绑定账号与邮箱 (展示在副屏资产第一行，最大30字符)
 
   AppSettings({
     this.hubUrl = '',
@@ -20,6 +22,8 @@ class AppSettings {
     this.refreshIntervalSeconds = 15,
     this.isConnected = false,
     this.themeMode = 'dark',
+    this.passportName = 'syhx114514',
+    this.passportOwner = 'syhx114514@gmail.com',
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -33,6 +37,8 @@ class AppSettings {
       refreshIntervalSeconds: (json['refreshIntervalSeconds'] as num?)?.toInt() ?? 15,
       isConnected: json['isConnected'] == true,
       themeMode: json['themeMode']?.toString() ?? 'dark',
+      passportName: json['passportName']?.toString() ?? 'syhx114514',
+      passportOwner: json['passportOwner']?.toString() ?? 'syhx114514@gmail.com',
     );
   }
 
@@ -46,5 +52,7 @@ class AppSettings {
     'refreshIntervalSeconds': refreshIntervalSeconds,
     'isConnected': isConnected,
     'themeMode': themeMode,
+    'passportName': passportName,
+    'passportOwner': passportOwner,
   };
 }

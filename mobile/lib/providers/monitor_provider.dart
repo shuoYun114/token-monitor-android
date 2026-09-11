@@ -256,6 +256,14 @@ class MonitorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 保存并持久化 AI Passport 随身副屏个人信息 (极客昵称与账号邮箱)
+  void updatePassportProfile(String name, String owner) {
+    settings.passportName = name.trim();
+    settings.passportOwner = owner.trim();
+    _storage.saveSettings(settings);
+    notifyListeners();
+  }
+
   void setSelectedDevice(String? deviceId) {
     selectedDeviceId = deviceId;
     notifyListeners();
