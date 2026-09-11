@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'providers/monitor_provider.dart';
+import 'providers/passport_relay_provider.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/billing_screen.dart';
@@ -18,6 +19,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => MonitorProvider(storageService)),
+        ChangeNotifierProvider(create: (_) => PassportRelayProvider()),
       ],
       child: const TokenMonitorApp(),
     ),

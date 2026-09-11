@@ -4,6 +4,7 @@ import '../../providers/monitor_provider.dart';
 import '../../services/currency_service.dart';
 import '../../theme/app_colors.dart';
 import '../widgets/glass_container.dart';
+import '../widgets/passport_relay_card.dart';
 import 'qr_scan_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -65,6 +66,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // AI Passport 硬件随身副屏 BLE 中继卡片
+          const PassportRelayCard(),
+          const SizedBox(height: 16),
+
           // 0. 主题模式切换卡片 (黑主题: 纯白+淡蓝 / 白主题: 纯白+暖黄)
           GlassContainer(
             padding: const EdgeInsets.all(16),

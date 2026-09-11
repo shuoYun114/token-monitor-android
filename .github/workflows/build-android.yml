@@ -50,22 +50,21 @@ jobs:
       - name: Publish Release APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.5
-          name: "Token Monitor Android v1.1.5 (AI 消费小票一键截图存相册 + 真实热敏撕纸)"
+          tag_name: v1.1.6
+          name: "Token Monitor Android v1.1.6 (新增 AI Passport 随身硬件副屏 BLE 中继)"
           body: |
-            📸 **Token Monitor Android v1.1.5 发布！新增消费小票一键截图并保存系统相册！**
+            📟 **Token Monitor Android v1.1.6 发布！新增 AI Passport 随身极客副屏 BLE 蓝牙中继支持！**
 
-            1. **小票高保真截图与相册直存 (Receipt Snapshot & Gallery Export)**：
-               - 小票顶部操作栏新增「📸 截图存相册」按钮；
-               - 采用 3.0x 超采样像素比，将热敏纸、ASCII Logo、输入输出细分数据与毒舌吐槽完美渲染为高清位图；
-               - 原生对接 Android `MediaStore`，图片直接存入手机系统相册（`Pictures/TokenMonitor`），系统相册即时可见；
-               - 保存后唤起交互式全景大图预览弹窗，支持双指自由缩放与拖拽查看细节。
-            2. **真实收银机热敏撕纸视觉 (Realistic Jagged Thermal Paper)**：
-               - 上下撕纸锯齿齿槽真正镂空透明，导出图片带完整物理撕裂感；
-               - 分享至微信好友、朋友圈或社交媒体宛如真实打印票据。
-            3. **模型输入/输出与缓存命中遥测 (Breakdown Telemetry)**：
-               - 完整支持展开模型手风琴查看缓存命中/未命中、输出 Tokens 与未分类 Tokens。
-            4. **官方正式 keystore 签名**：
+            1. **AI Passport 随身硬件副屏 BLE 蓝牙中继 (Hardware BLE Relay)**：
+               - 针对出门随身携带开发板场景，手机端 App 成为移动数据中继桥梁；
+               - 深度对接 Nordic UART Service (NUS) 串口透传协议与 ESP32-C3 固件；
+               - 首次建立连接自动对齐网络授时与当前时区 (`{"time": [ts, offset]}`)；
+               - 手机端流式或轮询获取到最新 Token 消耗、费用与主力模型额度时，全自动分片推送到副屏；
+               - 包含高可靠 64 字节 Chunking 与安全延迟机制，杜绝数据丢包。
+            2. **极客遥测控制卡片 (Hardware Relay Card)**：
+               - 设置页面与首页 AppBar 增加微晶玻璃控制卡片与状态呼吸指示；
+               - 支持一键自动扫描、直连、手动强制下发测试与断开管理。
+            3. **官方正式 Keystore 签名**：
                - 支持从历史版本免卸载直接平滑覆盖安装升级！
 
             **下载方式**：直接在下方 Assets 点击下载 `app-release.apk` 安装即可。

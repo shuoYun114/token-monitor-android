@@ -11,6 +11,8 @@ import '../widgets/tool_card.dart';
 import '../widgets/model_breakdown_card.dart';
 import '../widgets/chrono_aperture.dart';
 import '../widgets/receipt_dialog.dart';
+import '../widgets/passport_relay_card.dart';
+import '../../providers/passport_relay_provider.dart';
 
 
 /// Token Monitor 顶级审美移动看板 (Bento Grid 非对称架构 + 黑曜石控制台质感)
@@ -129,6 +131,37 @@ class HomeScreen extends StatelessWidget {
                   modelOutputs: today.modelOutputs,
                   modelUnclassifiedTokens: today.modelUnclassifiedTokens,
                 ),
+              );
+            },
+          ),
+          Consumer<PassportRelayProvider>(
+            builder: (context, relay, _) {
+              final isConn = relay.isConnected;
+              return IconButton(
+                tooltip: isConn ? 'AI Passport 已连接 (点击管理)' : '连接 AI Passport 随身副屏',
+                icon: Icon(
+                  Icons.devices_other_rounded,
+                  color: isConn
+                      ? const Color(0xFF64C987)
+                      : (isLight ? AppColors.lightTextMuted : AppColors.textMuted.withOpacity(0.5)),
+                  size: 21,
+                ),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    isScrollControlled: true,
+                    builder: (ctx) => Padding(
+                      padding: EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+                        top: 16,
+                      ),
+                      child: const PassportRelayCard(),
+                    ),
+                  );
+                },
               );
             },
           ),

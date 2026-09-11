@@ -7,6 +7,7 @@ import '../models/usage_history.dart';
 import '../services/currency_service.dart';
 import '../services/hub_client_service.dart';
 import '../services/limit_probe_service.dart';
+import '../services/passport_relay_service.dart';
 import '../services/storage_service.dart';
 import '../services/widget_sync_service.dart';
 
@@ -156,6 +157,15 @@ class MonitorProvider extends ChangeNotifier {
       rate: settings.usdToCnyRate,
       limits: limits,
     );
+
+    // 联动同步至 AI Passport 随身硬件副屏 (若已连接)
+    if (PassportRelayService().isConnected && currentStats != null) {
+      PassportRelayService().pushStatsSnapshot(
+        stats: currentStats!,
+        settings: settings,
+        limits: limits,
+      );
+    }
   }
 
   Future<void> _probeDirectLimits() async {
