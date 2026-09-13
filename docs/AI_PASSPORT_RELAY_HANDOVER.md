@@ -1,114 +1,112 @@
-# Token Monitor 移动端交接备忘录 (Handover Notes)
-> **致原开发会话 / 接手开发者**：本文档记录了在移动端工程中接入 **AI Passport 硬件随身副屏 BLE 蓝牙中继** 的所有技术改动、现有功能矩阵、版本号定义以及已知边界/待优化项。
+﻿# Token Monitor 移动端交接与架构备忘录 (HANDOFF)
+> **致接手开发者 / AI 助手**：本文档记录了 Token Monitor 移动端工程中接入 **AI Passport 硬件随身副屏 BLE 蓝牙中继**、**工牌档案无线修改** 以及 **本地 65 秒极速编译系统** 的全部技术实现细节、避坑经验、已知边界与后续演进路线。
 
 ---
 
-## 📌 一、当前版本号信息 (Version Info)
+## 📌 一、当前版本号基线 (Version Info)
 
 * **Git Release Tag**: `v1.1.7`
 * **Release Name**: `Token Monitor Android v1.1.7 (支持手机端直接修改 AI Passport 副屏个人信息与工牌档案)`
 * **Android Gradle 配置** (`mobile/android/app/build.gradle`):
-  * `versionCode`: **`9`** (上一版本为 8)
-  * `versionName`: **`"1.1.7"`** (上一版本为 "1.1.6")
+  * `versionCode`: **`9`**
+  * `versionName`: **`"1.1.7"`**
 * **Flutter pubspec.yaml** (`mobile/pubspec.yaml`):
-  * `version`: **`1.1.7+18`** (上一版本为 1.1.6+17)
-* **签名体系**: 保持使用工程内的官方正式 `release.keystore`（密码一致），支持平滑覆盖安装。
+  * `version`: **`1.1.7+18`**
+* **签名体系**: 保持使用工程内的官方正式 `release.keystore`（`mobile/android/app/release.keystore`，别名 `tokenmonitor`，密码 `tokenmonitor2026`），严格保证证书指纹一致，支持平滑覆盖安装。
+* **编译产物位置**:
+  * 根目录快捷打包: [`build_apk.bat`](file:///D:/PYTHON/APP/token%20monitor/build_apk.bat)
+  * 本地生成 APK: [`mobile/build/app/outputs/flutter-apk/app-release.apk`](file:///D:/PYTHON/APP/token%20monitor/mobile/build/app/outputs/flutter-apk/app-release.apk) (22.62 MB)
+  * 副屏工程交付位置: [`d:/PYTHON/Ai passport/TokenMonitor-v1.1.7-release.apk`](file:///d:/PYTHON/Ai%20passport/TokenMonitor-v1.1.7-release.apk)
+  * GitHub 云端 Releases: [GitHub Releases v1.1.7](https://github.com/shuoYun114/token-monitor-android/releases/tag/v1.1.7) (私有仓库托管)
 
 ---
 
-## 🛠️ 二、本次修改了什么 (What Changed)
+## 🛠️ 二、系统架构与新增核心模块 (Architecture & What Changed)
 
-本次改动主要为了解决**“带着 AI Passport 开发板出门脱离电脑时无法同步数据与对齐时钟”**的问题，使手机 App 成为随身移动中继：
+### 1. 随身硬件 BLE 中继通信层 (`PassportRelayService`)
+* **文件路径**: [`mobile/lib/services/passport_relay_service.dart`](file:///D:/PYTHON/APP/token%20monitor/mobile/lib/services/passport_relay_service.dart)
+* **协议与服务规范 (Nordic UART Service - NUS)**:
+  * 主服务 UUID: `6e400001-b5a3-f393-e0a9-e50e24dcca9e`
+  * RX 写入特征: `6e400002-b5a3-f393-e0a9-e50e24dcca9e` (手机 -> 开发板)
+  * TX 监听通知: `6e400003-b5a3-f393-e0a9-e50e24dcca9e` (开发板 -> 手机)
+* **网络时钟同步**:
+  * 蓝牙握手连通后，手机端立刻向 RX 写入第一条指令：`{"time": [unix_timestamp, tz_offset]}\n`；
+  * 彻底解决 ESP32-C3 离线断网后缺乏 RTC 电池导致的出门时间漂移问题。
+* **64 字节安全分片与延时写入 (Chunking & Delay)**:
+  * 针对 ESP32-C3 接收端 FIFO 缓冲区极小的硬件限制，将所有下发 JSON 报文以 64 字节分片；
+  * 每包切片附带 `Future.delayed(Duration(milliseconds: 12))` 保护写入，彻底避免底层丢包与接收溢出。
+* **固件数据契约匹配 (`pushStatsSnapshot`)**:
+  * 将 `AggregateStats` 完整打包并映射为含 `tokens_today`, `cost_today_cents`, `codex` 配额以及 `tools` 细分列表的标准载荷。
 
-### 1. 依赖与底层权限
-* **`mobile/pubspec.yaml`**:
-  * 引入 `flutter_blue_plus: 1.32.11`（**注意：必须严格锁定 1.32.11，严禁升级到 `^1.34.0`，原因见下方注意事项**）。
-* **`mobile/android/app/src/main/AndroidManifest.xml`**:
-  * 增加 Android 12+ (API 31+) 现代蓝牙权限：`BLUETOOTH_SCAN (neverForLocation)` 与 `BLUETOOTH_CONNECT`（免申请敏感位置权限）；
-  * 兼容低版本 Android 蓝牙权限 `BLUETOOTH`, `BLUETOOTH_ADMIN`, `ACCESS_FINE_LOCATION (maxSdkVersion=30)`。
+### 2. 工牌身份档案无线修改与 NVS 固化
+* **协议指令契约**:
+  * 极客昵称更新: `{"cmd": "name", "name": "<昵称>", "value": "<昵称>"}\n`
+  * 账号邮箱更新: `{"cmd": "owner", "name": "<账号>", "owner": "<账号>", "value": "<账号>"}\n`
+* **边界保护**:
+  * 自动进行前后空格去除，并在下发前截断为最长 30 字符，严格符合开发板固件 `BUDDY_NAME_MAX` 与 `BUDDY_OWNER_MAX` 边界；
+  * 开发板收到后直接调用底层 `app_save_buddy_profile()` 固化写入 NVS 闪存并即时刷新屏幕，关机重启依然永久保存。
+* **本地记忆机制**:
+  * 手机端通过 [`AppSettings`](file:///D:/PYTHON/APP/token%20monitor/mobile/lib/models/app_settings.dart) 与 `StorageService` 将用户编辑的工牌档案保存在本地 `SharedPreferences`，每次打开 App 自动回显。
 
-### 2. BLE 硬件中继通信层 (新建)
-* **`mobile/lib/services/passport_relay_service.dart`**:
-  * 采用单例设计，管理 Nordic UART Service (NUS) 连接；
-  * **UUID 规范**:
-    * 服务 UUID: `6e400001-b5a3-f393-e0a9-e50e24dcca9e`
-    * RX 写入: `6e400002-b5a3-f393-e0a9-e50e24dcca9e` (手机 -> 开发板)
-    * TX 通知: `6e400003-b5a3-f393-e0a9-e50e24dcca9e` (开发板 -> 手机)
-  * **网络时间戳自动授时**: 连上后立即下发 `{"time": [unix_timestamp, tz_offset]}\n`，解决单片机无 RTC 电池导致出门时间不准问题；
-  * **64 字节安全分片机制**: 将 JSON 报文按 64 字节切片并附带 12ms 延时写入，彻底防止 ESP32-C3 接收 FIFO 缓冲溢出丢包；
-  * **固件协议匹配**: 将 `AggregateStats` 完整打包成含 `tokens_today`, `cost_today_cents`, `codex` 配额以及 `tools` 细分列表的标准载荷。
+### 3. 全局状态响应流与自动中继
+* **`PassportRelayProvider`**: 继承 `ChangeNotifier` 并在 `main.dart` 中挂载为全局 Provider，管理连接状态、设备名、上次同步时间等响应式数据；
+* **`MonitorProvider`**: 在 `_handleStatsPayload` 处理完 Token 遥测数据后，无感调用 `PassportRelayService().pushStatsSnapshot(...)`，实现手机端获取新用量时副屏全自动静默刷新。
 
-### 3. 状态管理流扩展
-* **`mobile/lib/providers/passport_relay_provider.dart`**:
-  * 封装 `PassportRelayProvider extends ChangeNotifier`，提供响应式连接状态、设备名、上次同步时间等状态与控制方法。
-* **`mobile/lib/main.dart`**:
-  * 在 `MultiProvider` 中注册 `PassportRelayProvider`。
-* **`mobile/lib/providers/monitor_provider.dart`**:
-  * 在 `_handleStatsPayload` 处理完数据并更新小组件后，无感挂载 `PassportRelayService().pushStatsSnapshot(...)`，实现手机拿到新 Token 消耗时自动向副屏静默推送。
-
-### 4. 界面与交互层
-* **`mobile/lib/ui/widgets/passport_relay_card.dart`**:
-  * 遵循微晶毛玻璃与机能风设计，提供呼吸状态指示、设备标识码、一键直连、手动测试同步与断开按钮；
-  * **v1.1.7 新增「工牌身份档案 (Identity Profile)」折叠/内嵌卡片**：
-    * 提供「极客昵称 (Name)」与「通行证账号/邮箱 (Owner)」编辑框；
-    * 限长 30 字符，符合开发板固件 `BUDDY_NAME_MAX` / `BUDDY_OWNER_MAX` 边界；
-    * 点击「保存并下发至副屏工牌」按钮后，通过 BLE 逐条写入并由底层分包下发，完成后即时 SnackBar 反馈；
-    * 输入内容由 `AppSettings` & `StorageService` 自动保存到本地 `SharedPreferences`，无需反复输入。
-* **`mobile/lib/ui/screens/settings_screen.dart`**:
-  * 设置页面列表开头常驻 `PassportRelayCard`。
-* **`mobile/lib/ui/screens/home_screen.dart`**:
-  * AppBar 右侧操作栏新增随身副屏快捷按钮（未连接灰显、已连接微光绿显），点击唤出底部控制面板。
-
-### 5. 个人信息与固件 NVS 写入协议规范 (v1.1.7 新增)
-* 开发板固件协议支持接收特定 JSON 指令并固化至 NVS 闪存：
-  * **昵称更新**: `{"cmd": "name", "name": "<昵称>", "value": "<昵称>"}\n`
-  * **账号更新**: `{"cmd": "owner", "name": "<账号>", "owner": "<账号>", "value": "<账号>"}\n`
-* 手机端在 `PassportRelayService.updateProfile` 中自动处理两包分立发送及安全切片延时，开发板收到后调用 `app_save_buddy_profile()` 写入 Flash 并触发即时重绘，无需重启即可在个人信息主页实时生效。
-
-### 6. 云端 CI/CD 自动化工作流
-* **`.github/workflows/build-android.yml`**:
-  * Release 发布说明与 Tag 更新为 `v1.1.7`。
+### 4. 界面与交互层 (`PassportRelayCard`)
+* **文件路径**: [`mobile/lib/ui/widgets/passport_relay_card.dart`](file:///D:/PYTHON/APP/token%20monitor/mobile/lib/ui/widgets/passport_relay_card.dart)
+* 延续暗黑机能风设计，包含微晶毛玻璃底板、状态呼吸指示灯与一键扫描直连按钮；
+* 连接成功后平滑展开「工牌身份档案」编辑卡片与「保存并下发至副屏工牌」按钮，提供即时 SnackBar 反馈；
+* 首页 AppBar 增加微标快捷按钮，设置页面顶部常驻控制卡片。
 
 ---
 
-## 📱 三、应用当前已具备的功能全景 (Feature Matrix)
+## ⚡ 三、本地 65 秒极速编译构建体系 (Local Build Pipeline)
 
-1. **AI Compute Console 移动大屏总览**:
-   * Bento Grid 航天机能风格面板；
-   * 今日 / 本月 / 历史 Token 总量与折算人民币费用实时遥测；
-   * 活跃客户端（Antigravity、Codex、Claude 等）与主力模型占比环形仪表盘。
-2. **实时数据流与多端同步**:
-   * 支持通过 SSE (Server-Sent Events) 长连接秒级同步桌面端/云端 Hub 算力；
-   * 断网或离线时由 `shared_preferences` 提供离线镜像缓存，杜绝白屏。
-3. **AI 消费小票 (Token Receipt) 撕纸与相册存图**:
-   * 模拟热敏收银纸微刻排版与真实镂空撕纸锯齿；
-   * 附带 AI 毒舌神吐槽文案；
-   * 3.0x 超采样位图渲染，通过原生 Kotlin `MediaStore` Platform Channel 一键保存至手机系统相册（`Pictures/TokenMonitor`）。
-4. **Android 桌面小组件 (`home_widget`)**:
-   * 4x2、2x2 原生 AppWidget，支持桌面常驻显示今日 Token 与限额状态。
-5. **黑白双主题切换**:
-   * 黑曜石冰蓝 / 暖白色暖黄双套高质感配色。
-6. **AI Passport 随身极客副屏 BLE 中继**:
-   * 随身外出携带场景下的无线低功耗中继与自动对时。
-7. **随身工牌身份档案无线修改与 NVS 固化 (v1.1.7)**:
-   * 支持在手机 App 内直连编辑开发板工牌上的极客昵称 (Name) 与账号/邮箱 (Owner)；
-   * 通过 BLE 将指令下发并固化写入 ESP32 内部 NVS 闪存，即改即显，掉电不丢。
+为了摆脱云端 GitHub Actions 每次耗时 8 分多钟的低效等待，本地已在 **D 盘** 建立完整的纯命令行极速构建环境：
+
+### 1. 环境目录与配置 (100% 隔离 C 盘)
+* **Flutter SDK**: `D:\dev_tools\flutter` (v3.24.5 稳定版)
+* **Android SDK**: `D:\dev_tools\android-sdk` (`cmdline-tools`, `build-tools 34.0.0`, `platforms;android-33`, `platforms;android-34`)
+* **Gradle 缓存**: 环境变量 `GRADLE_USER_HOME=D:\dev_tools\.gradle`，强行重定向缓存至 D 盘，**系统 C 盘 0 字节侵占**；
+* **国内镜像加速**:
+  * `PUB_HOSTED_URL=https://pub.flutter-io.cn`
+  * `FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn`
+  * `android/settings.gradle` 和 `android/build.gradle` 已接入阿里云 Maven & Plugin 高速镜像源。
+
+### 2. 架构优化与一键打包
+* 默认打包命令已优化为主流 64 位单架构：
+  ```bash
+  flutter build apk --release --target-platform android-arm64
+  ```
+* 打包时间从 **8 分 15 秒 缩短至 65 秒**，包体由 **38.5MB 缩小至 22.6MB**；
+* 根目录提供一键脚本：双击 [`build_apk.bat`](file:///D:/PYTHON/APP/token%20monitor/build_apk.bat) 即可全自动完成依赖解析、打包与产物自动复制。
 
 ---
 
-## ⚠️ 四、尚存限制、潜在边界与待优化点 (Known Limitations & Pending Bugs)
+## ⚠️ 四、技术防坑指南 (CRITICAL PITFALLS - 必读)
 
-如果后续会话或开发者继续迭代该模块，请特别注意以下边界与优化空间：
+接手开发或继续迭代该模块时，**绝对不能违反以下原则**：
 
-1. **构建依赖陷阱 (CRITICAL - DO NOT TOUCH)**:
-   * **严禁将 `flutter_blue_plus` 升级为 `^1.34.0`**！
-   * **原因**：`flutter_blue_plus 1.34+` 改用了 federated architecture 并引入 `flutter_blue_plus_android-7.x`，其内部 `build.gradle` 强制评估 `compileSdkVersion flutter.compileSdkVersion`，在当前声明式 Gradle 插件体系下会报 `Could not get unknown property 'flutter' for extension 'android'`，导致云端 APK 编译中断。当前锁定 `1.32.11` 稳定版本是最优解。
-2. **Android 系统后台 Doze 模式与长久保活**:
-   * **现状**：当手机锁屏超过数十分钟进入 Android Doze 深度休眠、或系统内存吃紧杀死前台进程时，BLE 连接会被操作系统断开。
-   * **待优化方案**：后续若需要支持全天候锁屏不间断中继，可引入 Android `ForegroundService`（前台通知保活服务），并在设置中引导用户加入系统“忽略电池优化”白名单。
-3. **多设备配对选择弹窗**:
-   * **现状**：当前的 `startAutoScanAndConnect` 策略是扫描并自动秒级直连附近出现的**第一个**匹配名称（如 `Codex-xxxx` 或 `AI-Passport`）的设备。
-   * **待优化方案**：如果同一空间内有多块开发板，建议在 UI 上扩展一个底部 BottomSheet，列出扫描到的所有候选设备及其 RSSI 信号强度，允许用户点选特定设备进行绑定。
-4. **断开后的智能重连策略**:
-   * **现状**：连接断开后，为防止过度消耗手机电池，目前未开启无休止的高频重试轮询，需要用户在卡片上手动点击重新扫描连接。
-   * **待优化方案**：可增加一个带有指数退避（5s -> 15s -> 30s -> 60s）且限制重试次数（如最多 5 次）的自动重连状态机。
+1. **绝对不要升级 `flutter_blue_plus` 到 `^1.34.0`**：
+   * **原因**：`flutter_blue_plus 1.34+` 改用了 federated architecture 并引入 `flutter_blue_plus_android-7.x`，其内部 `build.gradle` 强制使用已废弃的 `compileSdkVersion flutter.compileSdkVersion`，在当前声明式 Gradle 体系下会导致构建直接报错中断。**必须严格锁定 `1.32.11` 稳定版本**。
+2. **Windows 跨盘符编译崩溃陷阱 (`different roots`)**：
+   * **现象**：当项目在 D 盘而 pub 依赖在 C 盘时，Kotlin 增量编译器计算相对路径时会抛出 `IllegalArgumentException: this and base files have different roots`；
+   * **解决方案**：必须在 `mobile/android/gradle.properties` 中保持 `kotlin.incremental=false`。
+3. **Android SDK 依赖必须同时具备 API 33 和 API 34**：
+   * 主工程 targetSdk 为 34，但 `flutter_blue_plus` 插件的 compileSdk 为 33。本地 SDK 目录 `D:\dev_tools\android-sdk\platforms` 下必须同时保留 `android-33` 与 `android-34`。
+4. **Gradle `afterEvaluate` 禁忌**：
+   * 根目录 `android/build.gradle` 中不能在 `evaluationDependsOn(":app")` 之后再调用 `subprojects.afterEvaluate`，否则会引发 Gradle 生命周期错乱报错。
+
+---
+
+## 🔮 五、尚存局限与后续演进建议 (Roadmap)
+
+1. **Android 后台 Doze 模式与长时间保活**：
+   * **现状**：手机深度锁屏数十分钟后进入系统休眠，BLE 链路会被操作系统挂起或中断；
+   * **演进方案**：后续若需要全天候锁屏不间断中继，可引入 Android `ForegroundService` 前台通知保活，并提示用户将 App 加入系统电池优化白名单。
+2. **多设备配对选择器**：
+   * **现状**：目前策略是扫描并直连附近发现的第一个匹配名称（如 `Codex-xxxx` 或 `AI-Passport`）的设备；
+   * **演进方案**：若同一空间存在多块副屏，可在 UI 上弹出 BottomSheet 列表，展示扫描到的设备名称与 RSSI 信号强度供用户自选。
+3. **断开后自动指数退避重连**：
+   * **现状**：连接断开后为节省手机电量，需手动点击重连；
+   * **演进方案**：增加带有指数退避（5s -> 15s -> 30s -> 60s）且最多重试 5 次的自动重连状态机。

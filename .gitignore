@@ -25,4 +25,8 @@ worker/.dev.vars
 devlog/
 mobile/build/
 mobile/build-output/
+mobile/.dart_tool/
+mobile/.flutter-plugins*
+mobile/android/.gradle/
+mobile/android/local.properties
 *.apk
