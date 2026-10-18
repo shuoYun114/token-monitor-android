@@ -79,20 +79,13 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(9),
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 顶部瑞士精准红定位条
-              Positioned(
-                top: 0,
-                left: 18,
-                child: Container(
-                  width: 28,
-                  height: 2.0,
-                  decoration: BoxDecoration(
-                    color: accent,
-                    borderRadius: BorderRadius.circular(1),
-                  ),
-                ),
+              // 顶部 2px 瑞士精准红结构标线 (Argon Swiss Accent Rule)
+              Container(
+                height: 2.0,
+                color: accent,
               ),
 
               Padding(
@@ -276,7 +269,7 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
 
                         const SizedBox(width: 14),
 
-                        // 右侧瑞士精密微刻度动态旋转仪 (精致紧凑，88x88，留出呼吸感)
+                        // 右侧瑞士精密微刻度动态旋转仪 (88x88，纯净物理刻度与动态指针)
                         SizedBox(
                           width: 88,
                           height: 88,
@@ -288,35 +281,6 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                                   rotationValue: _rotationController.value,
                                   isLight: isLight,
                                   accentColor: accent,
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 13,
-                                        height: 13,
-                                        decoration: BoxDecoration(
-                                          color: accent,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Center(
-                                          child: Icon(Icons.add, size: 9, color: Colors.white),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'SWISS',
-                                        style: TextStyle(
-                                          color: textPrimary,
-                                          fontSize: 7,
-                                          fontWeight: FontWeight.w900,
-                                          fontFamily: 'monospace',
-                                          letterSpacing: 0.8,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               );
                             },
@@ -382,7 +346,7 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
 }
 
 
-/// 绘制右侧方圆互锁瑞士精密刻度旋转罗盘
+/// 绘制右侧方圆互锁瑞士精密刻度旋转罗盘 (Argon 60-Tick Chrono Dial 架构)
 class _SwissDialPainter extends CustomPainter {
   final double rotationValue; // 0.0 ~ 1.0
   final bool isLight;
@@ -396,93 +360,91 @@ class _SwissDialPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final maxRadius = math.min(size.width, size.height) / 2 - 2;
+    final Offset center = Offset(size.width / 2, size.height / 2);
+    final double outerRadius = size.width / 2;
+    final Color borderCol = isLight ? const Color(0xFFE4E4E7) : const Color(0xFF27272A);
+    final Color textSecondary = isLight ? const Color(0xFF52525B) : const Color(0xFFA1A1AA);
+    final Color textPrimary = isLight ? const Color(0xFF09090B) : const Color(0xFFFAFAFA);
 
-    // 1. 最外层 0.8px 发丝底圈
-    final trackPaint = Paint()
-      ..color = isLight ? const Color(0xFFD4D4D8) : const Color(0xFF27272A)
+    // 1. 微妙外层容纳环
+    final Paint ringPaint = Paint()
+      ..color = borderCol
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.8;
-    canvas.drawCircle(center, maxRadius, trackPaint);
+    canvas.drawCircle(center, outerRadius - 0.5, ringPaint);
 
-    // 2. 60 单元高精度物理刻度线 (逢 5 加长并带有瑞士红强调)
-    const tickCount = 60;
-    for (int i = 0; i < tickCount; i++) {
-      final angle = (i * 6) * math.pi / 180.0;
-      final isMajor = i % 5 == 0;
-      final isRedQuarter = i % 15 == 0;
-      final length = isMajor ? 5.5 : 2.5;
+    // 2. 60 单元物理刻度线 (逢 5 长刻度，动态指针高光扫视与渐隐拖尾)
+    const int totalTicks = 60;
+    final int activeTickIndex = (rotationValue * totalTicks).floor() % totalTicks;
 
-      final p1 = Offset(
-        center.dx + (maxRadius - length) * math.cos(angle),
-        center.dy + (maxRadius - length) * math.sin(angle),
+    for (int i = 0; i < totalTicks; i++) {
+      final bool isMajor = i % 5 == 0;
+      final bool isActive = i == activeTickIndex;
+      final bool isTrail =
+          (activeTickIndex - i + totalTicks) % totalTicks <= 4 &&
+              i != activeTickIndex;
+
+      final double baseAngle = (i * 2 * math.pi / totalTicks) - (math.pi / 2);
+      final double tickLength = isMajor ? 7.0 : 4.0;
+      final double innerRadius = outerRadius - 4.0 - tickLength;
+      final double tickOuterRadius = outerRadius - 4.0;
+
+      final Offset p1 = Offset(
+        center.dx + innerRadius * math.cos(baseAngle),
+        center.dy + innerRadius * math.sin(baseAngle),
       );
-      final p2 = Offset(
-        center.dx + maxRadius * math.cos(angle),
-        center.dy + maxRadius * math.sin(angle),
+      final Offset p2 = Offset(
+        center.dx + tickOuterRadius * math.cos(baseAngle),
+        center.dy + tickOuterRadius * math.sin(baseAngle),
       );
 
-      final tickPaint = Paint()
-        ..color = isRedQuarter
-            ? accentColor
-            : (isMajor
-                ? (isLight ? const Color(0xFF18181B) : const Color(0xFFFAFAFA))
-                : (isLight ? const Color(0xFFA1A1AA) : const Color(0xFF52525B)))
-        ..strokeWidth = isMajor ? 1.2 : 0.7;
+      final Paint tickPaint = Paint()
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = isActive ? 1.8 : (isMajor ? 1.2 : 0.8);
+
+      if (isActive) {
+        tickPaint.color = accentColor;
+      } else if (isTrail) {
+        tickPaint.color = accentColor.withOpacity(0.45);
+      } else if (isMajor) {
+        tickPaint.color = textSecondary;
+      } else {
+        tickPaint.color = borderCol;
+      }
 
       canvas.drawLine(p1, p2, tickPaint);
     }
 
-    // 3. 动态旋转的瑞士双轨红白能量弧
-    final innerRadius = maxRadius - 10;
-    final rotAngle = rotationValue * 2 * math.pi;
+    // 3. 内部精度副环
+    canvas.drawCircle(center, outerRadius * 0.46, ringPaint);
 
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(rotAngle);
-
-    final arcPaint = Paint()
-      ..color = accentColor.withOpacity(0.9)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.square; // 瑞士风格：硬朗方头笔触，拒绝圆滑
-
-    // 绘制对角双弧
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset.zero, radius: innerRadius),
-      0,
-      math.pi * 0.45,
-      false,
-      arcPaint,
+    // 4. 旋转的瑞士红指针线
+    final double needleAngle = (rotationValue * 2 * math.pi) - (math.pi / 2);
+    final Offset needleStart = Offset(
+      center.dx + (outerRadius * 0.20) * math.cos(needleAngle),
+      center.dy + (outerRadius * 0.20) * math.sin(needleAngle),
     );
-
-    final whiteArcPaint = Paint()
-      ..color = isLight ? const Color(0xFF18181B) : const Color(0xFFE4E4E7)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..strokeCap = StrokeCap.square;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset.zero, radius: innerRadius),
-      math.pi,
-      math.pi * 0.45,
-      false,
-      whiteArcPaint,
+    final Offset needleEnd = Offset(
+      center.dx + (outerRadius * 0.64) * math.cos(needleAngle),
+      center.dy + (outerRadius * 0.64) * math.sin(needleAngle),
     );
-
-    // 旋转点
-    final dotPaint = Paint()
+    final Paint needlePaint = Paint()
       ..color = accentColor
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(innerRadius, 0), 2.0, dotPaint);
+      ..strokeWidth = 1.3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(needleStart, needleEnd, needlePaint);
 
-    canvas.restore();
+    // 5. 中心轴点微刻
+    final Paint centerDotPaint = Paint()
+      ..color = textPrimary
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 2.2, centerDotPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _SwissDialPainter oldDelegate) =>
-      oldDelegate.rotationValue != rotationValue ||
-      oldDelegate.isLight != isLight ||
-      oldDelegate.accentColor != accentColor;
+  bool shouldRepaint(covariant _SwissDialPainter oldDelegate) {
+    return oldDelegate.rotationValue != rotationValue ||
+        oldDelegate.isLight != isLight ||
+        oldDelegate.accentColor != accentColor;
+  }
 }

@@ -218,106 +218,120 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // =========================================================
-            // 2. Bento Grid 双列次级情报舱 (Bento Aerospace Pods)
+            // 2. Bento Grid 双列次级情报舱 (IntrinsicHeight 等高数学网格)
             // =========================================================
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 左翼：本月支出与累计趋势 (瑞士网格排版)
-                Expanded(
-                  child: GlassContainer(
-                    enableSwissAccent: true,
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_month_rounded, size: 14, color: accent),
-                            const SizedBox(width: 6),
-                            Text(
-                              '本月消耗',
-                              style: TextStyle(
-                                color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 左翼：本月支出与累计趋势 (瑞士网格排版)
+                  Expanded(
+                    child: GlassContainer(
+                      enableSwissAccent: true,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_month_rounded, size: 14, color: accent),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '本月消耗',
+                                    style: TextStyle(
+                                      color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            _formatCost(stats?.month.costUsd ?? 0.0, settings),
-                            style: TextStyle(
-                              color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              fontFamily: 'monospace',
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              'Token: ',
-                              style: TextStyle(
-                                color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
-                                fontSize: 10.5,
-                                fontFamily: 'monospace',
+                              const SizedBox(height: 10),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  _formatCost(stats?.month.costUsd ?? 0.0, settings),
+                                  style: TextStyle(
+                                    color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                    fontFamily: 'monospace',
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
                               ),
-                            ),
-                            Text(
-                              _formatTokensShort(stats?.month.totalTokens ?? 0),
-                              style: TextStyle(
-                                color: accent,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                fontFamily: 'monospace',
+                              const SizedBox(height: 3),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Token: ',
+                                    style: TextStyle(
+                                      color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                                      fontSize: 10.5,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatTokensShort(stats?.month.totalTokens ?? 0),
+                                    style: TextStyle(
+                                      color: accent,
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w800,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                          decoration: BoxDecoration(
-                            color: isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D),
-                            borderRadius: BorderRadius.circular(3),
-                            border: Border.all(
-                              color: isLight ? const Color(0xFFD4D4D8) : const Color(0xFF27272A),
-                              width: 0.8,
-                            ),
+                            ],
                           ),
-                          child: Text(
-                            '${today.clients.length} 款工具活跃',
-                            style: TextStyle(
-                              color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'monospace',
-                            ),
+                          const SizedBox(height: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${today.clients.length} 款工具活跃',
+                                style: TextStyle(
+                                  color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(2),
+                                child: LinearProgressIndicator(
+                                  value: stats != null && stats.month.totalTokens > 0
+                                      ? (today.totalTokens / stats.month.totalTokens).clamp(0.0, 1.0)
+                                      : 0.0,
+                                  minHeight: 3.0,
+                                  backgroundColor: isLight ? const Color(0xFFE4E4E7) : const Color(0xFF27272A),
+                                  valueColor: AlwaysStoppedAnimation<Color>(accent),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
+                  const SizedBox(width: 12),
 
-                // 右翼：AI 额度健康雷达 (瑞士网格排版)
-                Expanded(
-                  child: GlassContainer(
-                    enableSwissAccent: true,
-                    padding: const EdgeInsets.all(16),
-                    child: _buildQuotaRadarWidget(provider, isLight),
+                  // 右翼：AI 额度健康雷达 (瑞士网格排版)
+                  Expanded(
+                    child: GlassContainer(
+                      enableSwissAccent: true,
+                      padding: const EdgeInsets.all(16),
+                      child: _buildQuotaRadarWidget(provider, isLight),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -534,62 +548,80 @@ class HomeScreen extends StatelessWidget {
     if (provider.limits.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.shield_outlined, size: 13, color: AppColors.emerald),
-              const SizedBox(width: 5),
+              Row(
+                children: [
+                  const Icon(Icons.shield_outlined, size: 13, color: AppColors.emerald),
+                  const SizedBox(width: 5),
+                  Text(
+                    '额度健康',
+                    style: TextStyle(
+                      color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  '100%',
+                  style: TextStyle(
+                    color: AppColors.emerald,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    fontFamily: 'monospace',
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 3),
               Text(
-                '额度健康',
+                '所有服务正常',
                 style: TextStyle(
-                  color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
+                  color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                  fontSize: 10.5,
                   fontFamily: 'monospace',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          const Text(
-            '100%',
-            style: TextStyle(
-              color: AppColors.emerald,
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'monospace',
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '所有服务正常',
-            style: TextStyle(
-              color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
-              fontSize: 10,
-              fontFamily: 'monospace',
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppColors.emerald.withOpacity(isLight ? 0.08 : 0.15),
-              borderRadius: BorderRadius.circular(3),
-              border: Border.all(
-                color: AppColors.emerald.withOpacity(0.35),
-                width: 0.8,
+          const SizedBox(height: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '全线就绪',
+                style: TextStyle(
+                  color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'monospace',
+                ),
               ),
-            ),
-            child: const Text(
-              '已就绪',
-              style: TextStyle(
-                color: AppColors.emerald,
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'monospace',
+              const SizedBox(height: 6),
+              Row(
+                children: List.generate(12, (index) {
+                  return Expanded(
+                    child: Container(
+                      height: 3.0,
+                      margin: EdgeInsets.only(right: index == 11 ? 0 : 2.0),
+                      decoration: BoxDecoration(
+                        color: AppColors.emerald,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  );
+                }),
               ),
-            ),
+            ],
           ),
         ],
       );
@@ -611,105 +643,121 @@ class HomeScreen extends StatelessWidget {
     final color = p > 50 ? AppColors.emerald : (p > 20 ? AppColors.amber : AppColors.swissRedBright);
     final winLabel = lowestWindow != null ? '$providerName · ${lowestWindow.label}' : '健康';
     final resetTime = lowestWindow?.formattedResetCountdown;
+    final activeSegments = ((p / 100.0) * 12).round().clamp(0, 12);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Icons.shield_outlined, size: 13, color: AppColors.emerald),
-                const SizedBox(width: 5),
-                Text(
-                  '额度雷达',
-                  style: TextStyle(
-                    color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: 'monospace',
+                Row(
+                  children: [
+                    const Icon(Icons.shield_outlined, size: 13, color: AppColors.emerald),
+                    const SizedBox(width: 5),
+                    Text(
+                      '额度雷达',
+                      style: TextStyle(
+                        color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(1),
                   ),
                 ),
               ],
             ),
-            Container(
-              width: 5,
-              height: 5,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(1),
+            const SizedBox(height: 10),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '${p.round()}',
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      fontFamily: 'monospace',
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  Text(
+                    '%',
+                    style: TextStyle(
+                      color: color.withOpacity(0.7),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
               ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              winLabel,
+              style: TextStyle(
+                color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                fontSize: 10.5,
+                fontFamily: 'monospace',
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '${p.round()}',
-                style: TextStyle(
-                  color: color,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  fontFamily: 'monospace',
-                  letterSpacing: -0.5,
-                ),
-              ),
-              Text(
-                '%',
-                style: TextStyle(
-                  color: color.withOpacity(0.7),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          winLabel,
-          style: TextStyle(
-            color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
-            fontSize: 9.5,
-            fontFamily: 'monospace',
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 6),
-        if (resetTime != null && resetTime.isNotEmpty) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: color.withOpacity(isLight ? 0.08 : 0.15),
-              borderRadius: BorderRadius.circular(3),
-              border: Border.all(
-                color: color.withOpacity(0.35),
-                width: 0.8,
-              ),
-            ),
-            child: Text(
-              '$resetTime 重置',
+        const SizedBox(height: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              resetTime != null && resetTime.isNotEmpty ? '$resetTime 重置' : '健康运行',
               style: TextStyle(
-                color: color,
-                fontSize: 9,
+                color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                fontSize: 10,
                 fontWeight: FontWeight.w700,
                 fontFamily: 'monospace',
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Row(
+              children: List.generate(12, (index) {
+                final isLit = index < activeSegments;
+                return Expanded(
+                  child: Container(
+                    height: 3.0,
+                    margin: EdgeInsets.only(right: index == 11 ? 0 : 2.0),
+                    decoration: BoxDecoration(
+                      color: isLit
+                          ? color
+                          : (isLight ? const Color(0xFFE4E4E7) : const Color(0xFF27272A)),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ],
     );
   }
