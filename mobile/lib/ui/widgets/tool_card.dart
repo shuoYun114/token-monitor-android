@@ -29,62 +29,48 @@ class ToolCard extends StatelessWidget {
         ? '¥${(costUsd * rate).toStringAsFixed(2)}'
         : '\$${costUsd.toStringAsFixed(2)}';
 
-    final cardBg = isLight ? AppColors.lightGlassCard : AppColors.glassCard;
-    final toolNameColor = isLight ? AppColors.lightTextPrimary : AppColors.warmWhite;
+    final cardBg = isLight ? AppColors.swissLightSurface : AppColors.swissDarkSurface;
+    final borderColor = isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder;
+    final toolNameColor = isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary;
     final costColor = isLight
-        ? AppColors.warmYellowDark
-        : ((costUsd > 0) ? AppColors.warmYellow : AppColors.warmWhite);
+        ? (costUsd > 0 ? AppColors.swissRed : AppColors.swissLightTextSecondary)
+        : (costUsd > 0 ? AppColors.swissRedBright : AppColors.swissDarkTextSecondary);
 
     return GlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      borderRadius: 14,
-      borderColor: isLight ? AppColors.lightGlassBorder : toolColor.withOpacity(0.24),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      borderRadius: 6, // 瑞士硬朗 6px 微倒角
+      borderColor: borderColor,
       backgroundColor: cardBg,
-      topHighlightColor: AppColors.glassTopHighlightWarm,
       onTap: onTap,
       child: Row(
         children: [
-          // 左侧航天插槽微流光色条
+          // 左侧精密发丝色条
           Container(
-            width: 3,
-            height: 32,
-            margin: const EdgeInsets.only(right: 12),
+            width: 2.5,
+            height: 28,
+            margin: const EdgeInsets.only(right: 10),
             decoration: BoxDecoration(
               color: toolColor,
-              borderRadius: BorderRadius.circular(2),
-              boxShadow: [
-                BoxShadow(
-                  color: toolColor.withOpacity(0.6),
-                  blurRadius: 6,
-                  spreadRadius: 0.5,
-                ),
-              ],
+              borderRadius: BorderRadius.circular(1),
             ),
           ),
-          // 工具专属图标 (带有内衬流光底板)
+          // 工具专属图标 (几何平坦底座 + 发丝线边框)
           Container(
-            width: 42,
-            height: 42,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
-              color: toolColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: toolColor.withOpacity(0.38), width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: toolColor.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              color: toolColor.withOpacity(isLight ? 0.08 : 0.14),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: toolColor.withOpacity(0.35), width: 0.8),
             ),
             alignment: Alignment.center,
             child: Icon(
               _getToolIcon(clientName),
               color: toolColor,
-              size: 22,
+              size: 20,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           // 工具名称与 Token 统计
           Expanded(
             child: Column(
@@ -96,42 +82,36 @@ class ToolCard extends StatelessWidget {
                       _formatToolName(clientName),
                       style: TextStyle(
                         color: toolNameColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'monospace',
                       ),
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      width: 6,
-                      height: 6,
+                      width: 4.5,
+                      height: 4.5,
                       decoration: BoxDecoration(
                         color: AppColors.emerald,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.emerald.withOpacity(0.8),
-                            blurRadius: 4,
-                            spreadRadius: 1,
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(1),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   _formatTokens(tokenCount),
                   style: TextStyle(
-                    color: isLight ? AppColors.lightTextSecondary : AppColors.cyan,
-                    fontSize: 12,
+                    color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                    fontSize: 11,
                     fontFamily: 'monospace',
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
           ),
-          // 今日金额展示 (大于0展示温润暖黄)
+          // 今日金额展示 (瑞士高对比排版)
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -139,18 +119,19 @@ class ToolCard extends StatelessWidget {
                 costText,
                 style: TextStyle(
                   color: costColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
                   fontFamily: 'monospace',
-                  letterSpacing: -0.3,
+                  letterSpacing: -0.4,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 1),
               Text(
                 '今日消耗',
                 style: TextStyle(
-                  color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
-                  fontSize: 10,
+                  color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                  fontSize: 9.5,
+                  fontFamily: 'monospace',
                 ),
               ),
             ],

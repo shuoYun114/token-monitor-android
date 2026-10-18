@@ -49,9 +49,10 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
     if (widget.models.isEmpty) return const SizedBox.shrink();
 
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final primaryTextColor = isLight ? AppColors.lightTextPrimary : AppColors.warmWhite;
-    final mutedTextColor = isLight ? AppColors.lightTextMuted : AppColors.textMuted;
-    final trackColor = isLight ? const Color(0xFFE2E8F0) : AppColors.surfaceLight;
+    final primaryTextColor = isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary;
+    final mutedTextColor = isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted;
+    final trackColor = isLight ? const Color(0xFFE4E4E7) : const Color(0xFF18181D);
+    final accent = AppColors.getThemeAccent(isLight);
 
     // 按 Token 消耗量从高到低排序
     final sortedEntries = widget.models.entries.toList()
@@ -59,9 +60,8 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
 
     return GlassContainer(
       padding: const EdgeInsets.all(16),
-      enableCornerBolts: true,
-      podTag: 'TELEMETRY // MODELS',
-      topHighlightColor: AppColors.glassTopHighlightWarm,
+      enableSwissAccent: true,
+      podTag: '05 // MODELS',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -70,24 +70,27 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.hub_outlined, size: 16, color: isLight ? AppColors.warmYellowDark : AppColors.cyan),
+                  Icon(Icons.hub_outlined, size: 15, color: accent),
                   const SizedBox(width: 6),
                   Text(
                     '今日活跃模型',
                     style: TextStyle(
                       color: primaryTextColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w900,
+                      fontFamily: 'monospace',
                     ),
                   ),
                 ],
               ),
               Text(
-                '点击条目展开细分',
+                'TAP TO EXPAND',
                 style: TextStyle(
                   color: mutedTextColor,
-                  fontSize: 10,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
                   fontFamily: 'monospace',
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
@@ -147,28 +150,28 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
             );
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () => _toggleExpand(modelName),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(4),
                   child: Container(
                     decoration: BoxDecoration(
                       color: isExpanded
-                          ? (isLight ? Colors.black.withOpacity(0.025) : Colors.white.withOpacity(0.035))
+                          ? (isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D))
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                       border: isExpanded
                           ? Border.all(
-                              color: color.withOpacity(0.35),
+                              color: isLight ? const Color(0xFFD4D4D8) : const Color(0xFF27272A),
                               width: 0.8,
                             )
                           : null,
                     ),
                     padding: EdgeInsets.symmetric(
-                      horizontal: isExpanded ? 8 : 0,
-                      vertical: isExpanded ? 8 : 2,
+                      horizontal: isExpanded ? 8 : 2,
+                      vertical: isExpanded ? 8 : 4,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,18 +179,11 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
                         Row(
                           children: [
                             Container(
-                              width: 7,
-                              height: 7,
+                              width: 6,
+                              height: 6,
                               decoration: BoxDecoration(
                                 color: color,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: color.withOpacity(0.6),
-                                    blurRadius: 5,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
+                                borderRadius: BorderRadius.circular(1.5),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -196,8 +192,8 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
                                 modelName,
                                 style: TextStyle(
                                   color: primaryTextColor,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
                                   fontFamily: 'monospace',
                                 ),
                                 maxLines: 1,
@@ -207,26 +203,26 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
                             Text(
                               _formatTokens(tokens),
                               style: TextStyle(
-                                color: isLight ? AppColors.warmYellowDark : AppColors.cyan,
-                                fontSize: 12,
+                                color: accent,
+                                fontSize: 11.5,
                                 fontFamily: 'monospace',
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.14),
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: color.withOpacity(0.35), width: 0.6),
+                                color: color.withOpacity(isLight ? 0.08 : 0.15),
+                                borderRadius: BorderRadius.circular(3),
+                                border: Border.all(color: color.withOpacity(0.35), width: 0.8),
                               ),
                               child: Text(
                                 '$percentStr%',
                                 style: TextStyle(
                                   color: color,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w800,
                                   fontFamily: 'monospace',
                                 ),
                               ),
@@ -234,7 +230,7 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
                             const SizedBox(width: 4),
                             Icon(
                               isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                              size: 16,
+                              size: 15,
                               color: mutedTextColor.withOpacity(0.7),
                             ),
                           ],

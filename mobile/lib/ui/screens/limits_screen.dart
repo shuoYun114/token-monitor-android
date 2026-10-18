@@ -16,11 +16,52 @@ class LimitsScreen extends StatelessWidget {
     final accent = AppColors.getThemeAccent(isLight);
 
     return Scaffold(
+      backgroundColor: isLight ? AppColors.swissLightBg : AppColors.swissDarkBg,
       appBar: AppBar(
-        title: const Text('AI 额度与余额'),
+        title: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(4), // 瑞士极简几何微标
+              ),
+              child: const Center(
+                child: Icon(Icons.add, size: 16, color: Colors.white), // 纯正瑞士十字
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'AI LIMITS & QUOTA',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                Text(
+                  'MULTI-PROVIDER BALANCE',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: accent),
+            icon: Icon(Icons.refresh_rounded, color: accent, size: 21),
             onPressed: () => provider.refreshNow(),
           ),
         ],
@@ -31,12 +72,25 @@ class LimitsScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.speed_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.5)),
+                  Icon(Icons.speed_rounded, size: 48, color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted),
                   const SizedBox(height: 12),
-                  const Text('暂无 AI 额度提供商数据', style: TextStyle(color: AppColors.textMuted)),
+                  Text(
+                    '暂无 AI 额度提供商数据',
+                    style: TextStyle(
+                      color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  const Text('在设置中添加 API Key 或连接已配置 Limits 的 Hub',
-                      style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                  Text(
+                    '在设置中添加 API Key 或连接已配置 Limits 的 Hub',
+                    style: TextStyle(
+                      color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
                 ],
               ),
             )
@@ -50,11 +104,8 @@ class LimitsScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
-                    enableCornerBolts: true,
+                    enableSwissAccent: true,
                     podTag: '${item.id.toUpperCase()} // QUOTA',
-                    borderColor: provColor.withOpacity(0.28),
-                    glowColor: provColor.withOpacity(0.12),
-                    topHighlightColor: AppColors.glassTopHighlightWarm,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -67,16 +118,9 @@ class LimitsScreen extends StatelessWidget {
                                   width: 36,
                                   height: 36,
                                   decoration: BoxDecoration(
-                                    color: provColor.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: provColor.withOpacity(0.35), width: 1),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: provColor.withOpacity(0.25),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                                    color: provColor.withOpacity(isLight ? 0.08 : 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: provColor.withOpacity(0.35), width: 0.8),
                                   ),
                                   child: Icon(
                                     _getProviderIcon(item.id),
@@ -91,17 +135,18 @@ class LimitsScreen extends StatelessWidget {
                                     Text(
                                       item.name,
                                       style: TextStyle(
-                                        color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhite,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
+                                        color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w900,
+                                        fontFamily: 'monospace',
                                       ),
                                     ),
                                     if (item.account != null)
                                       Text(
                                         item.account!,
                                         style: TextStyle(
-                                          color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
-                                          fontSize: 11,
+                                          color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                                          fontSize: 10,
                                           fontFamily: 'monospace',
                                         ),
                                       ),
@@ -131,15 +176,16 @@ class LimitsScreen extends StatelessWidget {
   Widget _buildBalanceRow(LimitWindow win, Color provColor, bool isLight) {
     final curSymbol = win.currency == 'CNY' ? '¥' : '\$';
     final balStr = win.balance != null ? '$curSymbol${win.balance!.toStringAsFixed(2)}' : '--';
+    final accent = AppColors.getThemeAccent(isLight);
     return Container(
       margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isLight ? const Color(0xFFFEF3C7).withOpacity(0.6) : AppColors.warmYellowCard,
-        borderRadius: BorderRadius.circular(12),
+        color: isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D),
+        borderRadius: BorderRadius.circular(4), // 瑞士硬朗 4px
         border: Border.all(
-          color: isLight ? AppColors.warmYellowDark.withOpacity(0.3) : AppColors.warmYellowBorder,
-          width: 1,
+          color: isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder,
+          width: 0.8,
         ),
       ),
       child: Row(
@@ -148,16 +194,17 @@ class LimitsScreen extends StatelessWidget {
           Text(
             win.label,
             style: TextStyle(
-              color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhiteSoft,
+              color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'monospace',
             ),
           ),
           Text(
             balStr,
             style: TextStyle(
-              color: isLight ? AppColors.warmYellowDark : AppColors.warmYellow,
-              fontSize: 16,
+              color: accent,
+              fontSize: 15,
               fontWeight: FontWeight.w900,
               fontFamily: 'monospace',
               letterSpacing: -0.4,
@@ -182,9 +229,10 @@ class LimitsScreen extends StatelessWidget {
               Text(
                 win.label,
                 style: TextStyle(
-                  color: isLight ? AppColors.lightTextSecondary : AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'monospace',
                 ),
               ),
               Row(
@@ -195,7 +243,7 @@ class LimitsScreen extends StatelessWidget {
                     win.formattedPercent,
                     style: TextStyle(
                       color: activeColor,
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w900,
                       fontFamily: 'monospace',
                     ),
@@ -204,42 +252,34 @@ class LimitsScreen extends StatelessWidget {
                   Text(
                     '剩余',
                     style: TextStyle(
-                      color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
-                      fontSize: 10,
+                      color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                      fontSize: 9.5,
+                      fontFamily: 'monospace',
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 7),
-          // 能量槽
+          const SizedBox(height: 6),
+          // 能量槽 (瑞士平坦发丝轨)
           Stack(
             children: [
               Container(
-                height: 6,
+                height: 5,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: isLight ? const Color(0xFFE2E8F0) : AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(3),
+                  color: isLight ? const Color(0xFFE4E4E7) : const Color(0xFF27272A),
+                  borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
               FractionallySizedBox(
                 widthFactor: percentVal,
                 child: Container(
-                  height: 6,
+                  height: 5,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [activeColor.withOpacity(0.6), activeColor],
-                    ),
-                    borderRadius: BorderRadius.circular(3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: activeColor.withOpacity(0.35),
-                        blurRadius: 6,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
+                    color: activeColor,
+                    borderRadius: BorderRadius.circular(2.5),
                   ),
                 ),
               ),
@@ -252,14 +292,14 @@ class LimitsScreen extends StatelessWidget {
                 Icon(
                   Icons.access_time_rounded,
                   size: 11,
-                  color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+                  color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '$resetText 后重置',
                   style: TextStyle(
-                    color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
-                    fontSize: 10,
+                    color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                    fontSize: 9.5,
                     fontFamily: 'monospace',
                   ),
                 ),
@@ -273,30 +313,23 @@ class LimitsScreen extends StatelessWidget {
 
   Widget _buildStatusTag(String status) {
     final isOk = status == 'ok';
-    final color = isOk ? AppColors.emerald : AppColors.rose;
+    final color = isOk ? AppColors.emerald : AppColors.swissRedBright;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
       decoration: BoxDecoration(
         color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3), width: 0.8),
+        borderRadius: BorderRadius.circular(3), // 瑞士硬朗 3px 微倒角
+        border: Border.all(color: color.withOpacity(0.35), width: 0.8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 5,
-            height: 5,
+            width: 4.5,
+            height: 4.5,
             decoration: BoxDecoration(
               color: color,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.8),
-                  blurRadius: 4,
-                  spreadRadius: 1,
-                ),
-              ],
+              borderRadius: BorderRadius.circular(1),
             ),
           ),
           const SizedBox(width: 5),
@@ -305,7 +338,8 @@ class LimitsScreen extends StatelessWidget {
             style: TextStyle(
               color: color,
               fontSize: 10,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              fontFamily: 'monospace',
             ),
           ),
         ],

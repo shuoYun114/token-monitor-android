@@ -111,40 +111,50 @@ class _BillingScreenState extends State<BillingScreen> {
     }
     activeDailyRecord ??= dailyRecords.isNotEmpty ? dailyRecords.last : null;
 
-    final primaryText = isLight ? AppColors.lightTextPrimary : AppColors.textPrimary;
-    final secondaryText = isLight ? AppColors.lightTextSecondary : AppColors.textSecondary;
-    final mutedText = isLight ? AppColors.lightTextMuted : AppColors.textMuted;
-    final cardBg = isLight ? AppColors.lightGlassCard : AppColors.glassCard;
+    final secondaryText = isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary;
+    final cardBg = isLight ? AppColors.swissLightSurface : AppColors.swissDarkSurface;
 
     return Scaffold(
-      backgroundColor: isLight ? AppColors.lightBackground : AppColors.background,
+      backgroundColor: isLight ? AppColors.swissLightBg : AppColors.swissDarkBg,
       appBar: AppBar(
         title: Row(
           children: [
             Container(
-              width: 9,
-              height: 9,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: accent,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: accent.withOpacity(0.6),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  )
-                ],
+                borderRadius: BorderRadius.circular(4), // 瑞士极简几何微标
+              ),
+              child: const Center(
+                child: Icon(Icons.add, size: 16, color: Colors.white), // 纯正瑞士十字
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              'TOKEN 账单',
-              style: TextStyle(
-                color: primaryText,
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-              ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TOKEN BILLING',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                Text(
+                  'CHRONO HISTORICAL TELEMETRY',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -245,13 +255,11 @@ class _BillingScreenState extends State<BillingScreen> {
 
             const SizedBox(height: 16),
 
-            // 2. GitHub 贡献热力图卡片
+            // 2. GitHub 贡献热力图卡片 (瑞士精密网格排版)
             GlassContainer(
               padding: const EdgeInsets.all(16),
-              borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
-              glowColor: accent,
-              enableCornerBolts: true,
-              podTag: 'TELEMETRY // HEATMAP',
+              enableSwissAccent: true,
+              podTag: '01 // HEATMAP',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -260,14 +268,15 @@ class _BillingScreenState extends State<BillingScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.grid_view_rounded, size: 16, color: accent),
+                          Icon(Icons.grid_view_rounded, size: 15, color: accent),
                           const SizedBox(width: 6),
                           Text(
                             '活跃贡献热力图',
                             style: TextStyle(
-                              color: primaryText,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                              color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w900,
+                              fontFamily: 'monospace',
                             ),
                           ),
                         ],
@@ -281,17 +290,19 @@ class _BillingScreenState extends State<BillingScreen> {
                             });
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                             decoration: BoxDecoration(
-                              color: accent.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(10),
+                              color: accent.withOpacity(isLight ? 0.08 : 0.15),
+                              borderRadius: BorderRadius.circular(3),
+                              border: Border.all(color: accent.withOpacity(0.35), width: 0.8),
                             ),
                             child: Text(
                               '返回今天',
                               style: TextStyle(
                                 color: accent,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'monospace',
                               ),
                             ),
                           ),
@@ -362,20 +373,21 @@ class _BillingScreenState extends State<BillingScreen> {
     );
   }
 
-  /// 周期分段切换器
+  /// 周期分段切换器 (瑞士硬朗发丝线排版)
   Widget _buildPeriodSelector(bool isLight, Color accent) {
     final items = ['日账单', '月度账单', '年度 / 总览'];
-    final bg = isLight ? const Color(0xFFEDF2F7) : const Color(0xFF101420);
-    final activeText = isLight ? Colors.white : AppColors.textPrimary;
-    final inactiveText = isLight ? AppColors.lightTextSecondary : AppColors.textMuted;
+    final bg = isLight ? AppColors.swissLightSurface : AppColors.swissDarkSurface;
+    final borderCol = isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder;
+    final activeText = Colors.white;
+    final inactiveText = isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary;
 
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(4), // 瑞士硬朗 4px
         border: Border.all(
-          color: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
+          color: borderCol,
           width: 0.8,
         ),
       ),
@@ -390,28 +402,20 @@ class _BillingScreenState extends State<BillingScreen> {
                 });
               },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(vertical: 6.5),
                 decoration: BoxDecoration(
                   color: isSelected ? accent : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: accent.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          )
-                        ]
-                      : null,
+                  borderRadius: BorderRadius.circular(3),
                 ),
                 child: Center(
                   child: Text(
                     items[index],
                     style: TextStyle(
                       color: isSelected ? activeText : inactiveText,
-                      fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontSize: 11.5,
+                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                      fontFamily: 'monospace',
                     ),
                   ),
                 ),
@@ -457,20 +461,18 @@ class _BillingScreenState extends State<BillingScreen> {
           : (currentStats?.month.costUsd ?? 0.0);
     } else {
       periodTitle = '全时期 / 年度总投入';
-      tokens = history?.summary?.totalTokens ?? currentStats?.allTime.totalTokens ?? 0;
-      costUsd = history?.summary?.totalCostUsd ?? currentStats?.allTime.costUsd ?? 0.0;
+      tokens = history?.summary.totalTokens ?? currentStats?.allTime.totalTokens ?? 0;
+      costUsd = history?.summary.totalCostUsd ?? currentStats?.allTime.costUsd ?? 0.0;
     }
 
     final costCny = costUsd * provider.settings.usdToCnyRate;
-    final primaryText = isLight ? AppColors.lightTextPrimary : AppColors.textPrimary;
-    final mutedText = isLight ? AppColors.lightTextMuted : AppColors.textMuted;
+    final primaryText = isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary;
+    final mutedText = isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted;
 
     return GlassContainer(
-      padding: const EdgeInsets.all(20),
-      borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
-      glowColor: accent,
-      enableCornerBolts: true,
-      podTag: 'AUDIT // BOARD',
+      padding: const EdgeInsets.all(18),
+      enableSwissAccent: true,
+      podTag: '02 // AUDIT BOARD',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -481,23 +483,26 @@ class _BillingScreenState extends State<BillingScreen> {
                 periodTitle,
                 style: TextStyle(
                   color: mutedText,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'monospace',
                   letterSpacing: 0.3,
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  color: accent.withOpacity(isLight ? 0.08 : 0.15),
+                  borderRadius: BorderRadius.circular(3),
+                  border: Border.all(color: accent.withOpacity(0.35), width: 0.8),
                 ),
                 child: Text(
                   _selectedPeriodIndex == 0 ? 'DAY' : (_selectedPeriodIndex == 1 ? 'MONTH' : 'ALL-TIME'),
                   style: TextStyle(
                     color: accent,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                    fontFamily: 'monospace',
                   ),
                 ),
               ),
@@ -564,9 +569,8 @@ class _BillingScreenState extends State<BillingScreen> {
     required List<DailyUsageRecord> dailyRecords,
     required DailyUsageRecord? activeRecord,
   }) {
-    final primaryText = isLight ? AppColors.lightTextPrimary : AppColors.textPrimary;
-    final secondaryText = isLight ? AppColors.lightTextSecondary : AppColors.textSecondary;
-    final mutedText = isLight ? AppColors.lightTextMuted : AppColors.textMuted;
+    final primaryText = isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary;
+    final mutedText = isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted;
 
     // 模型明细
     final models = activeRecord?.models ?? {};
@@ -955,7 +959,22 @@ class _BillingScreenState extends State<BillingScreen> {
                     const SizedBox(height: 6),
                     Text(
                       _formatTokens(avgDailyTokens),
-                      style: TextStyle(color: primaryText, fontSize: 18, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        color: primaryText,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '≈ \$${avgDailyCost.toStringAsFixed(2)} / 天',
+                      style: TextStyle(
+                        color: accent,
+                        fontSize: 10,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),

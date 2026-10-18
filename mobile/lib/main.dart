@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/monitor_provider.dart';
 import 'providers/passport_relay_provider.dart';
 import 'services/storage_service.dart';
+import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/billing_screen.dart';
 import 'ui/screens/devices_screen.dart';
@@ -72,45 +73,56 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (idx) {
-          setState(() {
-            _currentIndex = idx;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pie_chart_outline_rounded),
-            activeIcon: Icon(Icons.pie_chart_rounded),
-            label: '总览',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder,
+              width: 0.8,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long_rounded),
-            label: '账单',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.speed_outlined),
-            activeIcon: Icon(Icons.speed_rounded),
-            label: '额度',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.devices_outlined),
-            activeIcon: Icon(Icons.devices_rounded),
-            label: '多设备',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_rounded),
-            label: '设置',
-          ),
-        ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (idx) {
+            setState(() {
+              _currentIndex = idx;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.pie_chart_outline_rounded),
+              activeIcon: Icon(Icons.pie_chart_rounded),
+              label: '总览',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.receipt_long_outlined),
+              activeIcon: Icon(Icons.receipt_long_rounded),
+              label: '账单',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.speed_outlined),
+              activeIcon: Icon(Icons.speed_rounded),
+              label: '额度',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.devices_outlined),
+              activeIcon: Icon(Icons.devices_rounded),
+              label: '多设备',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings_rounded),
+              label: '设置',
+            ),
+          ],
+        ),
       ),
     );
   }

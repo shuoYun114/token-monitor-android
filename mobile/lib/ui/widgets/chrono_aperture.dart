@@ -2,8 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 
-/// 全息算力天体视窗 (Chrono-Telemetry Aperture)
-/// 融合航天遥测精密仪器 (Aerospace Telemetry) 与瑞士复杂机械陀飞轮 (Haute Horlogerie) 美学
+/// 瑞士国际主义算力视窗 (Swiss Typographic Chrono-Grid Aperture)
+/// 遵循 Josef Müller-Brockmann 数学栅格法则：大比例字阶对比、方圆互锁几何张力、发丝线骨架与瑞士精准红点睛
 class ChronoApertureWidget extends StatefulWidget {
   final int totalTokens;
   final String shortTokensText;
@@ -39,10 +39,10 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
   @override
   void initState() {
     super.initState();
-    // 匀速缓慢旋转机械陀飞轮能量环 (28 秒完整周期，带机械阻尼从容感)
+    // 匀速缓慢旋转瑞士精密刻度环 (32 秒周期，从容理性)
     _rotationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 28),
+      duration: const Duration(seconds: 32),
     )..repeat();
   }
 
@@ -55,83 +55,86 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
   @override
   Widget build(BuildContext context) {
     final isLight = widget.isLight;
-    final accent = AppColors.getThemeAccent(isLight);
-
-    // 舱体底色与结构质感
-    final podBg = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF0C0F17);
-    final podBorder = isLight ? const Color(0xFFCBD5E1) : const Color(0xFF222B3D);
-    final boltColor = isLight ? AppColors.aeroBoltLight : AppColors.aeroBoltDark;
+    final accent = AppColors.getThemeAccent(isLight); // 瑞士精准红
+    final surfaceBg = isLight ? AppColors.swissLightSurface : AppColors.swissDarkSurface;
+    final borderCol = isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder;
+    final textPrimary = isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary;
+    final textSecondary = isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary;
+    final textMuted = isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: podBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: podBorder, width: 1.2),
+          color: surfaceBg,
+          borderRadius: BorderRadius.circular(8), // 瑞士硬朗 8px 微倒角
+          border: Border.all(color: borderCol, width: 0.9), // 0.9px 发丝线
           boxShadow: [
             BoxShadow(
-              color: isLight
-                  ? const Color(0x140F172A)
-                  : Colors.black.withOpacity(0.6),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              color: isLight ? const Color(0x0A09090B) : Colors.black.withOpacity(0.45),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
-            if (!isLight)
-              BoxShadow(
-                color: accent.withOpacity(0.08),
-                blurRadius: 36,
-                spreadRadius: -4,
-                offset: const Offset(0, 4),
-              ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(7),
           child: Stack(
             children: [
-              // 物理机舱内衬微纹理与四角螺栓刻线
+              // 1. 瑞士版面四角十字对齐标 (+)
               Positioned.fill(
                 child: CustomPaint(
-                  painter: _AeroChassisPainter(
-                    isLight: isLight,
-                    boltColor: boltColor,
+                  painter: _SwissCrosshairGridPainter(isLight: isLight),
+                ),
+              ),
+
+              // 2. 顶部瑞士精准红定位条
+              Positioned(
+                top: 0,
+                left: 16,
+                child: Container(
+                  width: 32,
+                  height: 2.4,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    borderRadius: BorderRadius.circular(1),
                   ),
                 ),
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. 顶部工业遥测编号标头与运行状态
+                    // 标头行：结构索引 + 活跃状态
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: [
                             Container(
-                              width: 6,
-                              height: 6,
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                               decoration: BoxDecoration(
                                 color: accent,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accent.withOpacity(0.8),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: const Text(
+                                'CH-01',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 8),
                             Text(
-                              'CHRONO-TELEMETRY // APERTURE-01',
+                              'SWISS TELEMETRY // CORE APERTURE',
                               style: TextStyle(
-                                color: isLight
-                                    ? AppColors.lightTextSecondary
-                                    : AppColors.textMuted,
+                                color: textSecondary,
                                 fontSize: 9,
                                 fontWeight: FontWeight.w800,
                                 fontFamily: 'monospace',
@@ -141,24 +144,28 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.emerald.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: AppColors.emerald.withOpacity(0.3),
-                              width: 0.6,
-                            ),
+                            color: accent.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(3),
+                            border: Border.all(color: accent.withOpacity(0.4), width: 0.7),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.bolt_rounded, size: 10, color: AppColors.emerald),
-                              SizedBox(width: 2),
+                              Container(
+                                width: 4.5,
+                                height: 4.5,
+                                decoration: BoxDecoration(
+                                  color: accent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
                               Text(
-                                'ENGAGED',
+                                'SYNCHRONIZED',
                                 style: TextStyle(
-                                  color: AppColors.emerald,
+                                  color: accent,
                                   fontSize: 8.5,
                                   fontWeight: FontWeight.w900,
                                   fontFamily: 'monospace',
@@ -171,178 +178,189 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                       ],
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
 
-                    // 2. 核心：瑞士机械腕表全息天体视窗 (Chrono Dial)
-                    AnimatedBuilder(
-                      animation: _rotationController,
-                      builder: (context, child) {
-                        return CustomPaint(
-                          size: const Size(double.infinity, 240),
-                          painter: _ChronoDialPainter(
-                            rotationValue: _rotationController.value,
-                            isLight: isLight,
-                            accentColor: accent,
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 240,
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                    // 中间核心：非对称方圆互锁排版 (左侧巨幕数据，右侧瑞士精密动态罗盘)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // 左侧巨幕大字阶排版
+                        Expanded(
+                          flex: 11,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'TODAY TOKEN ACCUMULATION',
+                                style: TextStyle(
+                                  color: textMuted,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+
+                              // 巨幕主数值
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
                                 children: [
-                                  // 微标
                                   Text(
-                                    'TODAY COMPUTE ACCUMULATION',
+                                    widget.shortTokensText,
                                     style: TextStyle(
-                                      color: isLight
-                                          ? AppColors.lightTextMuted
-                                          : AppColors.textMuted,
-                                      fontSize: 8.5,
-                                      fontWeight: FontWeight.w700,
+                                      color: textPrimary,
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.w900,
+                                      fontFamily: 'monospace',
+                                      letterSpacing: -1.5,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'TOKENS',
+                                    style: TextStyle(
+                                      color: accent,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
                                       fontFamily: 'monospace',
                                       letterSpacing: 1.0,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-
-                                  // Token 巨幕数值与单位
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      Text(
-                                        widget.shortTokensText,
-                                        style: TextStyle(
-                                          color: isLight
-                                              ? AppColors.lightTextPrimary
-                                              : Colors.white,
-                                          fontSize: 38,
-                                          fontWeight: FontWeight.w900,
-                                          fontFamily: 'monospace',
-                                          letterSpacing: -1.2,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'TOKENS',
-                                        style: TextStyle(
-                                          color: accent,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w900,
-                                          fontFamily: 'monospace',
-                                          letterSpacing: 0.8,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  // 精确数字
-                                  Text(
-                                    widget.exactTokensText,
-                                    style: TextStyle(
-                                      color: isLight
-                                          ? AppColors.lightTextMuted
-                                          : AppColors.warmWhiteMuted,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'monospace',
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 10),
-
-                                  // 嵌套式精密折合成本金属胶囊
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 14, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: isLight
-                                          ? const Color(0xFFFEF3C7).withOpacity(0.8)
-                                          : const Color(0xFF141A28),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: isLight
-                                            ? AppColors.warmYellowDark.withOpacity(0.35)
-                                            : accent.withOpacity(0.35),
-                                        width: 1,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: (isLight
-                                                  ? AppColors.warmYellowDark
-                                                  : accent)
-                                              .withOpacity(0.12),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 5,
-                                          height: 5,
-                                          decoration: BoxDecoration(
-                                            color: isLight
-                                                ? AppColors.warmYellowDark
-                                                : AppColors.warmYellow,
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          widget.costText,
-                                          style: TextStyle(
-                                            color: isLight
-                                                ? AppColors.warmYellowDark
-                                                : AppColors.warmYellow,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w900,
-                                            fontFamily: 'monospace',
-                                            letterSpacing: -0.2,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          widget.secondaryCostText,
-                                          style: TextStyle(
-                                            color: isLight
-                                                ? AppColors.lightTextMuted
-                                                : AppColors.textMuted,
-                                            fontSize: 9.5,
-                                            fontFamily: 'monospace',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
                                 ],
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              // 精确计数值
+                              Text(
+                                widget.exactTokensText,
+                                style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // 费用估算块 (瑞士红高光胶囊)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: isLight ? const Color(0xFFCBD5E1) : const Color(0xFF2E2E36),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 5,
+                                      height: 5,
+                                      decoration: BoxDecoration(
+                                        color: accent,
+                                        borderRadius: BorderRadius.circular(1),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      widget.costText,
+                                      style: TextStyle(
+                                        color: textPrimary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w900,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      widget.secondaryCostText,
+                                      style: TextStyle(
+                                        color: textMuted,
+                                        fontSize: 9.5,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // 右侧瑞士精密微刻度动态旋转仪 (方圆互锁几何)
+                        Expanded(
+                          flex: 8,
+                          child: Center(
+                            child: SizedBox(
+                              width: 124,
+                              height: 124,
+                              child: AnimatedBuilder(
+                                animation: _rotationController,
+                                builder: (context, _) {
+                                  return CustomPaint(
+                                    painter: _SwissDialPainter(
+                                      rotationValue: _rotationController.value,
+                                      isLight: isLight,
+                                      accentColor: accent,
+                                    ),
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 14,
+                                            height: 14,
+                                            decoration: BoxDecoration(
+                                              color: accent,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Center(
+                                              child: Icon(Icons.add, size: 10, color: Colors.white),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            'SWISS',
+                                            style: TextStyle(
+                                              color: textPrimary,
+                                              fontSize: 7.5,
+                                              fontWeight: FontWeight.w900,
+                                              fontFamily: 'monospace',
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
 
-                    // 3. 底部工业点阵遥测状态条
+                    // 底部发丝线与拓扑状态条
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.only(top: 8),
                       decoration: BoxDecoration(
-                        color: isLight
-                            ? const Color(0xFFF1F5F9)
-                            : const Color(0xFF111624),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isLight
-                              ? const Color(0xFFE2E8F0)
-                              : const Color(0xFF1E283C),
-                          width: 0.8,
+                        border: Border(
+                          top: BorderSide(
+                            color: borderCol,
+                            width: 0.8,
+                          ),
                         ),
                       ),
                       child: Row(
@@ -350,34 +368,33 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                         children: [
                           Row(
                             children: [
-                              _buildLedDot(true, accent),
-                              const SizedBox(width: 4),
-                              _buildLedDot(true, accent),
-                              const SizedBox(width: 4),
-                              _buildLedDot(true, accent),
-                              const SizedBox(width: 4),
-                              _buildLedDot(false, accent),
+                              Text(
+                                '||| | ||||| ||',
+                                style: TextStyle(
+                                  color: textMuted,
+                                  fontSize: 8,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
                               const SizedBox(width: 8),
                               Text(
-                                'CLUSTER TELEMETRY',
+                                'CLUSTER MESH',
                                 style: TextStyle(
-                                  color: isLight
-                                      ? AppColors.lightTextSecondary
-                                      : AppColors.textMuted,
+                                  color: textMuted,
                                   fontSize: 8.5,
                                   fontWeight: FontWeight.w800,
                                   fontFamily: 'monospace',
-                                  letterSpacing: 0.8,
+                                  letterSpacing: 1.0,
                                 ),
                               ),
                             ],
                           ),
                           Text(
-                            'MODELS: ${widget.modelsCount} // TOOLS: ${widget.clientsCount}',
+                            'MODELS: ${widget.modelsCount} // CLIENTS: ${widget.clientsCount}',
                             style: TextStyle(
-                              color: isLight
-                                  ? AppColors.lightTextMuted
-                                  : AppColors.textMuted,
+                              color: textPrimary,
                               fontSize: 8.5,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'monospace',
@@ -395,72 +412,49 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
       ),
     );
   }
-
-  Widget _buildLedDot(bool active, Color color) {
-    return Container(
-      width: 4,
-      height: 4,
-      decoration: BoxDecoration(
-        color: active ? color : color.withOpacity(0.2),
-        shape: BoxShape.circle,
-        boxShadow: active
-            ? [
-                BoxShadow(
-                  color: color.withOpacity(0.8),
-                  blurRadius: 3,
-                  spreadRadius: 0.5,
-                ),
-              ]
-            : null,
-      ),
-    );
-  }
 }
 
-/// 绘制机舱背景四角螺栓与微雕辅助定位线
-class _AeroChassisPainter extends CustomPainter {
+/// 绘制瑞士版面对位十字准星 (+)
+class _SwissCrosshairGridPainter extends CustomPainter {
   final bool isLight;
-  final Color boltColor;
 
-  _AeroChassisPainter({required this.isLight, required this.boltColor});
+  _SwissCrosshairGridPainter({required this.isLight});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final boltPaint = Paint()
-      ..color = boltColor.withOpacity(isLight ? 0.4 : 0.6)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+    final linePaint = Paint()
+      ..color = (isLight ? const Color(0xFF71717A) : const Color(0xFFA1A1AA)).withOpacity(isLight ? 0.3 : 0.4)
+      ..strokeWidth = 0.8
+      ..style = PaintingStyle.stroke;
 
-    final dotPaint = Paint()
-      ..color = boltColor.withOpacity(isLight ? 0.3 : 0.4)
-      ..style = PaintingStyle.fill;
+    const offset = 8.0;
+    const arm = 3.5;
 
-    // 四角微雕精密螺栓点缀 (距离各边 10px)
     final corners = [
-      const Offset(10, 10),
-      Offset(size.width - 10, 10),
-      Offset(10, size.height - 10),
-      Offset(size.width - 10, size.height - 10),
+      Offset(offset, offset),
+      Offset(size.width - offset, offset),
+      Offset(offset, size.height - offset),
+      Offset(size.width - offset, size.height - offset),
     ];
 
     for (final c in corners) {
-      canvas.drawCircle(c, 2.8, boltPaint);
-      canvas.drawCircle(c, 1.0, dotPaint);
+      canvas.drawLine(Offset(c.dx - arm, c.dy), Offset(c.dx + arm, c.dy), linePaint);
+      canvas.drawLine(Offset(c.dx, c.dy - arm), Offset(c.dx, c.dy + arm), linePaint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _AeroChassisPainter oldDelegate) =>
+  bool shouldRepaint(covariant _SwissCrosshairGridPainter oldDelegate) =>
       oldDelegate.isLight != isLight;
 }
 
-/// 核心：全息天体双轨精密陀飞轮表盘绘制器
-class _ChronoDialPainter extends CustomPainter {
+/// 绘制右侧方圆互锁瑞士精密刻度旋转罗盘
+class _SwissDialPainter extends CustomPainter {
   final double rotationValue; // 0.0 ~ 1.0
   final bool isLight;
   final Color accentColor;
 
-  _ChronoDialPainter({
+  _SwissDialPainter({
     required this.rotationValue,
     required this.isLight,
     required this.accentColor,
@@ -469,129 +463,91 @@ class _ChronoDialPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final maxRadius = math.min(size.width, size.height) / 2 - 6;
+    final maxRadius = math.min(size.width, size.height) / 2 - 2;
 
-    // 1. 绘制底层全息聚光微波光晕
-    final glowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: isLight
-            ? [
-                accentColor.withOpacity(0.09),
-                const Color(0xFFF1F5F9).withOpacity(0.0),
-              ]
-            : [
-                accentColor.withOpacity(0.12),
-                const Color(0xFF0C0F17).withOpacity(0.0),
-              ],
-        stops: const [0.2, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: maxRadius));
-    canvas.drawCircle(center, maxRadius, glowPaint);
-
-    // 2. 绘制最外层精密刻度外圈底轨
-    final outerTrackPaint = Paint()
-      ..color = isLight
-          ? const Color(0xFFE2E8F0)
-          : const Color(0xFF1E283C).withOpacity(0.8)
+    // 1. 最外层 0.8px 发丝底圈
+    final trackPaint = Paint()
+      ..color = isLight ? const Color(0xFFD4D4D8) : const Color(0xFF27272A)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    canvas.drawCircle(center, maxRadius, outerTrackPaint);
+      ..strokeWidth = 0.8;
+    canvas.drawCircle(center, maxRadius, trackPaint);
 
-    // 3. 绘制 60 单元高精度物理刻度线 (逢 5 加长加粗)
-    final tickRadius = maxRadius;
-    final tickLengthMajor = 7.0;
-    final tickLengthMinor = 3.5;
-
-    for (int i = 0; i < 60; i++) {
+    // 2. 60 单元高精度物理刻度线 (逢 5 加长并带有瑞士红强调)
+    const tickCount = 60;
+    for (int i = 0; i < tickCount; i++) {
       final angle = (i * 6) * math.pi / 180.0;
       final isMajor = i % 5 == 0;
-      final length = isMajor ? tickLengthMajor : tickLengthMinor;
+      final isRedQuarter = i % 15 == 0;
+      final length = isMajor ? 5.5 : 2.5;
 
       final p1 = Offset(
-        center.dx + (tickRadius - length) * math.cos(angle),
-        center.dy + (tickRadius - length) * math.sin(angle),
+        center.dx + (maxRadius - length) * math.cos(angle),
+        center.dy + (maxRadius - length) * math.sin(angle),
       );
       final p2 = Offset(
-        center.dx + tickRadius * math.cos(angle),
-        center.dy + tickRadius * math.sin(angle),
+        center.dx + maxRadius * math.cos(angle),
+        center.dy + maxRadius * math.sin(angle),
       );
 
       final tickPaint = Paint()
-        ..color = isMajor
-            ? (isLight ? AppColors.aeroTickLight : accentColor.withOpacity(0.8))
-            : (isLight ? const Color(0xFFCBD5E1) : const Color(0xFF334155))
-        ..strokeWidth = isMajor ? 1.5 : 0.8;
+        ..color = isRedQuarter
+            ? accentColor
+            : (isMajor
+                ? (isLight ? const Color(0xFF18181B) : const Color(0xFFFAFAFA))
+                : (isLight ? const Color(0xFFA1A1AA) : const Color(0xFF52525B)))
+        ..strokeWidth = isMajor ? 1.2 : 0.7;
 
       canvas.drawLine(p1, p2, tickPaint);
     }
 
-    // 4. 绘制陀飞轮中层双轨能量旋转弧线 (随时间缓慢旋转)
-    final midRadius = maxRadius - 14;
+    // 3. 动态旋转的瑞士双轨红白能量弧
+    final innerRadius = maxRadius - 10;
     final rotAngle = rotationValue * 2 * math.pi;
 
-    // 旋转图层
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(rotAngle);
 
-    final energyPaint = Paint()
-      ..shader = SweepGradient(
-        colors: [
-          accentColor.withOpacity(0.1),
-          accentColor.withOpacity(0.7),
-          accentColor,
-          accentColor.withOpacity(0.2),
-        ],
-        stops: const [0.0, 0.45, 0.7, 1.0],
-      ).createShader(Rect.fromCircle(center: Offset.zero, radius: midRadius))
+    final arcPaint = Paint()
+      ..color = accentColor.withOpacity(0.9)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.square; // 瑞士风格：硬朗方头笔触，拒绝圆滑
 
-    // 绘制 3 段非对称能量弧
+    // 绘制对角双弧
     canvas.drawArc(
-      Rect.fromCircle(center: Offset.zero, radius: midRadius),
+      Rect.fromCircle(center: Offset.zero, radius: innerRadius),
       0,
-      math.pi * 0.55,
-      false,
-      energyPaint,
-    );
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset.zero, radius: midRadius),
-      math.pi * 0.85,
       math.pi * 0.45,
       false,
-      energyPaint,
-    );
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset.zero, radius: midRadius),
-      math.pi * 1.5,
-      math.pi * 0.35,
-      false,
-      energyPaint,
+      arcPaint,
     );
 
-    // 齿轮微雕刻痕点缀
-    final gearDotPaint = Paint()
-      ..color = accentColor.withOpacity(isLight ? 0.6 : 0.8)
+    final whiteArcPaint = Paint()
+      ..color = isLight ? const Color(0xFF18181B) : const Color(0xFFE4E4E7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.square;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset.zero, radius: innerRadius),
+      math.pi,
+      math.pi * 0.45,
+      false,
+      whiteArcPaint,
+    );
+
+    // 旋转点
+    final dotPaint = Paint()
+      ..color = accentColor
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(midRadius, 0), 2.2, gearDotPaint);
-    canvas.drawCircle(Offset(-midRadius, 0), 2.2, gearDotPaint);
+    canvas.drawCircle(Offset(innerRadius, 0), 2.0, dotPaint);
 
     canvas.restore();
-
-    // 5. 绘制内层精密圆环与核心聚光圈
-    final innerRadius = midRadius - 8;
-    final innerPaint = Paint()
-      ..color = isLight
-          ? const Color(0xFFF1F5F9).withOpacity(0.9)
-          : const Color(0xFF131A27).withOpacity(0.6)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    canvas.drawCircle(center, innerRadius, innerPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _ChronoDialPainter oldDelegate) =>
+  bool shouldRepaint(covariant _SwissDialPainter oldDelegate) =>
       oldDelegate.rotationValue != rotationValue ||
       oldDelegate.isLight != isLight ||
       oldDelegate.accentColor != accentColor;

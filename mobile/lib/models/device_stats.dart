@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 /// Token 细分组成 (输入缓存命中、输入缓存未命中、输出、未分类)
 class TokenBreakdown {
   final int total;

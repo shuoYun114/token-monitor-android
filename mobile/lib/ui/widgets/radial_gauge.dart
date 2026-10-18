@@ -25,18 +25,18 @@ class RadialGauge extends StatelessWidget {
     final color = activeColor ?? _getColorByPercent(remainingPercent);
     final percentInt = remainingPercent.clamp(0.0, 100.0).round();
 
-    final cardBg = isLight ? const Color(0xFFF1F5F9) : AppColors.surface.withOpacity(0.5);
-    final trackColor = isLight ? const Color(0xFFE2E8F0) : AppColors.surfaceLight.withOpacity(0.6);
-    final titleColor = isLight ? AppColors.lightTextPrimary : AppColors.textPrimary;
+    final cardBg = isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D);
+    final trackColor = isLight ? const Color(0xFFE4E4E7) : const Color(0xFF27272A);
+    final titleColor = isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(6), // 瑞士硬朗 6px
         border: Border.all(
-          color: isLight ? AppColors.lightGlassBorder : color.withOpacity(0.18),
-          width: 1,
+          color: isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder,
+          width: 0.8,
         ),
       ),
       child: Column(
@@ -68,8 +68,8 @@ class RadialGauge extends StatelessWidget {
                           '$percentInt',
                           style: TextStyle(
                             color: color,
-                            fontSize: size * 0.26,
-                            fontWeight: FontWeight.w800,
+                            fontSize: size * 0.28,
+                            fontWeight: FontWeight.w900,
                             fontFamily: 'monospace',
                             letterSpacing: -0.5,
                           ),
@@ -77,9 +77,10 @@ class RadialGauge extends StatelessWidget {
                         Text(
                           '%',
                           style: TextStyle(
-                            color: color.withOpacity(0.7),
+                            color: color.withOpacity(0.8),
                             fontSize: size * 0.14,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
+                            fontFamily: 'monospace',
                           ),
                         ),
                       ],
@@ -89,7 +90,7 @@ class RadialGauge extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           SizedBox(
             width: 86,
             child: Text(
@@ -97,8 +98,9 @@ class RadialGauge extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: titleColor,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'monospace',
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -106,20 +108,24 @@ class RadialGauge extends StatelessWidget {
           ),
 
           if (subtitle != null && subtitle!.isNotEmpty) ...[
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: color.withOpacity(isLight ? 0.08 : 0.15),
+                borderRadius: BorderRadius.circular(3),
+                border: Border.all(
+                  color: color.withOpacity(0.35),
+                  width: 0.8,
+                ),
               ),
               child: Text(
                 subtitle!,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: color,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w700,
                   fontFamily: 'monospace',
                 ),
                 maxLines: 1,
@@ -135,7 +141,7 @@ class RadialGauge extends StatelessWidget {
   Color _getColorByPercent(double p) {
     if (p > 60) return AppColors.emerald;
     if (p > 25) return AppColors.amber;
-    return AppColors.rose;
+    return AppColors.swissRedBright;
   }
 }
 

@@ -30,3 +30,4 @@ mobile/.flutter-plugins*
 mobile/android/.gradle/
 mobile/android/local.properties
 *.apk
+mobile/android/app/src/main/java/

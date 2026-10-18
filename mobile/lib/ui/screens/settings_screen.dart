@@ -56,11 +56,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final inputBg = isLight ? AppColors.lightSurfaceSecondary : AppColors.surfaceLight;
 
     return Scaffold(
-      backgroundColor: isLight ? AppColors.lightBackground : AppColors.background,
+      backgroundColor: isLight ? AppColors.swissLightBg : AppColors.swissDarkBg,
       appBar: AppBar(
-        title: Text(
-          '系统设置与配对',
-          style: TextStyle(color: primaryText, fontWeight: FontWeight.w700),
+        title: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(4), // 瑞士极简几何微标
+              ),
+              child: const Center(
+                child: Icon(Icons.add, size: 16, color: Colors.white), // 纯正瑞士十字
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SYSTEM SETTINGS',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                Text(
+                  'SYNC & HARDWARE CONTROL',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
       body: ListView(
@@ -70,11 +107,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const PassportRelayCard(),
           const SizedBox(height: 16),
 
-          // 0. 主题模式切换卡片 (黑主题: 纯白+淡蓝 / 白主题: 纯白+暖黄)
+          // 0. 主题模式切换卡片 (瑞士曜黑 / 瑞士冷白)
           GlassContainer(
             padding: const EdgeInsets.all(16),
-            borderColor: isLight ? AppColors.lightGlassBorder : AppColors.glassBorder,
-            glowColor: accent,
+            enableSwissAccent: true,
+            podTag: '00 // THEME PRESET',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -82,30 +119,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '界面主题风格',
+                      '界面美学流派',
                       style: TextStyle(
                         color: primaryText,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
+                        fontFamily: 'monospace',
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                       decoration: BoxDecoration(
-                        color: accent.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
+                        color: accent.withOpacity(isLight ? 0.08 : 0.15),
+                        borderRadius: BorderRadius.circular(3),
+                        border: Border.all(color: accent.withOpacity(0.35), width: 0.8),
                       ),
                       child: Text(
-                        isLight ? '白主题 (暖黄)' : '黑主题 (冰蓝)',
-                        style: TextStyle(color: accent, fontSize: 11, fontWeight: FontWeight.w700),
+                        isLight ? '瑞士冷白 (SWISS LIGHT)' : '瑞士曜黑 (SWISS DARK)',
+                        style: TextStyle(
+                          color: accent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'monospace',
+                        ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '随时在黑曜石深邃模式与晨曦极简白模式之间无缝切换',
-                  style: TextStyle(color: mutedText, fontSize: 11),
+                  '遵循正统瑞士国际主义设计流派：硬朗发丝线骨架、等宽排版与瑞士精准红视觉点睛',
+                  style: TextStyle(
+                    color: mutedText,
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -115,24 +163,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: GestureDetector(
                         onTap: () => provider.setThemeMode('dark'),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF080A10),
-                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.swissDarkSurface,
+                            borderRadius: BorderRadius.circular(6), // 瑞士硬朗 6px
                             border: Border.all(
-                              color: !isLight ? AppColors.iceBlue : const Color(0x33FFFFFF),
-                              width: !isLight ? 2 : 1,
+                              color: !isLight ? AppColors.swissRedBright : AppColors.swissDarkBorder,
+                              width: !isLight ? 1.4 : 0.8,
                             ),
-                            boxShadow: !isLight
-                                ? [
-                                    BoxShadow(
-                                      color: AppColors.iceBlue.withOpacity(0.25),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 2),
-                                    )
-                                  ]
-                                : null,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,54 +179,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Icon(Icons.dark_mode_rounded, color: AppColors.iceBlue, size: 20),
+                                  Icon(Icons.dark_mode_rounded, color: !isLight ? AppColors.swissRedBright : AppColors.swissDarkTextMuted, size: 18),
                                   if (!isLight)
-                                    const Icon(Icons.check_circle_rounded, color: AppColors.iceBlue, size: 16),
+                                    const Icon(Icons.check_circle_rounded, color: AppColors.swissRedBright, size: 16),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                '黑主题 (Dark)',
+                                '瑞士曜黑 (Dark)',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'monospace',
                                 ),
                               ),
                               const SizedBox(height: 2),
                               const Text(
-                                '黑曜石底 + 冰蓝高光',
-                                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                                '纯粹深黑 + 瑞士精准红',
+                                style: TextStyle(color: AppColors.swissDarkTextMuted, fontSize: 10, fontFamily: 'monospace'),
                               ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     // 白主题选项
                     Expanded(
                       child: GestureDetector(
                         onTap: () => provider.setThemeMode('light'),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFFFFF),
-                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.swissLightSurface,
+                            borderRadius: BorderRadius.circular(6), // 瑞士硬朗 6px
                             border: Border.all(
-                              color: isLight ? AppColors.warmYellowDark : const Color(0x33CBD5E1),
-                              width: isLight ? 2 : 1,
+                              color: isLight ? AppColors.swissRed : AppColors.swissLightBorder,
+                              width: isLight ? 1.4 : 0.8,
                             ),
-                            boxShadow: isLight
-                                ? [
-                                    BoxShadow(
-                                      color: AppColors.warmYellow.withOpacity(0.3),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 2),
-                                    )
-                                  ]
-                                : null,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,24 +226,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Icon(Icons.wb_sunny_rounded, color: AppColors.warmYellowDark, size: 20),
+                                  Icon(Icons.wb_sunny_rounded, color: isLight ? AppColors.swissRed : AppColors.swissLightTextMuted, size: 18),
                                   if (isLight)
-                                    const Icon(Icons.check_circle_rounded, color: AppColors.warmYellowDark, size: 16),
+                                    const Icon(Icons.check_circle_rounded, color: AppColors.swissRed, size: 16),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                '白主题 (Light)',
+                                '瑞士冷白 (Light)',
                                 style: TextStyle(
-                                  color: Color(0xFF0F172A),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.swissLightTextPrimary,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'monospace',
                                 ),
                               ),
                               const SizedBox(height: 2),
                               const Text(
-                                '纯白底 + 暖黄高光',
-                                style: TextStyle(color: Color(0xFF64748B), fontSize: 10),
+                                '理性冷白 + 纯黑等宽字阶',
+                                style: TextStyle(color: AppColors.swissLightTextMuted, fontSize: 10, fontFamily: 'monospace'),
                               ),
                             ],
                           ),

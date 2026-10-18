@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/monitor_provider.dart';
-import '../../models/device_stats.dart';
 import '../../theme/app_colors.dart';
 import '../widgets/glass_container.dart';
 
@@ -18,19 +17,67 @@ class DevicesScreen extends StatelessWidget {
     final accent = AppColors.getThemeAccent(isLight);
 
     return Scaffold(
+      backgroundColor: isLight ? AppColors.swissLightBg : AppColors.swissDarkBg,
       appBar: AppBar(
-        title: const Text('已接入设备'),
+        title: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(4), // 瑞士极简几何微标
+              ),
+              child: const Center(
+                child: Icon(Icons.add, size: 16, color: Colors.white), // 纯正瑞士十字
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'CONNECTED CLUSTER',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                Text(
+                  'NODE TELEMETRY & HARDWARE',
+                  style: TextStyle(
+                    color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: accent),
+            icon: Icon(Icons.refresh_rounded, color: accent, size: 21),
             onPressed: () => provider.refreshNow(),
           ),
         ],
       ),
 
       body: devices.isEmpty
-          ? const Center(
-              child: Text('暂无接入设备信息', style: TextStyle(color: AppColors.textMuted)),
+          ? Center(
+              child: Text(
+                '暂无接入设备信息',
+                style: TextStyle(
+                  color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             )
           : ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -66,38 +113,31 @@ class DevicesScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
-                    enableCornerBolts: true,
+                    enableSwissAccent: true,
                     podTag: '${dev.platform.toUpperCase()} // NODE',
-                    glowColor: isOnline ? AppColors.glowCyan : null,
-                    borderColor: isOnline ? AppColors.cyan.withOpacity(0.25) : AppColors.glassBorder,
-                    topHighlightColor: AppColors.glassTopHighlightWarm,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             Container(
-                              width: 40,
-                              height: 40,
+                              width: 36,
+                              height: 36,
                               decoration: BoxDecoration(
-                                color: isLight ? const Color(0xFFF1F5F9) : AppColors.surfaceLight,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.cyan.withOpacity(0.3), width: 1),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.cyan.withOpacity(0.15),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                                color: isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: isLight ? const Color(0xFFD4D4D8) : const Color(0xFF27272A),
+                                  width: 0.8,
+                                ),
                               ),
                               child: Icon(
                                 _getPlatformIcon(dev.platform),
-                                color: AppColors.cyan,
-                                size: 22,
+                                color: accent,
+                                size: 20,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,18 +145,18 @@ class DevicesScreen extends StatelessWidget {
                                   Text(
                                     dev.hostname,
                                     style: TextStyle(
-                                      color: isLight ? AppColors.lightTextPrimary : AppColors.warmWhite,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.2,
+                                      color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w900,
+                                      fontFamily: 'monospace',
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 1),
                                   Text(
                                     platformSubtitle,
                                     style: TextStyle(
-                                      color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
-                                      fontSize: 11,
+                                      color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                                      fontSize: 10,
                                       fontFamily: 'monospace',
                                     ),
                                   ),
@@ -124,12 +164,12 @@ class DevicesScreen extends StatelessWidget {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                               decoration: BoxDecoration(
-                                color: (isOnline ? AppColors.emerald : AppColors.textMuted).withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
+                                color: (isOnline ? AppColors.emerald : AppColors.swissDarkTextMuted).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(3), // 瑞士硬朗 3px
                                 border: Border.all(
-                                  color: (isOnline ? AppColors.emerald : AppColors.textMuted).withOpacity(0.3),
+                                  color: (isOnline ? AppColors.emerald : AppColors.swissDarkTextMuted).withOpacity(0.35),
                                   width: 0.8,
                                 ),
                               ),
@@ -137,29 +177,21 @@ class DevicesScreen extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
-                                    width: 6,
-                                    height: 6,
+                                    width: 4.5,
+                                    height: 4.5,
                                     decoration: BoxDecoration(
-                                      color: isOnline ? AppColors.emerald : AppColors.textMuted,
-                                      shape: BoxShape.circle,
-                                      boxShadow: isOnline
-                                          ? [
-                                              BoxShadow(
-                                                color: AppColors.emerald.withOpacity(0.8),
-                                                blurRadius: 5,
-                                                spreadRadius: 1,
-                                              ),
-                                            ]
-                                          : null,
+                                      color: isOnline ? AppColors.emerald : AppColors.swissDarkTextMuted,
+                                      borderRadius: BorderRadius.circular(1),
                                     ),
                                   ),
                                   const SizedBox(width: 5),
                                   Text(
                                     isOnline ? '在线同步' : '离线',
                                     style: TextStyle(
-                                      color: isOnline ? AppColors.emerald : AppColors.textMuted,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
+                                      color: isOnline ? AppColors.emerald : AppColors.swissDarkTextMuted,
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      fontFamily: 'monospace',
                                     ),
                                   ),
                                 ],
@@ -167,37 +199,41 @@ class DevicesScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
-                        Divider(color: isLight ? const Color(0xFFE2E8F0) : AppColors.glassBorder, height: 1),
+                        const SizedBox(height: 12),
+                        Divider(
+                          color: isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder,
+                          height: 1,
+                          thickness: 0.8,
+                        ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildInfoCol('今日花费', costFormatted, isLight ? AppColors.warmYellowDark : AppColors.warmYellow, isLight),
-                            _buildInfoCol('今日 Token', tokensFormatted, AppColors.cyan, isLight),
-                            _buildInfoCol('活跃工具', '${clientNames.length} 款', isLight ? AppColors.lightTextPrimary : AppColors.warmWhite, isLight),
+                            _buildInfoCol('今日花费', costFormatted, accent, isLight),
+                            _buildInfoCol('今日 Token', tokensFormatted, isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary, isLight),
+                            _buildInfoCol('活跃工具', '${clientNames.length} 款', isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary, isLight),
                           ],
                         ),
                         if (clientNames.isNotEmpty) ...[
                           const SizedBox(height: 12),
                           Wrap(
-                            spacing: 6,
+                            spacing: 5,
                             runSpacing: 5,
                             children: clientNames.map((c) {
                               final color = AppColors.getToolColor(c);
                               return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: color.withOpacity(0.35), width: 0.6),
+                                  color: color.withOpacity(isLight ? 0.08 : 0.15),
+                                  borderRadius: BorderRadius.circular(3),
+                                  border: Border.all(color: color.withOpacity(0.35), width: 0.8),
                                 ),
                                 child: Text(
                                   c,
                                   style: TextStyle(
                                     color: color,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
                                     fontFamily: 'monospace',
                                   ),
                                 ),

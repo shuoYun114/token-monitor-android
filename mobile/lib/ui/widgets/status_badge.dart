@@ -46,45 +46,32 @@ class StatusBadge extends StatelessWidget {
     return Tooltip(
       message: errorMessage ?? text,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(
           color: dotColor.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: dotColor.withOpacity(0.32), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: dotColor.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(3), // 瑞士硬朗 3px 微倒角
+          border: Border.all(color: dotColor.withOpacity(0.4), width: 0.8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 7,
-              height: 7,
+              width: 5,
+              height: 5,
               decoration: BoxDecoration(
                 color: dotColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: dotColor.withOpacity(0.7),
-                    blurRadius: 5,
-                    spreadRadius: 1,
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(1),
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 5),
             Text(
               text,
               style: TextStyle(
                 color: dotColor,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.2,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'monospace',
+                letterSpacing: 0.4,
               ),
             ),
           ],
