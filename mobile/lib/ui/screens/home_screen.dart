@@ -47,62 +47,49 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
+        titleSpacing: 16,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 30,
-              height: 30,
+              width: 26,
+              height: 26,
               decoration: BoxDecoration(
                 color: accent,
                 borderRadius: BorderRadius.circular(4), // 瑞士极简几何微标
                 boxShadow: [
                   BoxShadow(
-                    color: accent.withOpacity(0.35),
-                    blurRadius: 8,
+                    color: accent.withOpacity(0.3),
+                    blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: const Center(
-                child: Icon(Icons.add, size: 18, color: Colors.white), // 纯正瑞士十字
+                child: Icon(Icons.add, size: 16, color: Colors.white), // 纯正瑞士十字
               ),
             ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'TOKEN MONITOR',
-                  style: TextStyle(
-                    color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-                Text(
-                  'SWISS TYPOGRAPHIC EDITION',
-                  style: TextStyle(
-                    color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
+            const SizedBox(width: 8),
+            Text(
+              'Token Monitor',
+              style: TextStyle(
+                color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
+                fontSize: 16.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.2,
+              ),
             ),
           ],
         ),
-
         actions: [
           IconButton(
             tooltip: '出小票 (Token Receipt)',
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
             icon: Icon(
               Icons.receipt_long_rounded,
               color: accent,
-              size: 21,
+              size: 20,
             ),
             onPressed: () {
               final primaryClient = today.clients.isNotEmpty ? today.clients.keys.first : null;
@@ -137,12 +124,14 @@ class HomeScreen extends StatelessWidget {
               final isConn = relay.isConnected;
               return IconButton(
                 tooltip: isConn ? 'AI Passport 已连接 (点击管理)' : '连接 AI Passport 随身副屏',
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                padding: const EdgeInsets.symmetric(horizontal: 6),
                 icon: Icon(
                   Icons.devices_other_rounded,
                   color: isConn
                       ? const Color(0xFF10B981)
                       : (isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted),
-                  size: 21,
+                  size: 20,
                 ),
                 onPressed: () {
                   showModalBottomSheet(
@@ -164,7 +153,7 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 14),
+            padding: const EdgeInsets.only(left: 4, right: 16),
             child: StatusBadge(
               status: provider.syncStatus,
               errorMessage: provider.errorMessage,
@@ -226,7 +215,7 @@ class HomeScreen extends StatelessWidget {
               isLight: isLight,
               onTap: () => provider.refreshNow(),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             // =========================================================
             // 2. Bento Grid 双列次级情报舱 (Bento Aerospace Pods)
@@ -238,21 +227,20 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: GlassContainer(
                     enableSwissAccent: true,
-                    podTag: '02 // MONTH',
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.calendar_month_rounded, size: 13, color: accent),
-                            const SizedBox(width: 5),
+                            Icon(Icons.calendar_month_rounded, size: 14, color: accent),
+                            const SizedBox(width: 6),
                             Text(
-                              '本月累计消耗',
+                              '本月消耗',
                               style: TextStyle(
                                 color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
@@ -265,7 +253,7 @@ class HomeScreen extends StatelessWidget {
                             _formatCost(stats?.month.costUsd ?? 0.0, settings),
                             style: TextStyle(
                               color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
-                              fontSize: 20,
+                              fontSize: 22,
                               fontWeight: FontWeight.w900,
                               fontFamily: 'monospace',
                               letterSpacing: -0.5,
@@ -279,7 +267,7 @@ class HomeScreen extends StatelessWidget {
                               'Token: ',
                               style: TextStyle(
                                 color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
-                                fontSize: 10,
+                                fontSize: 10.5,
                                 fontFamily: 'monospace',
                               ),
                             ),
@@ -287,7 +275,7 @@ class HomeScreen extends StatelessWidget {
                               _formatTokensShort(stats?.month.totalTokens ?? 0),
                               style: TextStyle(
                                 color: accent,
-                                fontSize: 10,
+                                fontSize: 10.5,
                                 fontWeight: FontWeight.w800,
                                 fontFamily: 'monospace',
                               ),
@@ -296,7 +284,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                           decoration: BoxDecoration(
                             color: isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D),
                             borderRadius: BorderRadius.circular(3),
@@ -309,7 +297,7 @@ class HomeScreen extends StatelessWidget {
                             '${today.clients.length} 款工具活跃',
                             style: TextStyle(
                               color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
-                              fontSize: 9,
+                              fontSize: 9.5,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'monospace',
                             ),
@@ -319,20 +307,19 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
 
                 // 右翼：AI 额度健康雷达 (瑞士网格排版)
                 Expanded(
                   child: GlassContainer(
                     enableSwissAccent: true,
-                    podTag: '03 // QUOTA',
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(16),
                     child: _buildQuotaRadarWidget(provider, isLight),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
 
             // =========================================================
             // 3. AI 额度健康全景舱 (如果配置了多提供商，展开展示)
@@ -772,7 +759,6 @@ class HomeScreen extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.all(16),
       enableSwissAccent: true,
-      podTag: '04 // QUOTA POD',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -784,29 +770,26 @@ class HomeScreen extends StatelessWidget {
                   Icon(Icons.speed_rounded, size: 15, color: accent),
                   const SizedBox(width: 6),
                   Text(
-                    'AI 额度全景舱',
+                    'AI 额度全景',
                     style: TextStyle(
                       color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
                       fontSize: 13.5,
-                      fontWeight: FontWeight.w900,
-                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
               ),
               Text(
-                'MULTI-WINDOW TELEMETRY',
+                '共 ${provider.limits.length} 款服务',
                 style: TextStyle(
                   color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'monospace',
-                  letterSpacing: 0.5,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(children: gauges),

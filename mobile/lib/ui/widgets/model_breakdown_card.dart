@@ -61,7 +61,6 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
     return GlassContainer(
       padding: const EdgeInsets.all(16),
       enableSwissAccent: true,
-      podTag: '05 // MODELS',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -77,20 +76,17 @@ class _ModelBreakdownCardState extends State<ModelBreakdownCard> {
                     style: TextStyle(
                       color: primaryTextColor,
                       fontSize: 13.5,
-                      fontWeight: FontWeight.w900,
-                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
               ),
               Text(
-                'TAP TO EXPAND',
+                '点击查看细分',
                 style: TextStyle(
                   color: mutedTextColor,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'monospace',
-                  letterSpacing: 0.5,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

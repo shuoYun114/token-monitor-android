@@ -67,34 +67,27 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
       child: Container(
         decoration: BoxDecoration(
           color: surfaceBg,
-          borderRadius: BorderRadius.circular(8), // 瑞士硬朗 8px 微倒角
-          border: Border.all(color: borderCol, width: 0.9), // 0.9px 发丝线
+          borderRadius: BorderRadius.circular(10), // 现代精致 10px 微倒角
+          border: Border.all(color: borderCol, width: 0.8), // 0.8px 优雅发丝线
           boxShadow: [
             BoxShadow(
-              color: isLight ? const Color(0x0A09090B) : Colors.black.withOpacity(0.45),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+              color: isLight ? const Color(0x0609090B) : Colors.black.withOpacity(0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: BorderRadius.circular(9),
           child: Stack(
             children: [
-              // 1. 瑞士版面四角十字对齐标 (+)
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: _SwissCrosshairGridPainter(isLight: isLight),
-                ),
-              ),
-
-              // 2. 顶部瑞士精准红定位条
+              // 顶部瑞士精准红定位条
               Positioned(
                 top: 0,
-                left: 16,
+                left: 18,
                 child: Container(
-                  width: 32,
-                  height: 2.4,
+                  width: 28,
+                  height: 2.0,
                   decoration: BoxDecoration(
                     color: accent,
                     borderRadius: BorderRadius.circular(1),
@@ -103,73 +96,72 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
               ),
 
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 标头行：结构索引 + 活跃状态
+                    // 1. 标头行：清晰简约，绝不横向堆叠
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              width: 6,
+                              height: 6,
                               decoration: BoxDecoration(
                                 color: accent,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                              child: const Text(
-                                'CH-01',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w900,
-                                  fontFamily: 'monospace',
-                                  letterSpacing: 0.5,
-                                ),
+                                shape: BoxShape.circle,
                               ),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'SWISS TELEMETRY // CORE APERTURE',
+                              '今日算力遥测',
                               style: TextStyle(
-                                color: textSecondary,
-                                fontSize: 9,
+                                color: textPrimary,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w800,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'TODAY',
+                              style: TextStyle(
+                                color: textMuted,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
                                 fontFamily: 'monospace',
-                                letterSpacing: 1.2,
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                           decoration: BoxDecoration(
-                            color: accent.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(3),
-                            border: Border.all(color: accent.withOpacity(0.4), width: 0.7),
+                            color: isLight ? const Color(0xFFF1F3F5) : const Color(0xFF16161A),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: borderCol, width: 0.7),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                width: 4.5,
-                                height: 4.5,
-                                decoration: BoxDecoration(
-                                  color: accent,
+                                width: 5,
+                                height: 5,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.emerald,
                                   shape: BoxShape.circle,
                                 ),
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 5),
                               Text(
-                                'SYNCHRONIZED',
+                                '实时同步',
                                 style: TextStyle(
-                                  color: accent,
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w900,
-                                  fontFamily: 'monospace',
-                                  letterSpacing: 0.8,
+                                  color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],
@@ -178,84 +170,70 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                       ],
                     ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
 
                     // 中间核心：非对称方圆互锁排版 (左侧巨幕数据，右侧瑞士精密动态罗盘)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // 左侧巨幕大字阶排版
+                        // 左侧主数据栏 (舒展透气，绝不溢出)
                         Expanded(
-                          flex: 11,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'TODAY TOKEN ACCUMULATION',
+                                '累计消耗 (TOKENS)',
                                 style: TextStyle(
                                   color: textMuted,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
                                   fontFamily: 'monospace',
-                                  letterSpacing: 1.2,
                                 ),
                               ),
                               const SizedBox(height: 4),
 
-                              // 巨幕主数值
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
-                                children: [
-                                  Text(
-                                    widget.shortTokensText,
-                                    style: TextStyle(
-                                      color: textPrimary,
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.w900,
-                                      fontFamily: 'monospace',
-                                      letterSpacing: -1.5,
-                                      height: 1.0,
-                                    ),
+                              // 巨幕主数值：FittedBox 确保任何大数均不溢出
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  widget.shortTokensText,
+                                  style: TextStyle(
+                                    color: textPrimary,
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.w900,
+                                    fontFamily: 'monospace',
+                                    letterSpacing: -1.0,
+                                    height: 1.0,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'TOKENS',
-                                    style: TextStyle(
-                                      color: accent,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w900,
-                                      fontFamily: 'monospace',
-                                      letterSpacing: 1.0,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
 
                               const SizedBox(height: 4),
 
                               // 精确计数值
                               Text(
-                                widget.exactTokensText,
+                                '${widget.exactTokensText} tokens',
                                 style: TextStyle(
                                   color: textSecondary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                   fontFamily: 'monospace',
-                                  letterSpacing: 0.8,
                                 ),
                               ),
 
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
 
-                              // 费用估算块 (瑞士红高光胶囊)
+                              // 费用估算块 (纯净胶囊)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
                                 decoration: BoxDecoration(
-                                  color: isLight ? const Color(0xFFF1F2F4) : const Color(0xFF18181D),
+                                  color: isLight ? const Color(0xFFF4F5F7) : const Color(0xFF16161B),
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(
-                                    color: isLight ? const Color(0xFFCBD5E1) : const Color(0xFF2E2E36),
+                                    color: isLight ? const Color(0xFFE2E4E8) : const Color(0xFF282830),
                                     width: 0.8,
                                   ),
                                 ),
@@ -263,8 +241,8 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      width: 5,
-                                      height: 5,
+                                      width: 4,
+                                      height: 4,
                                       decoration: BoxDecoration(
                                         color: accent,
                                         borderRadius: BorderRadius.circular(1),
@@ -275,8 +253,8 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                                       widget.costText,
                                       style: TextStyle(
                                         color: textPrimary,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w900,
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
                                         fontFamily: 'monospace',
                                       ),
                                     ),
@@ -285,7 +263,7 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                                       widget.secondaryCostText,
                                       style: TextStyle(
                                         color: textMuted,
-                                        fontSize: 9.5,
+                                        fontSize: 10,
                                         fontFamily: 'monospace',
                                       ),
                                     ),
@@ -296,55 +274,52 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                           ),
                         ),
 
-                        // 右侧瑞士精密微刻度动态旋转仪 (方圆互锁几何)
-                        Expanded(
-                          flex: 8,
-                          child: Center(
-                            child: SizedBox(
-                              width: 124,
-                              height: 124,
-                              child: AnimatedBuilder(
-                                animation: _rotationController,
-                                builder: (context, _) {
-                                  return CustomPaint(
-                                    painter: _SwissDialPainter(
-                                      rotationValue: _rotationController.value,
-                                      isLight: isLight,
-                                      accentColor: accent,
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            width: 14,
-                                            height: 14,
-                                            decoration: BoxDecoration(
-                                              color: accent,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Center(
-                                              child: Icon(Icons.add, size: 10, color: Colors.white),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            'SWISS',
-                                            style: TextStyle(
-                                              color: textPrimary,
-                                              fontSize: 7.5,
-                                              fontWeight: FontWeight.w900,
-                                              fontFamily: 'monospace',
-                                              letterSpacing: 1.0,
-                                            ),
-                                          ),
-                                        ],
+                        const SizedBox(width: 14),
+
+                        // 右侧瑞士精密微刻度动态旋转仪 (精致紧凑，88x88，留出呼吸感)
+                        SizedBox(
+                          width: 88,
+                          height: 88,
+                          child: AnimatedBuilder(
+                            animation: _rotationController,
+                            builder: (context, _) {
+                              return CustomPaint(
+                                painter: _SwissDialPainter(
+                                  rotationValue: _rotationController.value,
+                                  isLight: isLight,
+                                  accentColor: accent,
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 13,
+                                        height: 13,
+                                        decoration: BoxDecoration(
+                                          color: accent,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Center(
+                                          child: Icon(Icons.add, size: 9, color: Colors.white),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'SWISS',
+                                        style: TextStyle(
+                                          color: textPrimary,
+                                          fontSize: 7,
+                                          fontWeight: FontWeight.w900,
+                                          fontFamily: 'monospace',
+                                          letterSpacing: 0.8,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -352,14 +327,14 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
 
                     const SizedBox(height: 12),
 
-                    // 底部发丝线与拓扑状态条
+                    // 底部发丝线与拓扑状态条 (去除多余伪条码)
                     Container(
-                      padding: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.only(top: 10),
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
                             color: borderCol,
-                            width: 0.8,
+                            width: 0.7,
                           ),
                         ),
                       ),
@@ -368,36 +343,28 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                         children: [
                           Row(
                             children: [
-                              Text(
-                                '||| | ||||| ||',
-                                style: TextStyle(
-                                  color: textMuted,
-                                  fontSize: 8,
-                                  fontFamily: 'monospace',
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.5,
-                                ),
+                              Icon(
+                                Icons.auto_awesome_mosaic_rounded,
+                                size: 12,
+                                color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 6),
                               Text(
-                                'CLUSTER MESH',
+                                '接入 ${widget.modelsCount} 款模型',
                                 style: TextStyle(
-                                  color: textMuted,
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w800,
-                                  fontFamily: 'monospace',
-                                  letterSpacing: 1.0,
+                                  color: textSecondary,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
                           Text(
-                            'MODELS: ${widget.modelsCount} // CLIENTS: ${widget.clientsCount}',
+                            '${widget.clientsCount} 款工具活跃',
                             style: TextStyle(
                               color: textPrimary,
-                              fontSize: 8.5,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w700,
-                              fontFamily: 'monospace',
                             ),
                           ),
                         ],
@@ -414,39 +381,6 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
   }
 }
 
-/// 绘制瑞士版面对位十字准星 (+)
-class _SwissCrosshairGridPainter extends CustomPainter {
-  final bool isLight;
-
-  _SwissCrosshairGridPainter({required this.isLight});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final linePaint = Paint()
-      ..color = (isLight ? const Color(0xFF71717A) : const Color(0xFFA1A1AA)).withOpacity(isLight ? 0.3 : 0.4)
-      ..strokeWidth = 0.8
-      ..style = PaintingStyle.stroke;
-
-    const offset = 8.0;
-    const arm = 3.5;
-
-    final corners = [
-      Offset(offset, offset),
-      Offset(size.width - offset, offset),
-      Offset(offset, size.height - offset),
-      Offset(size.width - offset, size.height - offset),
-    ];
-
-    for (final c in corners) {
-      canvas.drawLine(Offset(c.dx - arm, c.dy), Offset(c.dx + arm, c.dy), linePaint);
-      canvas.drawLine(Offset(c.dx, c.dy - arm), Offset(c.dx, c.dy + arm), linePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SwissCrosshairGridPainter oldDelegate) =>
-      oldDelegate.isLight != isLight;
-}
 
 /// 绘制右侧方圆互锁瑞士精密刻度旋转罗盘
 class _SwissDialPainter extends CustomPainter {

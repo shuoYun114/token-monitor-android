@@ -25,7 +25,7 @@ class GlassContainer extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.margin,
-    this.borderRadius = 8, // 瑞士风格：收敛为硬朗理性的 8px 微倒角
+    this.borderRadius = 10, // 现代精致 10px 微倒角
     this.backgroundColor,
     this.gradient,
     this.borderColor,
@@ -33,7 +33,7 @@ class GlassContainer extends StatelessWidget {
     this.topHighlightColor,
     this.enableTopHighlight = false,
     this.enableCornerBolts = false,
-    this.enableCrosshairs = true, // 默认启用瑞士版面对位十字微标 (+)
+    this.enableCrosshairs = false, // 默认关闭杂乱十字，保持留白与纯净
     this.enableSwissAccent = false,
     this.podTag,
     this.onTap,
@@ -44,22 +44,22 @@ class GlassContainer extends StatelessWidget {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final defaultBg = isLight ? AppColors.swissLightSurface : AppColors.swissDarkSurface;
     final defaultBorder = isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder;
-    final defaultShadowColor = isLight ? const Color(0x0809090B) : Colors.black.withOpacity(0.4);
+    final defaultShadowColor = isLight ? const Color(0x0609090B) : Colors.black.withOpacity(0.35);
 
-    // 瑞士风格极度克制的阴影系统：弱化大面积模糊扩散，强化边界发丝线锐度
+    // 现代瑞士风格极度克制的微阴影系统：弱化模糊扩散，强化边界发丝线锐度
     final List<BoxShadow> shadows = [
       BoxShadow(
         color: defaultShadowColor,
-        blurRadius: isLight ? 8 : 16,
-        offset: Offset(0, isLight ? 2 : 6),
+        blurRadius: isLight ? 6 : 12,
+        offset: Offset(0, isLight ? 2 : 4),
       ),
     ];
 
     if (glowColor != null) {
       shadows.add(
         BoxShadow(
-          color: glowColor!.withOpacity(isLight ? 0.08 : 0.15),
-          blurRadius: 20,
+          color: glowColor!.withOpacity(isLight ? 0.06 : 0.12),
+          blurRadius: 16,
           spreadRadius: -2,
           offset: const Offset(0, 2),
         ),
@@ -72,7 +72,7 @@ class GlassContainer extends StatelessWidget {
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
         color: borderColor ?? defaultBorder,
-        width: 0.9, // 严格的瑞士 0.9px 发丝线
+        width: 0.8, // 严格的 0.8px 优雅发丝线
       ),
       boxShadow: shadows,
     );
@@ -84,7 +84,7 @@ class GlassContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
           children: [
-            // 瑞士风格版面对齐十字微准星 (+)
+            // 瑞士风格版面对齐十字微准星 (+) - 仅显式启用时绘制
             if (enableCrosshairs)
               Positioned.fill(
                 child: CustomPaint(
@@ -92,25 +92,14 @@ class GlassContainer extends StatelessWidget {
                 ),
               ),
 
-            // 航天四角螺栓点缀 (保留兼容)
-            if (enableCornerBolts && !enableCrosshairs)
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: _ContainerBoltPainter(
-                    isLight: isLight,
-                    boltColor: isLight ? AppColors.aeroBoltLight : AppColors.aeroBoltDark,
-                  ),
-                ),
-              ),
-
-            // 顶部瑞士精准红发丝线指示器
+            // 顶部瑞士精准红发丝线指示器 (高阶点睛，仅 2px 高)
             if (enableSwissAccent)
               Positioned(
                 top: 0,
-                left: 12,
+                left: 14,
                 child: Container(
                   width: 24,
-                  height: 2.2,
+                  height: 2.0,
                   decoration: BoxDecoration(
                     color: isLight ? AppColors.swissRed : AppColors.swissRedBright,
                     borderRadius: BorderRadius.circular(1),
@@ -118,38 +107,7 @@ class GlassContainer extends StatelessWidget {
                 ),
               ),
 
-            // 瑞士版面结构编号微刻 (Section Index)
-            if (podTag != null && podTag!.isNotEmpty)
-              Positioned(
-                top: 7,
-                right: 10,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: (isLight ? AppColors.swissRed : AppColors.swissRedBright).withOpacity(0.85),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      podTag!,
-                      style: TextStyle(
-                        color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
-                        fontSize: 8,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-            // 主体内容
+            // 主体内容 (绝不被绝对定位元素遮挡)
             Padding(
               padding: padding ?? const EdgeInsets.all(16),
               child: child,
@@ -206,38 +164,3 @@ class _SwissCrosshairPainter extends CustomPainter {
       oldDelegate.isLight != isLight;
 }
 
-class _ContainerBoltPainter extends CustomPainter {
-  final bool isLight;
-  final Color boltColor;
-
-  _ContainerBoltPainter({required this.isLight, required this.boltColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final boltPaint = Paint()
-      ..color = boltColor.withOpacity(isLight ? 0.35 : 0.45)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8;
-
-    final dotPaint = Paint()
-      ..color = boltColor.withOpacity(isLight ? 0.25 : 0.35)
-      ..style = PaintingStyle.fill;
-
-    final offset = 7.0;
-    final corners = [
-      Offset(offset, offset),
-      Offset(size.width - offset, offset),
-      Offset(offset, size.height - offset),
-      Offset(size.width - offset, size.height - offset),
-    ];
-
-    for (final c in corners) {
-      canvas.drawCircle(c, 2.2, boltPaint);
-      canvas.drawCircle(c, 0.8, dotPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _ContainerBoltPainter oldDelegate) =>
-      oldDelegate.isLight != isLight || oldDelegate.boltColor != boltColor;
-}
