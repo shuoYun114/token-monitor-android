@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import 'glass_container.dart';
 
-/// 单个活跃 AI 工具卡片
+/// 单个活跃 AI 工具卡片 (全套支持 37 款 AI 客户端识别与瑞士极简排版)
 class ToolCard extends StatelessWidget {
   final String clientName;
   final int tokenCount;
@@ -65,7 +65,7 @@ class ToolCard extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: Icon(
-              _getToolIcon(clientName),
+              AppColors.getToolIcon(clientName),
               color: toolColor,
               size: 20,
             ),
@@ -78,13 +78,17 @@ class ToolCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      _formatToolName(clientName),
-                      style: TextStyle(
-                        color: toolNameColor,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: 'monospace',
+                    Flexible(
+                      child: Text(
+                        AppColors.getToolLabel(clientName),
+                        style: TextStyle(
+                          color: toolNameColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: 'monospace',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -139,38 +143,6 @@ class ToolCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-
-  IconData _getToolIcon(String client) {
-    final lower = client.toLowerCase();
-    if (lower.contains('claude')) return Icons.psychology_rounded;
-    if (lower.contains('cursor')) return Icons.code_rounded;
-    if (lower.contains('antigravity')) return Icons.auto_awesome_mosaic_rounded;
-    if (lower.contains('codex')) return Icons.terminal_rounded;
-    if (lower.contains('copilot') || lower.contains('github')) return Icons.hub_rounded;
-    if (lower.contains('alibaba') || lower.contains('qwen') || lower.contains('bailian')) return Icons.cloud_done_rounded;
-    if (lower.contains('zed')) return Icons.code_off_rounded;
-    if (lower.contains('unsloth')) return Icons.auto_awesome_rounded;
-    if (lower.contains('trae')) return Icons.integration_instructions_rounded;
-    if (lower.contains('volcengine') || lower.contains('doubao')) return Icons.bubble_chart_rounded;
-    if (lower.contains('deepseek')) return Icons.explore_rounded;
-    if (lower.contains('kimi')) return Icons.chat_bubble_outline_rounded;
-    if (lower.contains('opencode')) return Icons.terminal_rounded;
-    return Icons.bolt_rounded;
-  }
-
-  String _formatToolName(String client) {
-    if (client.isEmpty) return 'Unknown';
-    final lower = client.toLowerCase();
-    if (lower == 'alibaba' || lower == 'bailian') return 'Alibaba Qwen';
-    if (lower == 'zed') return 'Zed Editor';
-    if (lower == 'unsloth') return 'Unsloth Studio';
-    if (lower == 'volcengine') return 'Volcengine';
-    if (lower == 'copilot') return 'GitHub Copilot';
-    if (lower == 'opencode') return 'OpenCode';
-    if (lower == 'antigravity') return 'Antigravity';
-    return client[0].toUpperCase() + client.substring(1);
   }
 
   String _formatTokens(int count) {

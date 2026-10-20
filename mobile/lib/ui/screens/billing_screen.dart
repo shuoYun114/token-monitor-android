@@ -259,7 +259,6 @@ class _BillingScreenState extends State<BillingScreen> {
             GlassContainer(
               padding: const EdgeInsets.all(16),
               enableSwissAccent: true,
-              podTag: '01 // HEATMAP',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -472,7 +471,6 @@ class _BillingScreenState extends State<BillingScreen> {
     return GlassContainer(
       padding: const EdgeInsets.all(18),
       enableSwissAccent: true,
-      podTag: '02 // AUDIT BOARD',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -663,7 +661,7 @@ class _BillingScreenState extends State<BillingScreen> {
                           border: Border.all(color: toolColor.withOpacity(0.3), width: 0.5),
                         ),
                         child: Text(
-                          '${entry.key}: ${_formatTokens(clientTokens)}',
+                          '${AppColors.getToolLabel(entry.key)}: ${_formatTokens(clientTokens)}',
                           style: TextStyle(color: toolColor, fontSize: 11, fontWeight: FontWeight.w600),
                         ),
                       );

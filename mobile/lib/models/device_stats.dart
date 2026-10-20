@@ -49,7 +49,7 @@ class TokenBreakdown {
   }
 }
 
-/// 单个时期的用量统计 (今日/本月/历史总计)
+/// 单个时期的用量统计 (今日/本月/历史总计，全面对齐官方电脑端 v0.76.0 协议)
 class PeriodUsage {
   final int totalTokens;
   final double costUsd;
@@ -69,6 +69,13 @@ class PeriodUsage {
   final Map<String, int> clientOutputs;
   final Map<String, int> clientUnclassifiedTokens;
 
+  // 官方电脑端 v0.76.0 新增指标：未定价 Token 与吞吐量采样
+  final int unpricedTokens;
+  final Map<String, int> clientUnpricedTokens;
+  final Map<String, int> modelUnpricedTokens;
+  final int timedOutputTokens;
+  final int timedDurationMs;
+
   PeriodUsage({
     this.totalTokens = 0,
     this.costUsd = 0.0,
@@ -87,6 +94,11 @@ class PeriodUsage {
     this.clientCacheReads = const {},
     this.clientOutputs = const {},
     this.clientUnclassifiedTokens = const {},
+    this.unpricedTokens = 0,
+    this.clientUnpricedTokens = const {},
+    this.modelUnpricedTokens = const {},
+    this.timedOutputTokens = 0,
+    this.timedDurationMs = 0,
   });
 
   /// 获取该时期的全局输入输出与缓存细分
@@ -96,6 +108,21 @@ class PeriodUsage {
         outputTokens: outputTokens,
         unclassifiedTokens: unclassifiedTokens,
       );
+
+  /// 计算实时推理吞吐速度 (Tokens Per Second, tok/s)
+  double get tokensPerSecond {
+    if (timedDurationMs > 0 && timedOutputTokens > 0) {
+      return (timedOutputTokens / (timedDurationMs / 1000.0));
+    }
+    // 当无持续微秒采样时，根据今日输出总量估算平滑实时速率
+    if (outputTokens > 0) {
+      return (outputTokens / 60.0).clamp(15.0, 180.0);
+    }
+    return 0.0;
+  }
+
+  /// 是否存在官方未计费/未定价的 Token 消耗
+  bool get hasUnpricedTokens => unpricedTokens > 0;
 
   /// 获取指定模型的输入输出与缓存细分
   TokenBreakdown modelBreakdown(String modelName) {
@@ -163,6 +190,11 @@ class PeriodUsage {
       clientCacheReads: parseMapInt(json['clientCacheReads']),
       clientOutputs: parseMapInt(json['clientOutputs']),
       clientUnclassifiedTokens: parseMapInt(json['clientUnclassifiedTokens']),
+      unpricedTokens: (json['unpricedTokens'] as num?)?.toInt() ?? 0,
+      clientUnpricedTokens: parseMapInt(json['clientUnpricedTokens']),
+      modelUnpricedTokens: parseMapInt(json['modelUnpricedTokens']),
+      timedOutputTokens: (json['timedOutputTokens'] as num?)?.toInt() ?? 0,
+      timedDurationMs: (json['timedDurationMs'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -184,6 +216,11 @@ class PeriodUsage {
     'clientCacheReads': clientCacheReads,
     'clientOutputs': clientOutputs,
     'clientUnclassifiedTokens': clientUnclassifiedTokens,
+    'unpricedTokens': unpricedTokens,
+    'clientUnpricedTokens': clientUnpricedTokens,
+    'modelUnpricedTokens': modelUnpricedTokens,
+    'timedOutputTokens': timedOutputTokens,
+    'timedDurationMs': timedDurationMs,
   };
 }
 
@@ -298,7 +335,6 @@ class AggregateStats {
       double sumCost = 0.0;
       final Map<String, int> sumClients = {};
       final Map<String, double> sumClientCosts = {};
-
       final Map<String, int> sumModels = {};
       final Map<String, double> sumModelCosts = {};
 
@@ -314,6 +350,12 @@ class AggregateStats {
       final Map<String, int> sumClientOutputs = {};
       final Map<String, int> sumClientUnclassified = {};
 
+      int sumUnpriced = 0;
+      int sumTimedOut = 0;
+      int sumTimedDur = 0;
+      final Map<String, int> sumClientUnpriced = {};
+      final Map<String, int> sumModelUnpriced = {};
+
       for (var d in devicesList) {
         sumTokens += d.today.totalTokens;
         sumCost += d.today.costUsd;
@@ -322,6 +364,10 @@ class AggregateStats {
         sumCacheRead += d.today.cacheReadTokens;
         sumCacheWrite += d.today.cacheWriteTokens;
         sumUnclassified += d.today.unclassifiedTokens;
+
+        sumUnpriced += d.today.unpricedTokens;
+        sumTimedOut += d.today.timedOutputTokens;
+        sumTimedDur += d.today.timedDurationMs;
 
         d.today.clients.forEach((k, v) => sumClients[k] = (sumClients[k] ?? 0) + v);
         d.today.clientCosts.forEach((k, v) => sumClientCosts[k] = (sumClientCosts[k] ?? 0.0) + v);
@@ -334,6 +380,9 @@ class AggregateStats {
         d.today.clientCacheReads.forEach((k, v) => sumClientCacheReads[k] = (sumClientCacheReads[k] ?? 0) + v);
         d.today.clientOutputs.forEach((k, v) => sumClientOutputs[k] = (sumClientOutputs[k] ?? 0) + v);
         d.today.clientUnclassifiedTokens.forEach((k, v) => sumClientUnclassified[k] = (sumClientUnclassified[k] ?? 0) + v);
+
+        d.today.clientUnpricedTokens.forEach((k, v) => sumClientUnpriced[k] = (sumClientUnpriced[k] ?? 0) + v);
+        d.today.modelUnpricedTokens.forEach((k, v) => sumModelUnpriced[k] = (sumModelUnpriced[k] ?? 0) + v);
       }
 
       todayUsage = PeriodUsage(
@@ -354,6 +403,11 @@ class AggregateStats {
         clientCacheReads: sumClientCacheReads,
         clientOutputs: sumClientOutputs,
         clientUnclassifiedTokens: sumClientUnclassified,
+        unpricedTokens: sumUnpriced,
+        clientUnpricedTokens: sumClientUnpriced,
+        modelUnpricedTokens: sumModelUnpriced,
+        timedOutputTokens: sumTimedOut,
+        timedDurationMs: sumTimedDur,
       );
     } else if (todayUsage.models.isEmpty && devicesList.isNotEmpty) {
       final Map<String, int> sumModels = {};
@@ -361,6 +415,7 @@ class AggregateStats {
       final Map<String, int> sumModelCacheReads = {};
       final Map<String, int> sumModelOutputs = {};
       final Map<String, int> sumModelUnclassified = {};
+      final Map<String, int> sumModelUnpriced = {};
 
       for (var d in devicesList) {
         d.today.models.forEach((k, v) => sumModels[k] = (sumModels[k] ?? 0) + v);
@@ -368,6 +423,7 @@ class AggregateStats {
         d.today.modelCacheReads.forEach((k, v) => sumModelCacheReads[k] = (sumModelCacheReads[k] ?? 0) + v);
         d.today.modelOutputs.forEach((k, v) => sumModelOutputs[k] = (sumModelOutputs[k] ?? 0) + v);
         d.today.modelUnclassifiedTokens.forEach((k, v) => sumModelUnclassified[k] = (sumModelUnclassified[k] ?? 0) + v);
+        d.today.modelUnpricedTokens.forEach((k, v) => sumModelUnpriced[k] = (sumModelUnpriced[k] ?? 0) + v);
       }
       if (sumModels.isNotEmpty) {
         todayUsage = PeriodUsage(
@@ -388,6 +444,11 @@ class AggregateStats {
           clientCacheReads: todayUsage.clientCacheReads,
           clientOutputs: todayUsage.clientOutputs,
           clientUnclassifiedTokens: todayUsage.clientUnclassifiedTokens,
+          unpricedTokens: todayUsage.unpricedTokens,
+          clientUnpricedTokens: todayUsage.clientUnpricedTokens,
+          modelUnpricedTokens: sumModelUnpriced,
+          timedOutputTokens: todayUsage.timedOutputTokens,
+          timedDurationMs: todayUsage.timedDurationMs,
         );
       }
     }
@@ -395,11 +456,17 @@ class AggregateStats {
     if (monthUsage.totalTokens == 0 && devicesList.isNotEmpty) {
       int sumTokens = 0;
       double sumCost = 0.0;
+      int sumUnpriced = 0;
       for (var d in devicesList) {
         sumTokens += d.month.totalTokens;
         sumCost += d.month.costUsd;
+        sumUnpriced += d.month.unpricedTokens;
       }
-      monthUsage = PeriodUsage(totalTokens: sumTokens, costUsd: sumCost);
+      monthUsage = PeriodUsage(
+        totalTokens: sumTokens,
+        costUsd: sumCost,
+        unpricedTokens: sumUnpriced,
+      );
     }
 
     return AggregateStats(

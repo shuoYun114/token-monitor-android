@@ -212,6 +212,8 @@ class HomeScreen extends StatelessWidget {
               secondaryCostText: secondaryCostStr,
               modelsCount: today.models.length,
               clientsCount: today.clients.length,
+              tokensPerSecond: today.tokensPerSecond,
+              unpricedTokens: today.unpricedTokens,
               isLight: isLight,
               onTap: () => provider.refreshNow(),
             ),
@@ -766,11 +768,12 @@ class HomeScreen extends StatelessWidget {
   Widget _buildLimitsOverviewPod(MonitorProvider provider, bool isLight) {
     final List<Widget> gauges = [];
     for (final item in provider.limits) {
+      final provName = AppColors.getToolLabel(item.id);
       if (item.windows.isNotEmpty) {
         for (final win in item.windows) {
           final title = item.windows.length > 1
-              ? '${item.name} · ${win.label}'
-              : item.name;
+              ? '$provName · ${win.label}'
+              : provName;
           gauges.add(
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -791,7 +794,7 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: RadialGauge(
               remainingPercent: 100.0,
-              title: item.name,
+              title: provName,
               subtitle: '已就绪',
               size: 58,
             ),

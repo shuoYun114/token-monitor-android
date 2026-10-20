@@ -4,6 +4,7 @@ import '../../theme/app_colors.dart';
 
 /// 瑞士国际主义算力视窗 (Swiss Typographic Chrono-Grid Aperture)
 /// 遵循 Josef Müller-Brockmann 数学栅格法则：大比例字阶对比、方圆互锁几何张力、发丝线骨架与瑞士精准红点睛
+/// 并对齐官方电脑端 v0.76.0 实时吞吐率 (⚡ tok/s) 与未定价 Token 遥测指标
 class ChronoApertureWidget extends StatefulWidget {
   final int totalTokens;
   final String shortTokensText;
@@ -12,6 +13,8 @@ class ChronoApertureWidget extends StatefulWidget {
   final String secondaryCostText;
   final int modelsCount;
   final int clientsCount;
+  final double tokensPerSecond;
+  final int unpricedTokens;
   final bool isLight;
   final VoidCallback? onTap;
 
@@ -24,6 +27,8 @@ class ChronoApertureWidget extends StatefulWidget {
     required this.secondaryCostText,
     this.modelsCount = 0,
     this.clientsCount = 0,
+    this.tokensPerSecond = 0.0,
+    this.unpricedTokens = 0,
     required this.isLight,
     this.onTap,
   });
@@ -130,35 +135,67 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                             ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                          decoration: BoxDecoration(
-                            color: isLight ? const Color(0xFFF1F3F5) : const Color(0xFF16161A),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: borderCol, width: 0.7),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
+                        Row(
+                          children: [
+                            // 官方电脑端 v0.76.0 实时推理吞吐速率胶囊 (⚡ tok/s)
+                            if (widget.tokensPerSecond > 0) ...[
                               Container(
-                                width: 5,
-                                height: 5,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.emerald,
-                                  shape: BoxShape.circle,
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                                decoration: BoxDecoration(
+                                  color: AppColors.amber.withOpacity(isLight ? 0.08 : 0.16),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: AppColors.amber.withOpacity(0.35), width: 0.7),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.bolt_rounded, size: 10.5, color: AppColors.amber),
+                                    const SizedBox(width: 2.5),
+                                    Text(
+                                      '${widget.tokensPerSecond.toStringAsFixed(1)} tok/s',
+                                      style: const TextStyle(
+                                        color: AppColors.amber,
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w800,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 5),
-                              Text(
-                                '实时同步',
-                                style: TextStyle(
-                                  color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                              const SizedBox(width: 6),
                             ],
-                          ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                              decoration: BoxDecoration(
+                                color: isLight ? const Color(0xFFF1F3F5) : const Color(0xFF16161A),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: borderCol, width: 0.7),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 5,
+                                    height: 5,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.emerald,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '实时同步',
+                                    style: TextStyle(
+                                      color: isLight ? AppColors.swissLightTextSecondary : AppColors.swissDarkTextSecondary,
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -169,7 +206,6 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // 左侧巨幕大字阶排版
                         // 左侧主数据栏 (舒展透气，绝不溢出)
                         Expanded(
                           child: Column(
@@ -206,15 +242,30 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
 
                               const SizedBox(height: 4),
 
-                              // 精确计数值
-                              Text(
-                                '${widget.exactTokensText} tokens',
-                                style: TextStyle(
-                                  color: textSecondary,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'monospace',
-                                ),
+                              // 精确计数值与未定价 Token
+                              Row(
+                                children: [
+                                  Text(
+                                    '${widget.exactTokensText} tokens',
+                                    style: TextStyle(
+                                      color: textSecondary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                  if (widget.unpricedTokens > 0) ...[
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '(${_formatUnpriced(widget.unpricedTokens)}未计价)',
+                                      style: TextStyle(
+                                        color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
+                                        fontSize: 9.5,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
 
                               const SizedBox(height: 10),
@@ -343,8 +394,13 @@ class _ChronoApertureWidgetState extends State<ChronoApertureWidget>
       ),
     );
   }
-}
 
+  String _formatUnpriced(int count) {
+    if (count >= 1000000) return '${(count / 1000000.0).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000.0).toStringAsFixed(0)}K';
+    return count.toString();
+  }
+}
 
 /// 绘制右侧方圆互锁瑞士精密刻度旋转罗盘 (Argon 60-Tick Chrono Dial 架构)
 class _SwissDialPainter extends CustomPainter {

@@ -46,7 +46,7 @@ class LimitsScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'MULTI-PROVIDER BALANCE',
+                  '30+ PROVIDERS LIVE BALANCES',
                   style: TextStyle(
                     color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
                     fontSize: 8.5,
@@ -84,7 +84,7 @@ class LimitsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '在设置中添加 API Key 或连接已配置 Limits 的 Hub',
+                    '在电脑端配置 AI Tool Limits 或连接支持额度的 Hub',
                     style: TextStyle(
                       color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
                       fontSize: 11,
@@ -99,13 +99,13 @@ class LimitsScreen extends StatelessWidget {
               itemCount: limits.length,
               itemBuilder: (context, index) {
                 final item = limits[index];
-                final provColor = _getProviderColor(item.id);
+                final provColor = AppColors.getToolColor(item.id);
+                final provLabel = AppColors.getToolLabel(item.id);
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
                     enableSwissAccent: true,
-                    podTag: '${item.id.toUpperCase()} // QUOTA',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -123,7 +123,7 @@ class LimitsScreen extends StatelessWidget {
                                     border: Border.all(color: provColor.withOpacity(0.35), width: 0.8),
                                   ),
                                   child: Icon(
-                                    _getProviderIcon(item.id),
+                                    AppColors.getToolIcon(item.id),
                                     size: 20,
                                     color: provColor,
                                   ),
@@ -133,7 +133,7 @@ class LimitsScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      item.name,
+                                      provLabel,
                                       style: TextStyle(
                                         color: isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary,
                                         fontSize: 13.5,
@@ -345,27 +345,5 @@ class LimitsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getProviderColor(String id) {
-    return AppColors.getToolColor(id);
-  }
-
-  IconData _getProviderIcon(String id) {
-    final lower = id.toLowerCase();
-    if (lower.contains('claude')) return Icons.psychology_rounded;
-    if (lower.contains('cursor')) return Icons.code_rounded;
-    if (lower.contains('antigravity')) return Icons.auto_awesome_mosaic_rounded;
-    if (lower.contains('codex')) return Icons.terminal_rounded;
-    if (lower.contains('copilot') || lower.contains('github')) return Icons.hub_rounded;
-    if (lower.contains('alibaba') || lower.contains('qwen') || lower.contains('bailian')) return Icons.cloud_done_rounded;
-    if (lower.contains('zed')) return Icons.code_off_rounded;
-    if (lower.contains('unsloth')) return Icons.auto_awesome_rounded;
-    if (lower.contains('trae')) return Icons.integration_instructions_rounded;
-    if (lower.contains('volcengine') || lower.contains('doubao')) return Icons.bubble_chart_rounded;
-    if (lower.contains('deepseek')) return Icons.explore_rounded;
-    if (lower.contains('kimi')) return Icons.chat_bubble_outline_rounded;
-    if (lower.contains('openrouter')) return Icons.alt_route_rounded;
-    return Icons.bolt_rounded;
   }
 }

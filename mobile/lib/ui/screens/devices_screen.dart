@@ -114,7 +114,6 @@ class DevicesScreen extends StatelessWidget {
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
                     enableSwissAccent: true,
-                    podTag: '${dev.platform.toUpperCase()} // NODE',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -221,6 +220,7 @@ class DevicesScreen extends StatelessWidget {
                             runSpacing: 5,
                             children: clientNames.map((c) {
                               final color = AppColors.getToolColor(c);
+                              final label = AppColors.getToolLabel(c);
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
@@ -229,7 +229,7 @@ class DevicesScreen extends StatelessWidget {
                                   border: Border.all(color: color.withOpacity(0.35), width: 0.8),
                                 ),
                                 child: Text(
-                                  c,
+                                  label,
                                   style: TextStyle(
                                     color: color,
                                     fontSize: 9.5,
@@ -257,7 +257,7 @@ class DevicesScreen extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: isLight ? AppColors.lightTextMuted : AppColors.textMuted,
+            color: isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted,
             fontSize: 10,
             fontWeight: FontWeight.w600,
           ),
