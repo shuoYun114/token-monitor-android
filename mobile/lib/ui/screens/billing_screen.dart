@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../widgets/github_heatmap.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/receipt_dialog.dart';
+import '../widgets/date_range_receipt_modal.dart';
 
 /// Token 周期账单与每日流水屏幕 (支持 日/月/年 切换与 GitHub 热力图)
 class BillingScreen extends StatefulWidget {
@@ -159,6 +160,19 @@ class _BillingScreenState extends State<BillingScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: '自选日期打印小票 (几月几号到几月几号)',
+            icon: Icon(Icons.calendar_month_rounded, color: accent, size: 21),
+            onPressed: () {
+              DateRangeReceiptModal.show(
+                context: context,
+                dailyRecords: dailyRecords,
+                currentStats: currentStats,
+                settings: provider.settings,
+                isLight: isLight,
+              );
+            },
+          ),
           IconButton(
             tooltip: '出消费小票 (Token Receipt)',
             icon: Icon(Icons.receipt_long_rounded, color: accent, size: 21),
@@ -339,7 +353,18 @@ class _BillingScreenState extends State<BillingScreen> {
 
             const SizedBox(height: 16),
 
-            // 4. 明细列表 (根据所选周期呈现 日流水、月账单 或 年度/模型分布)
+            // 4. 自选日期范围打印小票入口横幅 (几月几号到几月几号)
+            _buildCustomDateRangeReceiptBanner(
+              isLight: isLight,
+              accent: accent,
+              dailyRecords: dailyRecords,
+              currentStats: currentStats,
+              provider: provider,
+            ),
+
+            const SizedBox(height: 16),
+
+            // 5. 明细列表 (根据所选周期呈现 日流水、月账单 或 年度/模型分布)
             if (_selectedPeriodIndex == 0)
               _buildDailyDetailSection(
                 isLight: isLight,
@@ -366,6 +391,130 @@ class _BillingScreenState extends State<BillingScreen> {
               ),
 
             const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 自选日期范围打印小票功能横幅 (几月几号到几月几号)
+  Widget _buildCustomDateRangeReceiptBanner({
+    required bool isLight,
+    required Color accent,
+    required List<DailyUsageRecord> dailyRecords,
+    required AggregateStats? currentStats,
+    required MonitorProvider provider,
+  }) {
+    final bg = isLight ? AppColors.swissLightSurface : AppColors.swissDarkSurface;
+    final border = isLight ? AppColors.swissLightBorder : AppColors.swissDarkBorder;
+    final primaryText = isLight ? AppColors.swissLightTextPrimary : AppColors.swissDarkTextPrimary;
+    final mutedText = isLight ? AppColors.swissLightTextMuted : AppColors.swissDarkTextMuted;
+
+    return GestureDetector(
+      onTap: () {
+        DateRangeReceiptModal.show(
+          context: context,
+          dailyRecords: dailyRecords,
+          currentStats: currentStats,
+          settings: provider.settings,
+          isLight: isLight,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: border, width: 0.8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isLight ? 0.03 : 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: accent.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: accent.withOpacity(0.35), width: 0.8),
+              ),
+              child: Icon(Icons.calendar_month_rounded, color: accent, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        '自选日期打印小票',
+                        style: TextStyle(
+                          color: primaryText,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: accent.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Text(
+                          'CUSTOM RANGE',
+                          style: TextStyle(
+                            color: accent,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '可自由选择几月几号到几月几号，聚合生成专属账单小票',
+                    style: TextStyle(
+                      color: mutedText,
+                      fontSize: 10.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.receipt_long_rounded, size: 13, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text(
+                    '选日期',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

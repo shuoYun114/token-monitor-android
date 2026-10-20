@@ -10,6 +10,9 @@ import '../../theme/app_colors.dart';
 class ReceiptData {
   final String title;
   final DateTime date;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? dateRange;
   final String hostname;
   final int totalTokens;
   final double costUsd;
@@ -30,6 +33,9 @@ class ReceiptData {
   const ReceiptData({
     required this.title,
     required this.date,
+    this.startDate,
+    this.endDate,
+    this.dateRange,
     required this.hostname,
     required this.totalTokens,
     required this.costUsd,
@@ -251,8 +257,15 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
 
   String _generateReceiptId() {
     final d = widget.data.date;
-    final datePart = '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
     final randPart = (1000 + math.Random().nextInt(8999)).toString();
+    if (widget.data.startDate != null && widget.data.endDate != null) {
+      final s = widget.data.startDate!;
+      final e = widget.data.endDate!;
+      final sStr = '${s.year.toString().substring(2)}${s.month.toString().padLeft(2, '0')}${s.day.toString().padLeft(2, '0')}';
+      final eStr = '${e.year.toString().substring(2)}${e.month.toString().padLeft(2, '0')}${e.day.toString().padLeft(2, '0')}';
+      return 'TM-$sStr-$eStr-$randPart';
+    }
+    final datePart = '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
     return 'TM-$datePart-$randPart';
   }
 
@@ -314,7 +327,12 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     buffer.writeln('       AI COMPUTE CONSUMPTION LOG       ');
     buffer.writeln('========================================');
     buffer.writeln('RECEIPT #: $_receiptId');
-    buffer.writeln('DATE     : $dateStr');
+    if (widget.data.dateRange != null && widget.data.dateRange!.isNotEmpty) {
+      buffer.writeln('PERIOD   : ${widget.data.dateRange}');
+      buffer.writeln('PRINTED  : $dateStr');
+    } else {
+      buffer.writeln('DATE     : $dateStr');
+    }
     buffer.writeln('REGISTER : ${widget.data.hostname}');
     buffer.writeln('----------------------------------------');
     buffer.writeln('ITEM / MODEL             QTY      AMOUNT');
@@ -836,7 +854,12 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
 
                           // 2. 元信息区
                           _buildMetaRow(_isEnglish ? 'RECEIPT #' : '小票编号', _receiptId),
-                          _buildMetaRow(_isEnglish ? 'DATE TIME' : '结账时间', dateStr),
+                          if (widget.data.dateRange != null && widget.data.dateRange!.isNotEmpty) ...[
+                            _buildMetaRow(_isEnglish ? 'PERIOD' : '统计周期', widget.data.dateRange!),
+                            _buildMetaRow(_isEnglish ? 'PRINTED' : '打印时间', dateStr),
+                          ] else ...[
+                            _buildMetaRow(_isEnglish ? 'DATE TIME' : '结账时间', dateStr),
+                          ],
                           _buildMetaRow(_isEnglish ? 'REGISTER' : '监控终端', widget.data.hostname),
                           if (widget.data.primaryClient != null && widget.data.primaryClient!.isNotEmpty)
                             _buildMetaRow(_isEnglish ? 'PRIMARY' : '主力工具', widget.data.primaryClient!.toUpperCase()),
